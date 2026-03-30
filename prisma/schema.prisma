@@ -1,0 +1,443 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+////////////////////
+// USERS & AUTH
+////////////////////
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  password      String?
+  image         String?
+  role          UserRole  @default(USER)
+
+  // Stripe Connect for payouts
+  stripeConnectedAccountId String?
+  stripeConnectOnboardedAt DateTime?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts            Account[]
+  sessions            Session[]
+  passwordResetTokens PasswordResetToken[]
+  emailVerificationTokens EmailVerificationToken[]
+  orders              Order[]
+  wallet              UserWallet?
+  walletTransactions  WalletTransaction[]
+  withdrawals         Withdrawal[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model EmailVerificationToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+////////////////////
+// PRODUCTS
+////////////////////
+
+model Product {
+  id          String          @id @default(cuid())
+  title       String
+  slug        String          @unique
+  description String?         @db.Text
+  price       Decimal         @db.Decimal(10, 2)
+  imageUrl    String?
+  sku         String?         @unique
+
+  category    ProductCategory
+  tier        ProductTier     @default(COMMON)
+
+  inventory   Int             @default(0)
+  isActive    Boolean         @default(true)
+
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  orderItems  OrderItem[]
+  audits      ProductAudit[]
+
+  @@index([slug])
+  @@index([category])
+  @@index([tier])
+  @@index([isActive])
+}
+
+enum ProductCategory {
+  BASEBALL
+  BASKETBALL
+  FOOTBALL
+  HOCKEY
+  SOCCER
+  POKEMON
+  YUGIOH
+  MAGIC_THE_GATHERING
+  ONE_PIECE
+  DRAGON_BALL
+  OTHER
+}
+
+enum ProductTier {
+  COMMON
+  UNCOMMON
+  RARE
+  ULTRA_RARE
+  SECRET_RARE
+  BANGER
+  GRAIL
+}
+
+////////////////////
+// ORDERS
+////////////////////
+
+enum OrderType {
+  PACK
+  PRODUCT
+}
+
+model Order {
+  id              String       @id @default(cuid())
+  type            OrderType    @default(PACK)
+  orderNumber     Int          @unique @default(autoincrement())
+
+  // Pack metadata (only for PACK orders)
+  packId          String?
+  packName        String?
+
+  // Pricing (all in cents)
+  subtotal        Int?
+  tax             Int?
+  shipping        Int?
+  amount          Int          // Total paid
+
+  userId          String?
+  user            User?        @relation(fields: [userId], references: [id])
+
+  selectedTier    ProductTier?
+  status          OrderStatus  @default(PENDING)
+
+  stripeSessionId String?
+  customerEmail   String?
+  customerName    String?
+
+  // Shipping address (stored for record)
+  shippingLine1   String?
+  shippingLine2   String?
+  shippingCity    String?
+  shippingState   String?
+  shippingPostal  String?
+  shippingCountry String?
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  revealedAt      DateTime?
+
+  items           OrderItem[]
+  audits          OrderAudit[]
+
+  @@index([status])
+  @@index([userId])
+  @@index([createdAt])
+  @@index([customerEmail])
+}
+
+enum OrderStatus {
+  PENDING
+  COMPLETED
+  PROCESSING
+  FAILED
+  REFUNDED
+  ABANDONED 
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  productId String
+
+  quantity  Int      @default(1)
+  unitPrice Decimal  @db.Decimal(10, 2)
+
+  // Asset disposition tracking (for buyback)
+  disposition   ItemDisposition @default(KEPT)
+  buybackAmount Int?            // Amount credited in cents (stored for audit)
+  dispositionAt DateTime?       // When disposition changed
+
+  createdAt DateTime @default(now())
+
+  order              Order               @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product            Product             @relation(fields: [productId], references: [id])
+  walletTransactions WalletTransaction[]
+
+  @@index([orderId])
+  @@index([productId])
+  @@index([disposition])
+}
+
+// Item disposition enum - tracks what happened to revealed items
+enum ItemDisposition {
+  KEPT            // Default - user is keeping the item
+  SOLD_BACK       // User sold back for wallet credit
+  SHIP_REQUESTED  // User requested shipping
+  SHIPPED         // Item has been shipped
+  DELIVERED       // Item delivered to user
+}
+
+////////////////////
+// WALLET & PAYOUTS
+////////////////////
+
+model UserWallet {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  
+  balance   Int      @default(0)  // Balance in cents
+  
+  // Hold period settings (for fraud prevention)
+  holdUntil DateTime?  // Credits before this date can't be withdrawn
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model WalletTransaction {
+  id        String   @id @default(cuid())
+  userId    String
+  
+  type      WalletTransactionType
+  amount    Int                       // Always positive, type determines direction
+  
+  reason    WalletTransactionReason
+  
+  // References for traceability
+  orderItemId   String?
+  withdrawalId  String?
+  
+  // Balance snapshot (for reconciliation)
+  balanceAfter  Int
+  
+  notes     String?
+  
+  createdAt DateTime @default(now())
+
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orderItem   OrderItem?        @relation(fields: [orderItemId], references: [id])
+  withdrawal  Withdrawal?       @relation(fields: [withdrawalId], references: [id])
+
+  @@index([userId])
+  @@index([orderItemId])
+  @@index([withdrawalId])
+  @@index([createdAt])
+}
+
+enum WalletTransactionType {
+  CREDIT
+  DEBIT
+}
+
+enum WalletTransactionReason {
+  DEPOSIT            // Deposited funds via Stripe
+  BUYBACK           // Sold back an item
+  WITHDRAWAL        // Withdrew to bank
+  WITHDRAWAL_FAILED // Withdrawal failed, funds returned
+  ADJUSTMENT        // Manual adjustment by admin
+  BONUS             // Promotional credit
+  REFUND            // Refund credited to wallet
+}
+
+model Withdrawal {
+  id        String   @id @default(cuid())
+  userId    String
+  
+  amount    Int                  // Amount in cents
+  status    WithdrawalStatus     @default(PENDING)
+  
+  // Stripe payout details
+  stripeTransferId  String?
+  stripePayoutId    String?
+  
+  // Processing info
+  processedAt       DateTime?
+  failedAt          DateTime?
+  failureReason     String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  walletTransactions  WalletTransaction[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum WithdrawalStatus {
+  PENDING     // Requested, not yet processed
+  PROCESSING  // Worker picked it up
+  PAID        // Successfully paid out
+  FAILED      // Payout failed
+  CANCELED    // User canceled or admin canceled
+}
+
+////////////////////
+// WEBHOOK IDEMPOTENCY
+////////////////////
+
+model ProcessedWebhookEvent {
+  id        String   @id // Stripe event ID (evt_xxx)
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+////////////////////
+// AUDITS
+////////////////////
+
+model ProductAudit {
+  id          String            @id @default(cuid())
+  productId   String
+  action      ProductAction
+
+  field       String?
+  oldValue    String?
+  newValue    String?
+
+  metadata    Json?
+  performedBy String?
+  ipAddress   String?
+  userAgent   String?
+
+  createdAt   DateTime          @default(now())
+
+  product     Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+enum ProductAction {
+  CREATED
+  UPDATED
+  DELETED
+  INVENTORY_INCREASED
+  INVENTORY_DECREASED
+  PRICE_CHANGED
+  STATUS_CHANGED
+  TIER_CHANGED
+}
+
+model OrderAudit {
+  id          String       @id @default(cuid())
+  orderId     String
+  action      OrderAction
+
+  oldStatus   OrderStatus?
+  newStatus   OrderStatus?
+
+  metadata    Json?
+  performedBy String?
+  ipAddress   String?
+  userAgent   String?
+
+  createdAt   DateTime     @default(now())
+
+  order       Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+enum OrderAction {
+  CREATED
+  STATUS_CHANGED
+  PAYMENT_INITIATED
+  PAYMENT_COMPLETED
+  PAYMENT_FAILED
+  REFUND_INITIATED
+  REFUND_COMPLETED
+  PRODUCT_REVEALED
+  PRODUCT_SHIPPED
+  PRODUCT_DELIVERED
+  BUYBACK_ACCEPTED    // User sold back item for wallet credit
+}
