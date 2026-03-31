@@ -12,14 +12,14 @@ interface Props {
 }
 
 async function getOrderFromSession(sessionId: string) {
-  const session = await stripe.checkout.sessions.retrieve(sessionId, {
+  const session = (await stripe.checkout.sessions.retrieve(sessionId, {
     expand: [
       "line_items",
       "line_items.data.price.product",
       "total_details.breakdown",
       "shipping_cost",
     ],
-  });
+  })) as any;
 
   if (!session || session.payment_status !== "paid") {
     return null;
@@ -87,6 +87,7 @@ async function getOrderFromSession(sessionId: string) {
           month: "long",
           day: "numeric",
         }),
+        orderType: order.type as "PACK" | "PRODUCT", // ← add this
         items: order.items.map((item) => ({
           name: item.product.title,
           quantity: item.quantity,
