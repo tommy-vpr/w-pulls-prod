@@ -41,7 +41,6 @@ export default function RevealClient({ orderId }: { orderId: string }) {
 
   return (
     <PackSlashAnimation
-      product={order.product}
       tier={order.selectedTier}
       packName={order.packName}
       orderId={order.id}

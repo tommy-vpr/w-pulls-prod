@@ -56,62 +56,6 @@ function DataParticles() {
     </div>
   );
 }
-// Scan lines overlay
-// function ScanLines() {
-//   return (
-//     <div className="absolute inset-0 pointer-events-none overflow-hidden">
-//       {/* Horizontal scan lines */}
-//       <div
-//         className="absolute inset-0 opacity-[0.03]"
-//         style={{
-//           backgroundImage: `repeating-linear-gradient(
-//             0deg,
-//             transparent,
-//             transparent 2px,
-//             rgba(0, 255, 255, 0.5) 2px,
-//             rgba(0, 255, 255, 0.5) 4px
-//           )`,
-//         }}
-//       />
-//       {/* Moving scan beam */}
-//       <div
-//         className="absolute left-0 right-0 h-[2px] animate-scan-beam"
-//         style={{
-//           background: `linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.6), transparent)`,
-//           boxShadow: `0 0 20px rgba(0, 255, 255, 0.5), 0 0 40px rgba(0, 255, 255, 0.3)`,
-//         }}
-//       />
-//     </div>
-//   );
-// }
-
-// Holographic corner brackets
-// function HoloBrackets({ className = "" }: { className?: string }) {
-//   return (
-//     <div className={`absolute inset-0 pointer-events-none ${className}`}>
-//       {/* Top Left */}
-//       <div className="absolute top-0 left-0 w-8 h-8">
-//         <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-cyan-400 to-transparent" />
-//         <div className="absolute top-0 left-0 h-full w-[2px] bg-gradient-to-b from-cyan-400 to-transparent" />
-//       </div>
-//       {/* Top Right */}
-//       <div className="absolute top-0 right-0 w-8 h-8">
-//         <div className="absolute top-0 right-0 w-full h-[2px] bg-gradient-to-l from-cyan-400 to-transparent" />
-//         <div className="absolute top-0 right-0 h-full w-[2px] bg-gradient-to-b from-cyan-400 to-transparent" />
-//       </div>
-//       {/* Bottom Left */}
-//       <div className="absolute bottom-0 left-0 w-8 h-8">
-//         <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-cyan-400 to-transparent" />
-//         <div className="absolute bottom-0 left-0 h-full w-[2px] bg-gradient-to-t from-cyan-400 to-transparent" />
-//       </div>
-//       {/* Bottom Right */}
-//       <div className="absolute bottom-0 right-0 w-8 h-8">
-//         <div className="absolute bottom-0 right-0 w-full h-[2px] bg-gradient-to-l from-cyan-400 to-transparent" />
-//         <div className="absolute bottom-0 right-0 h-full w-[2px] bg-gradient-to-t from-cyan-400 to-transparent" />
-//       </div>
-//     </div>
-//   );
-// }
 
 // Animated status indicators
 function StatusIndicator({
