@@ -1,9 +1,4 @@
-# docker-compose.yml
-# Deploy on Coolify: Add as "Docker Compose" resource
-# All env vars are set in Coolify UI under each service's Environment tab
-
 services:
-  # ---- Self-hosted Redis ----
   redis:
     image: redis:7-alpine
     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy noeviction
@@ -16,7 +11,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # ---- Next.js Web App ----
   web:
     build:
       context: .
@@ -52,7 +46,6 @@ services:
       timeout: 10s
       retries: 3
 
-  # ---- BullMQ Workers ----
   worker:
     build:
       context: .
@@ -66,10 +59,8 @@ services:
       - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
       - AUTH_SECRET=${AUTH_SECRET}
       - BUYBACK_QUOTE_SECRET=${BUYBACK_QUOTE_SECRET}
-      - GCP_PROJECT_ID=${GCP_PROJECT_ID}
-      - GCP_CLIENT_EMAIL=${GCP_CLIENT_EMAIL}
-      - GCP_PRIVATE_KEY=${GCP_PRIVATE_KEY}
       - GCP_BUCKET_NAME=${GCP_BUCKET_NAME}
+      - GCS_SERVICE_ACCOUNT_BASE64=${GCS_SERVICE_ACCOUNT_BASE64}
     depends_on:
       redis:
         condition: service_healthy
