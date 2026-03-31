@@ -72,7 +72,7 @@ export function Footer() {
                   <div className="relative">
                     <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-gradient-to-br from-cyan-400/20 to-fuchsia-500/20 border border-cyan-400/30 shadow-[0_0_15px_rgba(0,255,255,0.3)]">
                       <Image
-                        src="/images/W-Pulls-logo.png"
+                        src="/images/w-pull-logo.png"
                         width={32}
                         height={32}
                         alt="W-Pulls"
