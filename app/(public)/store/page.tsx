@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { productService } from "@/lib/services/product.service";
 import { serializeProduct } from "@/types/product";
 import { Pagination } from "./(components)/Pagination";

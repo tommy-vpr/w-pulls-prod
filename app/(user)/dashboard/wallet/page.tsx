@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 // app/(site)/wallet/page.tsx
 
 import { redirect } from "next/navigation";

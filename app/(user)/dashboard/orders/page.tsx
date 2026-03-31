@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 // app/dashboard/orders/page.tsx
 import { Suspense } from "react";
 import { Metadata } from "next";

@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { notFound } from "next/navigation";
 import { ProductForm } from "@/components/product-form";
 import { getProductByIdAction } from "@/app/actions/product.actions";

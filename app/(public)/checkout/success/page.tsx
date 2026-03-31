@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 // app/checkout/success/page.tsx
 import { Suspense } from "react";
 import { redirect } from "next/navigation";

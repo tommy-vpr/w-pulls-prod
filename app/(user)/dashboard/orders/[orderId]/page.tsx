@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 // app/dashboard/orders/[orderId]/page.tsx
 import { notFound } from "next/navigation";
 import { Metadata } from "next";

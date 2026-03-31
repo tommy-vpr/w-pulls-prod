@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { ProductForm } from '@/components/product-form';
 
 export default function NewProductPage() {

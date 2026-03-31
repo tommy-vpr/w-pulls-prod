@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 // app/admin/users/[id]/page.tsx
 import { notFound } from "next/navigation";
 import { getUserById } from "@/lib/actions/admin-user.actions";

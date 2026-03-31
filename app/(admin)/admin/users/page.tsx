@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 // app/admin/users/page.tsx
 import { getUsers } from "@/lib/actions/admin-user.actions";
 import { UsersTable } from "./_components/users-table";

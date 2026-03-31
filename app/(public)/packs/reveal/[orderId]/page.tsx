@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { notFound, redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import { RevealAnimation } from "@/components/reveal/RevealAnimation";

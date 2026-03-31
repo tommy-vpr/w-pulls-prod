@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 // app/dashboard/collection/page.tsx
 import { requireAuth } from "@/lib/auth-utils";
 import { collectionService } from "@/lib/services/collection.service";

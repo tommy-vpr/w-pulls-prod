@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 // app/faq/page.tsx
 import { HolographicBackground } from "@/components/ui/HolographicBackground";
 import { FAQContent } from "@/components/faq/FAQcontent";
