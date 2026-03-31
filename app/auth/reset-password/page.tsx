@@ -1,4 +1,3 @@
-export const dynamic = "force-dynamic";
 // app/auth/reset-password/page.tsx
 import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
