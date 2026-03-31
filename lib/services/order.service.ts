@@ -34,36 +34,34 @@ export interface SerializedOrder {
   type: string;
   orderNumber: number;
 
-  packId: string | null;
+  packId?: string | null;
   packName: string | null;
 
-  // 💰 Stripe money (ALL IN CENTS)
-  subtotal: number;
-  tax: number;
-  shipping: number;
-  amount: number; // total paid
+  subtotal?: number;
+  tax?: number;
+  shipping?: number;
+  amount: number;
 
   selectedTier: string | null;
   status: string;
-  stripeSessionId: string | null;
-  customerEmail: string | null;
-  customerName: string | null;
+  stripeSessionId?: string | null;
+  customerEmail?: string | null;
+  customerName?: string | null;
 
-  // 📦 Shipping address (persisted on Order)
-  shippingLine1: string | null;
-  shippingLine2: string | null;
-  shippingCity: string | null;
-  shippingState: string | null;
-  shippingPostal: string | null;
-  shippingCountry: string | null;
+  shippingLine1?: string | null;
+  shippingLine2?: string | null;
+  shippingCity?: string | null;
+  shippingState?: string | null;
+  shippingPostal?: string | null;
+  shippingCountry?: string | null;
 
   createdAt: string;
-  updatedAt: string;
+  updatedAt: string; // ← required
 
-  items: SerializedOrderItem[];
+  items: SerializedOrderItem[]; // ← required
   product: SerializedOrderItem["product"] | null;
 
-  user: {
+  user?: {
     id: string;
     name: string | null;
     email: string;

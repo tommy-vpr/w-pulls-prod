@@ -45,6 +45,27 @@ export interface SerializedUserOrder {
   createdAt: string;
 }
 
+export interface SerializedUserOrderFull {
+  id: string;
+  orderNumber: number;
+  type: string;
+  packName: string | null;
+  amount: number;
+  status: string;
+  selectedTier: string | null;
+  createdAt: string;
+  updatedAt: string;
+  items: any[];
+  product: {
+    id: string;
+    title: string;
+    imageUrl: string | null;
+    price: string;
+    description: string | null;
+    tier: string;
+    category: string;
+  } | null;
+}
 export interface SerializedWithdrawal {
   id: string;
   amount: number; // dollars

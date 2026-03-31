@@ -19,10 +19,10 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import { OrderModal } from "./order-modal";
 import { getTierConfig, getTierBadgeClass } from "@/lib/tier-config";
-import { SerializedUserOrder } from "@/lib/actions/user-orders.actions";
+import { SerializedUserOrderFull } from "@/lib/services/user.service";
 
 interface OrdersGridProps {
-  orders: SerializedUserOrder[];
+  orders: SerializedUserOrderFull[];
   pagination: {
     page: number;
     totalPages: number;
@@ -64,7 +64,7 @@ export function OrdersGrid({ orders, pagination }: OrdersGridProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [selectedOrder, setSelectedOrder] =
-    useState<SerializedUserOrder | null>(null);
+    useState<SerializedUserOrderFull | null>(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -74,7 +74,7 @@ export function OrdersGrid({ orders, pagination }: OrdersGridProps) {
     router.push(`?${params.toString()}`);
   };
 
-  const handleQuickView = (order: SerializedUserOrder) => {
+  const handleQuickView = (order: SerializedUserOrderFull) => {
     setSelectedOrder(order);
     setIsModalOpen(true);
   };
@@ -138,7 +138,7 @@ function OrderCard({
   order,
   onQuickView,
 }: {
-  order: SerializedUserOrder;
+  order: SerializedUserOrderFull;
   onQuickView: () => void;
 }) {
   const tier = getTierConfig(order.selectedTier);
@@ -166,7 +166,7 @@ function OrderCard({
           <span
             className={cn(
               "absolute top-3 left-3 inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium border backdrop-blur-sm",
-              getTierBadgeClass(order.selectedTier)
+              getTierBadgeClass(order.selectedTier),
             )}
           >
             {tier.label}
@@ -179,7 +179,7 @@ function OrderCard({
             "absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium",
             status.bgColor,
             status.color,
-            "border border-current/20 backdrop-blur-sm"
+            "border border-current/20 backdrop-blur-sm",
           )}
         >
           {status.label}
@@ -222,7 +222,7 @@ function OrderCard({
             <p
               className={cn(
                 "font-bold",
-                isRevealed ? "text-emerald-400" : "text-zinc-500"
+                isRevealed ? "text-emerald-400" : "text-zinc-500",
               )}
             >
               {isRevealed
