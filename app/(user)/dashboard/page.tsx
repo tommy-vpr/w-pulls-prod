@@ -106,7 +106,7 @@ export default async function UserDashboardPage() {
             <img
               src={user.image}
               alt={user.name || "Avatar"}
-              className="h-14 w-14 rounded-full object-cover ring-2 ring-white"
+              className="h-14 w-14 rounded-full object-cover"
             />
           ) : (
             <div className="h-14 w-14 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-xl font-bold">

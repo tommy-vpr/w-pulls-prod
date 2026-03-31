@@ -79,14 +79,12 @@ function BalanceCard({
   balance,
   holdUntil,
   onWithdraw,
-  onDeposit,
   isRefreshing,
   onRefresh,
 }: {
   balance: number;
   holdUntil: string | null;
   onWithdraw: () => void;
-  onDeposit: () => void;
   isRefreshing: boolean;
   onRefresh: () => void;
 }) {
@@ -146,17 +144,10 @@ function BalanceCard({
         {/* Action Buttons */}
         <div className="flex gap-3">
           <button
-            onClick={onDeposit}
-            className="cursor-pointer flex-1 py-3.5 px-4 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700"
-          >
-            <ArrowDownToLine className="w-5 h-5" />
-            Deposit
-          </button>
-          <button
             onClick={onWithdraw}
             disabled={withdrawableBalance < 1000}
             className={cn(
-              "cursor-pointer flex-1 py-3.5 px-4 rounded-xl font-semibold transition-all flex items-center justify-center gap-2",
+              "cursor-pointer w-full py-3.5 px-4 rounded-xl font-semibold transition-all flex items-center justify-center gap-2",
               withdrawableBalance >= 1000
                 ? "bg-emerald-500 hover:bg-emerald-600 text-white"
                 : "bg-zinc-800 text-zinc-500 cursor-not-allowed",
@@ -710,8 +701,8 @@ function DepositModal({
           {/* Info */}
           <div className="mb-6 p-3 bg-zinc-800/50 border border-zinc-700/50 rounded-lg">
             <p className="text-xs text-zinc-400">
-              You'll be redirected to Stripe to complete payment securely.
-              Funds will appear in your wallet immediately after payment.
+              You'll be redirected to Stripe to complete payment securely. Funds
+              will appear in your wallet immediately after payment.
             </p>
           </div>
 
@@ -782,6 +773,20 @@ export function WalletDashboard({
   const [activeTab, setActiveTab] = useState<"activity" | "withdrawals">(
     "activity",
   );
+
+  // Auto-refresh when there are processing withdrawals
+  useEffect(() => {
+    const hasProcessing = withdrawals.some(
+      (w) => w.status === "PROCESSING" || w.status === "PENDING",
+    );
+    if (!hasProcessing) return;
+
+    const interval = setInterval(() => {
+      handleRefresh();
+    }, 5000); // poll every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [withdrawals]);
 
   // Handle Stripe Connect callback
   useEffect(() => {
@@ -917,7 +922,6 @@ export function WalletDashboard({
           balance={balance}
           holdUntil={holdUntil}
           onWithdraw={() => setShowWithdrawModal(true)}
-          onDeposit={() => setShowDepositModal(true)}
           isRefreshing={isRefreshing}
           onRefresh={handleRefresh}
         />

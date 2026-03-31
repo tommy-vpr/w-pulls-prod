@@ -219,6 +219,7 @@ export function Sidebar({ user }: SidebarProps) {
                 src={user.image}
                 alt={user.name || "Avatar"}
                 className="h-10 w-10 rounded-full object-cover"
+                referrerPolicy="no-referrer"
               />
             ) : (
               <div className="h-10 w-10 shrink-0 rounded-full overflow-hidden flex items-center justify-center bg-gradient-to-br from-purple-600 to-cyan-600 text-white text-xs font-bold">

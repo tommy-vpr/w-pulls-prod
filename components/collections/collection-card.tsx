@@ -88,7 +88,7 @@ export function CollectionCard({ item, onQuickView }: CollectionCardProps) {
             ${item.value.toFixed(2)}
           </p>
         ) : (
-          <p className="text-sm text-blue-500">${item.value.toFixed(2)}</p>
+          <p className="text-sm text-gray-500">${item.value.toFixed(2)}</p>
         )}
       </div>
     </div>

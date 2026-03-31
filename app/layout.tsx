@@ -21,9 +21,9 @@ export const metadata: Metadata = {
   title: "WPulls",
   description: "W every pull",
   icons: {
-    icon: "/images/W-Pulls-logo.png", // 32x32 or 48x48
-    shortcut: "/images/W-Pulls-logo.png", // optional alias
-    apple: "/images/W-Pulls-logo.png", // for iOS home screen
+    icon: "/images/w-pull-logo.png", // 32x32 or 48x48
+    shortcut: "/images/w-pull-logo.png", // optional alias
+    apple: "/images/w-pull-logo.png", // for iOS home screen
   },
 };
 

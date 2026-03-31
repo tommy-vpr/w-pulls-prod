@@ -48,7 +48,7 @@ export default async function ProfilePage() {
               <img
                 src={user.image}
                 alt={user.name || "Avatar"}
-                className="h-24 w-24 rounded-full object-cover ring-4 ring-violet-500/30 mb-4"
+                className="h-24 w-24 rounded-full object-cover mb-4"
               />
             ) : (
               <div className="h-24 w-24 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-3xl font-bold mb-4">

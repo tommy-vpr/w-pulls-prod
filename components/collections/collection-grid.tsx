@@ -15,7 +15,7 @@ export function CollectionGrid({
   const [selectedItem, setSelectedItem] =
     useState<SerializedCollectionItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [showSoldBack, setShowSoldBack] = useState(false);
+  const [showSoldBack, setShowSoldBack] = useState(true);
 
   const handleQuickView = (item: SerializedCollectionItem) => {
     setSelectedItem(item);

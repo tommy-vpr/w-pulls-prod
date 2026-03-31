@@ -124,7 +124,7 @@ function AvatarSection({ user }: { user: SettingsUser }) {
             <img
               src={preview}
               alt={user.name || "Avatar"}
-              className="h-24 w-24 rounded-full object-cover ring-2 ring-violet-500/30"
+              className="h-24 w-24 rounded-full object-cover"
             />
           ) : (
             <div className="h-24 w-24 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold">

@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 import { SerializedProduct } from "@/types/product";
 import { getTierConfig } from "@/lib/tier-config";
 import { BuybackModal } from "./BuybackModal";
+import { PackLoadingScreen } from "./PackinLoadingScreen";
+import { PackLoadingSparks } from "./PackLoadingSparks";
 
 type AnimationStage = "idle" | "tearing" | "revealing" | "done";
 
@@ -220,42 +222,60 @@ function HoloCardFace({
 // ============================================
 // CardBack Component
 // ============================================
-interface CardBackProps {
-  tier: {
-    label: string;
-    hexColor: string;
-  };
-}
-
-function CardBack({ tier }: CardBackProps) {
+function CardBack() {
   return (
     <div
       className="w-full h-full rounded-xl flex items-center justify-center overflow-hidden"
       style={{
-        background: `linear-gradient(135deg, ${tier.hexColor}90 0%, ${tier.hexColor}40 50%, ${tier.hexColor}90 100%)`,
+        background:
+          "linear-gradient(135deg, #f59e0b 0%, #fde68a 40%, #f59e0b 70%, #92400e 100%)",
       }}
     >
-      <div className="relative">
-        <div className="absolute inset-0 opacity-10">
-          {[...Array(6)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute rounded-full border border-white"
-              style={{
-                width: `${80 + i * 30}px`,
-                height: `${80 + i * 30}px`,
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-              }}
-            />
-          ))}
-        </div>
-        <Sparkles className="h-16 w-16 text-white/50" />
-      </div>
+      <img
+        src="/images/w-logo.png"
+        alt="W-Pulls"
+        className="w-24 h-auto object-contain drop-shadow-lg select-none"
+        draggable={false}
+      />
     </div>
   );
 }
+// interface CardBackProps {
+//   tier: {
+//     label: string;
+//     hexColor: string;
+//   };
+// }
+
+// function CardBack({ tier }: CardBackProps) {
+//   return (
+//     <div
+//       className="w-full h-full rounded-xl flex items-center justify-center overflow-hidden"
+//       style={{
+//         background: `linear-gradient(135deg, ${tier.hexColor}90 0%, ${tier.hexColor}40 50%, ${tier.hexColor}90 100%)`,
+//       }}
+//     >
+//       <div className="relative">
+//         <div className="absolute inset-0 opacity-10">
+//           {[...Array(6)].map((_, i) => (
+//             <div
+//               key={i}
+//               className="absolute rounded-full border border-white"
+//               style={{
+//                 width: `${80 + i * 30}px`,
+//                 height: `${80 + i * 30}px`,
+//                 top: "50%",
+//                 left: "50%",
+//                 transform: "translate(-50%, -50%)",
+//               }}
+//             />
+//           ))}
+//         </div>
+//         <Sparkles className="h-16 w-16 text-white/50" />
+//       </div>
+//     </div>
+//   );
+// }
 
 // ============================================
 // SlashEffect Component
@@ -599,6 +619,27 @@ export function PackSlashAnimation({
   const [buybackExpired, setBuybackExpired] = useState(false);
   const [buybackCompleted, setBuybackCompleted] = useState(false);
 
+  const [imagesLoaded, setImagesLoaded] = useState(false);
+
+  useEffect(() => {
+    let loaded = 0;
+    const total = 2;
+
+    const onLoad = () => {
+      loaded++;
+      if (loaded === total) setImagesLoaded(true);
+    };
+
+    const top = new Image();
+    const bottom = new Image();
+    top.onload = onLoad;
+    bottom.onload = onLoad;
+    top.onerror = onLoad; // don't block on error
+    bottom.onerror = onLoad;
+    top.src = packTopImage;
+    bottom.src = packBottomImage;
+  }, [packTopImage, packBottomImage]);
+
   // Preload audio on mount
   useEffect(() => {
     tearSoundRef.current = new Audio("/audio/tearing-effect.mp3");
@@ -754,7 +795,7 @@ export function PackSlashAnimation({
       return {
         ...baseStyles,
         top: "50%",
-        transform: "translateX(-50%) translateY(-50%)",
+        transform: "translateX(-50%) translateY(-60%)",
         opacity: 1,
       };
     }
@@ -762,7 +803,7 @@ export function PackSlashAnimation({
     return {
       ...baseStyles,
       top: "50%",
-      transform: "translateX(-50%) translateY(-50%)",
+      transform: "translateX(-50%) translateY(-60%)",
       opacity: 1,
       animation: "cardReveal 1.5s ease-in-out forwards",
     };
@@ -858,6 +899,10 @@ export function PackSlashAnimation({
       opacity: showGlow ? 1 : 0,
     };
   };
+
+  if (!imagesLoaded) {
+    return <PackLoadingSparks tierColor={tierConfig.hexColor} />;
+  }
 
   return (
     <div className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden">
@@ -1012,10 +1057,10 @@ export function PackSlashAnimation({
       `}</style>
 
       {/* Pack Name Header */}
-      <div className="absolute top-8 left-1/2 -translate-x-1/2 text-center z-50">
+      {/* <div className="absolute top-20 left-1/2 -translate-x-1/2 text-center z-50">
         <p className="text-zinc-500 text-sm">Opening</p>
         <h1 className="text-2xl font-bold text-zinc-100">{packName}</h1>
-      </div>
+      </div> */}
 
       <div className="relative w-[300px] h-[450px]">
         <div style={getGlowStyles()} />
@@ -1190,7 +1235,7 @@ export function PackSlashAnimation({
               <Wallet className="w-6 h-6 text-emerald-400" />
             </div>
             <h3 className="text-lg font-semibold text-zinc-100 mb-1">
-              ${(buybackQuote?.buybackAmount ?? 0 / 100).toFixed(2)} Added to
+              ${((buybackQuote?.buybackAmount ?? 0) / 100).toFixed(2)} Added to
               Wallet!
             </h3>
             <p className="text-zinc-400 text-sm mb-4">

@@ -78,7 +78,7 @@ export const MAXIMUM_WITHDRAWAL_AMOUNT: number | null = null; // No limit
  * Helps prevent chargeback fraud
  * Set to 0 to disable
  */
-export const CREDIT_HOLD_PERIOD_HOURS = 336; // 14 days (chargeback protection)
+export const CREDIT_HOLD_PERIOD_HOURS = 0.00139; // 14 days (chargeback protection)
 
 /**
  * Require minimum account age for first withdrawal (in days)
