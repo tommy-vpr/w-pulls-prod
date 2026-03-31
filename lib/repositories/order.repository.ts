@@ -219,7 +219,9 @@ export class OrderRepository {
           user: { select: { id: true, name: true, email: true } },
         },
       }),
-      prisma.order.count({ where }),
+      prisma.order.count({
+        where: { status: { not: "ABANDONED" } },
+      }),
     ]);
 
     return {
@@ -247,7 +249,7 @@ export class OrderRepository {
       todayOrders,
       todayRevenueResult,
     ] = await Promise.all([
-      prisma.order.count(),
+      prisma.order.count({ where: { status: { not: "ABANDONED" } } }),
       prisma.order.count({ where: { status: "COMPLETED" } }),
       prisma.order.count({ where: { status: "PENDING" } }),
       prisma.order.count({ where: { status: "FAILED" } }),
@@ -256,7 +258,10 @@ export class OrderRepository {
         _sum: { amount: true },
       }),
       prisma.order.count({
-        where: { createdAt: { gte: today } },
+        where: {
+          createdAt: { gte: today },
+          status: { not: "ABANDONED" },
+        },
       }),
       prisma.order.aggregate({
         where: {
