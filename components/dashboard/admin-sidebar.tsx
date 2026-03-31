@@ -1,4 +1,3 @@
-// components/admin/admin-sidebar.tsx
 "use client";
 
 import Link from "next/link";
@@ -27,7 +26,7 @@ const navItems = [
   { label: "Activity", href: "/admin/activity", icon: Activity },
   { label: "Products", href: "/admin/products", icon: Package },
   { label: "Orders", href: "/admin/orders", icon: DollarSign },
-  { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+  // { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { label: "Profile", href: "/admin/profile", icon: User },
   { label: "Settings", href: "/admin/settings", icon: Settings },
   { label: "Users", href: "/admin/users", icon: Users },
@@ -64,7 +63,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
               src={"/images/logo.png"}
               width={100}
               height={40}
-              alt="W-Pullss"
+              alt="W-Pulls"
               className="relative z-10 invert"
             />
             <div className="absolute inset-0 blur-lg bg-purple-500/30 group-hover:bg-cyan-500/30 transition-colors duration-500" />
@@ -142,6 +141,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                 src={user.image}
                 alt={user.name || "Avatar"}
                 className="h-10 w-10 rounded-full object-cover"
+                referrerPolicy="no-referrer"
               />
             ) : (
               <div className="h-10 w-10 shrink-0 rounded-full overflow-hidden flex items-center justify-center bg-gradient-to-br from-purple-600 to-cyan-600 text-white text-xs font-bold">
