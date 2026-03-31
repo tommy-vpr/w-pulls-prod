@@ -62,7 +62,7 @@ ENV NODE_ENV=production
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Generate prisma client in worker context
-RUN npx prisma generate
+# Copy already-generated prisma client from deps
+COPY --from=deps /app/node_modules/.prisma ./node_modules/.prisma
 
 CMD ["npx", "tsx", "workers/index.ts"]
