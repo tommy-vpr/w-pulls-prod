@@ -16,6 +16,7 @@ import {
   Home,
   Package,
   ShoppingBag,
+  LucideIcon,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { signOutAction } from "@/lib/actions/auth.actions";
@@ -25,7 +26,7 @@ import { CartIcon } from "./CartIcon";
 type NavItem = {
   label: string;
   href: string;
-  icon: React.ElementType;
+  icon: LucideIcon;
 };
 
 const NAV: NavItem[] = [
