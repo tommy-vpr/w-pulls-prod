@@ -186,61 +186,60 @@ function PayoutAccountCard({
   onDisconnect: () => void;
 }) {
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-5">
-      <div className="flex items-center gap-4">
+    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
+      <div className="flex items-start gap-3">
         <div
           className={cn(
-            "w-12 h-12 rounded-xl flex items-center justify-center",
+            "w-10 h-10 shrink-0 rounded-xl flex items-center justify-center",
             isOnboarded ? "bg-emerald-500/20" : "bg-violet-500/20",
           )}
         >
           {isOnboarded ? (
-            <Building className="w-6 h-6 text-emerald-400" />
+            <Building className="w-5 h-5 text-emerald-400" />
           ) : (
-            <CreditCard className="w-6 h-6 text-violet-400" />
+            <CreditCard className="w-5 h-5 text-violet-400" />
           )}
         </div>
 
-        <div className="flex-1">
-          <h3 className="font-semibold text-zinc-100">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <h3 className="font-semibold text-zinc-100 text-sm">
+              {isOnboarded ? "Payout Connected" : "Connect Payout Account"}
+            </h3>
+            {isOnboarded ? (
+              <div className="flex items-center gap-2 shrink-0">
+                <CheckCircle className="w-4 h-4 text-emerald-400" />
+                <button
+                  onClick={onDisconnect}
+                  disabled={isDisconnecting}
+                  className="cursor-pointer text-zinc-500 hover:text-red-400 text-xs transition-colors disabled:opacity-50"
+                >
+                  {isDisconnecting ? "..." : "Disconnect"}
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={onConnect}
+                disabled={isConnecting}
+                className="cursor-pointer px-3 py-1.5 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs font-medium transition-colors flex items-center gap-1.5 disabled:opacity-50 shrink-0"
+              >
+                {isConnecting ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <>
+                    <span>Connect</span>
+                    <ArrowLeftRight className="w-3 h-3" />
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+          <p className="text-xs text-zinc-500 mt-0.5">
             {isOnboarded
-              ? "Payout Account Connected"
-              : "Connect Payout Account"}
-          </h3>
-          <p className="text-sm text-zinc-500">
-            {isOnboarded
-              ? "Your bank account is ready to receive withdrawals"
+              ? "Bank account ready for withdrawals"
               : "Required to withdraw funds to your bank"}
           </p>
         </div>
-
-        {isOnboarded ? (
-          <div className="flex items-center gap-3">
-            <CheckCircle className="w-5 h-5 text-emerald-400" />
-            <button
-              onClick={onDisconnect}
-              disabled={isDisconnecting}
-              className="cursor-pointer text-zinc-500 hover:text-red-400 text-sm transition-colors disabled:opacity-50"
-            >
-              {isDisconnecting ? "..." : "Disconnect"}
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={onConnect}
-            disabled={isConnecting}
-            className="cursor-pointer px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
-          >
-            {isConnecting ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <>
-                <span>Connect</span>
-                <ArrowLeftRight className="w-3.5 h-3.5" />
-              </>
-            )}
-          </button>
-        )}
       </div>
     </div>
   );
