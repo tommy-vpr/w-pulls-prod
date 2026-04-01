@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "./carousel-3d.css";
 
 interface Carousel3DProps {
@@ -25,6 +25,21 @@ export const Carousel3D: React.FC<Carousel3DProps> = ({
   className = "",
 }) => {
   const angle = 360 / images.length;
+
+  const [responsiveDepth, setResponsiveDepth] = useState(depth);
+
+  useEffect(() => {
+    const update = () => {
+      const w = window.innerWidth;
+      if (w < 480) setResponsiveDepth(depth * 0.55);
+      else if (w < 640) setResponsiveDepth(depth * 0.7);
+      else if (w < 768) setResponsiveDepth(depth * 0.85);
+      else setResponsiveDepth(depth);
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, [depth]);
 
   return (
     <div
@@ -52,9 +67,7 @@ export const Carousel3D: React.FC<Carousel3DProps> = ({
                 key={`${src}-${index}`}
                 className="absolute inset-0 carousel-item"
                 style={{
-                  transform: `rotateY(${
-                    index * angle
-                  }deg) translateZ(${depth}px)`,
+                  transform: `rotateY(${index * angle}deg) translateZ(${responsiveDepth}px)`, // ← change depth to responsiveDepth
                   transformStyle: "preserve-3d",
                 }}
               >

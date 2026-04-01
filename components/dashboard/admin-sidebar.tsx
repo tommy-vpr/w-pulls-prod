@@ -189,10 +189,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
 
         {/* Logo */}
         <div className="relative flex h-16 items-center border-b border-purple-500/20 px-6">
-          <Link
-            href="/admin"
-            className="flex items-center gap-2 font-bold group"
-          >
+          <Link href="/" className="flex items-center gap-2 font-bold group">
             <div className="relative">
               <Image
                 src={"/images/logo.png"}
@@ -219,7 +216,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
 
       {/* ─── Mobile Top Bar ─── */}
       <div className="fixed top-0 left-0 right-0 z-50 flex h-14 items-center justify-between px-4 bg-[#0a0a0f]/95 backdrop-blur-xl border-b border-purple-500/20 lg:hidden">
-        <Link href="/admin" className="flex items-center">
+        <Link href="/" className="flex items-center">
           <Image
             src={"/images/logo.png"}
             width={80}
@@ -290,7 +287,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
             {/* Drawer Header */}
             <div className="relative flex h-14 items-center justify-between border-b border-purple-500/20 px-4">
               <Link
-                href="/admin"
+                href="/"
                 onClick={() => setMobileOpen(false)}
                 className="flex items-center"
               >
