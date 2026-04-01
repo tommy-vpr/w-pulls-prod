@@ -9,7 +9,6 @@ const FOOTER_LINKS = {
   product: [
     { label: "Packs", href: "/packs" },
     { label: "Store", href: "/store" },
-    { label: "Changelog", href: "/changelog" },
     { label: "Roadmap", href: "/roadmap" },
   ],
   support: [

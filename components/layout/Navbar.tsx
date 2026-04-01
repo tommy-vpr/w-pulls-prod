@@ -19,7 +19,6 @@ const NAV: NavItem[] = [
   { label: "Home", href: "/" },
   { label: "Packs", href: "/packs" },
   { label: "Shop", href: "/store" },
-  { label: "Changelog", href: "/changelog" },
 ];
 
 // Holographic corner brackets

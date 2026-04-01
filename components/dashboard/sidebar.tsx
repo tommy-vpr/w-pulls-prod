@@ -105,10 +105,7 @@ export function Sidebar({ user }: SidebarProps) {
 
       {/* Logo */}
       <div className="relative flex h-16 items-center border-b border-purple-500/20 px-6">
-        <Link
-          href="/dashboard"
-          className="flex items-center gap-2 font-bold group"
-        >
+        <Link href="/" className="flex items-center gap-2 font-bold group">
           <div className="relative">
             <Image
               src={"/images/logo.png"}

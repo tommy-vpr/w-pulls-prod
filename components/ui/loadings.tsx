@@ -198,6 +198,10 @@ export const ProductsLoading = () => {
   );
 };
 
+// ================================================================================
+// ORDERS CARDS
+// ================================================================================
+
 export const OrdersLoading = () => {
   return (
     <div className="space-y-6">
@@ -211,7 +215,7 @@ export const OrdersLoading = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+      <div className="flex flex-col gap-2">
         {Array.from({ length: 4 }).map((_, i) => (
           <div
             key={i}

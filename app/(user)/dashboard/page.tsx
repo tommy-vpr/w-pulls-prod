@@ -101,7 +101,7 @@ export default async function UserDashboardPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="hidden md:flex items-center justify-between">
         <div className="flex items-center gap-4">
           {user?.image ? (
             <img
@@ -128,7 +128,7 @@ export default async function UserDashboardPage() {
 
         <Link
           href="/packs"
-          className="flex items-center gap-2 px-6 h-10 rounded-md bg-gradient-to-br border border-purple-500
+          className="whitespace-nowrap flex items-center gap-2 px-6 h-10 rounded-md bg-gradient-to-br border border-purple-500
           from-violet-600 to-purple-600 text-white text-sm font-medium hover:opacity-90 transition"
         >
           <Sparkles className="h-4 w-4" />
@@ -205,7 +205,9 @@ export default async function UserDashboardPage() {
               >
                 {getTierConfig(bestProduct.tier).label}
               </span>
-              <h3 className="text-xl text-gray-200">{bestProduct.title}</h3>
+              <h3 className="text-sm md:text-xl text-gray-200">
+                {bestProduct.title}
+              </h3>
               <p className="text-emerald-400 font-medium">
                 ${Number(bestProduct.price).toFixed(2)} value
               </p>

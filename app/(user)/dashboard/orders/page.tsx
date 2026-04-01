@@ -9,6 +9,7 @@ import {
 import { OrdersFilter } from "./_components/orders-filter";
 import { Package } from "lucide-react";
 import { OrdersTable } from "./_components/orders-table";
+import { OrdersCard } from "./_components/orders-card";
 
 export const metadata: Metadata = {
   title: "My Orders | WPulls",
@@ -51,7 +52,7 @@ export default async function MyOrdersPage({
         <Suspense fallback={<GridLoading />}>
           {ordersResult.success && ordersResult.data ? (
             ordersResult.data.data.length > 0 ? (
-              <OrdersTable
+              <OrdersCard
                 orders={ordersResult.data.data}
                 pagination={{
                   page: ordersResult.data.page,
@@ -75,7 +76,7 @@ export default async function MyOrdersPage({
 
 function GridLoading() {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-4 grid-cols-1">
       {[...Array(6)].map((_, i) => (
         <div key={i} className="h-64 rounded-xl bg-zinc-800/50 animate-pulse" />
       ))}
