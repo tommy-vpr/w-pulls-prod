@@ -148,9 +148,12 @@ function isValidCallbackUrl(url: string): boolean {
   return true;
 }
 
+// export async function signOutAction() {
+//   await signOut({ redirect: false });
+//   redirect("/auth");
+// }
 export async function signOutAction() {
-  await signOut({ redirect: false });
-  redirect("/auth");
+  await signOut({ redirectTo: "/auth" });
 }
 
 export async function forgotPasswordAction(formData: FormData) {

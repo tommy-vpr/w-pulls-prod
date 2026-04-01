@@ -209,7 +209,7 @@ export function UserDashboardLoading() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       {/* Welcome Header */}
-      <div className="flex items-center gap-4">
+      <div className="hidden md:flex items-center gap-4">
         <div className="h-16 w-16 rounded-full bg-zinc-800 animate-pulse" />
         <div className="space-y-2">
           <div className="h-7 w-48 bg-zinc-800 rounded animate-pulse" />

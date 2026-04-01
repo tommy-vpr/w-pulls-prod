@@ -1062,7 +1062,7 @@ export function PackSlashAnimation({
         <h1 className="text-2xl font-bold text-zinc-100">{packName}</h1>
       </div> */}
 
-      <div className="relative w-[300px] h-[450px]">
+      <div className="relative w-[300px] h-[450px] shrink-0">
         <div style={getGlowStyles()} />
 
         {/* Card with Flip */}
@@ -1129,7 +1129,7 @@ export function PackSlashAnimation({
 
       {/* Swipe to Open Button */}
       {stage === "idle" && (
-        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-50">
+        <div className="mt-8 z-50">
           <SwipeToOpenButton
             onComplete={startAnimation}
             accentColor={tierConfig.hexColor}
@@ -1139,8 +1139,7 @@ export function PackSlashAnimation({
 
       {/* Result Panel */}
       {stage === "done" && revealedProduct && !buybackCompleted && (
-        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-4">
-          {/* Buyback Timer */}
+        <div className="z-50 flex flex-col items-center gap-3 w-[90vw] max-w-sm mt-6 pb-8">
           {buybackQuote && !buybackExpired && (
             <QuoteTimer
               expiresAt={buybackQuote.expiresAt}
@@ -1148,118 +1147,90 @@ export function PackSlashAnimation({
             />
           )}
 
-          <span
-            className={cn(
-              "inline-flex items-center rounded-md px-3 py-1.5 text-sm font-medium border",
-              tierConfig.bgColor,
-              tierConfig.color,
-              tierConfig.borderColor,
-            )}
-          >
-            <Sparkles className="mr-1.5 h-3.5 w-3.5" />
-            {tierConfig.label}
-          </span>
-
-          <div className="text-center">
-            <h2 className="text-xl font-bold text-zinc-100">
-              {revealedProduct.title}
-            </h2>
-            <p className="text-emerald-400 font-medium">
-              ${Number(revealedProduct.price).toFixed(2)} value
+          <div className="flex items-center gap-3">
+            <span
+              className={cn(
+                "inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium border",
+                tierConfig.bgColor,
+                tierConfig.color,
+                tierConfig.borderColor,
+              )}
+            >
+              <Sparkles className="mr-1 h-3 w-3" />
+              {tierConfig.label}
+            </span>
+            <p className="text-sm text-emerald-400 font-medium">
+              ${Number(revealedProduct.price).toFixed(2)}
             </p>
           </div>
 
-          <div className="flex flex-col gap-3 mt-2">
-            <div className="flex gap-3">
-              <button
-                onClick={handleViewOrder}
-                className="
-                  cursor-pointer relative px-6 py-3
-                  font-semibold text-violet-400
-                  bg-zinc-950
-                  border border-violet-500/40
-                  rounded-md
-                  shadow-[0_0_25px_-10px_rgba(168,85,247,0.9)]
-                  hover:bg-violet-500
-                  hover:shadow-[0_0_40px_-8px_rgba(168,85,247,1)]
-                  hover:text-white
-                  transition-all duration-300
-              "
-              >
-                View Order
-              </button>
-              <button
-                onClick={handleOpenAnother}
-                className="
-                  cursor-pointer relative px-6 py-3
-                  font-semibold text-teal-400
-                  bg-zinc-950
-                  border border-teal-500/40
-                  rounded-md
-                  shadow-[0_0_25px_-10px_rgba(20,184,166,0.9)]
-                  hover:bg-teal-500
-                  hover:shadow-[0_0_40px_-8px_rgba(20,184,166,1)]
-                  hover:text-white
-                  transition-all duration-300
-              "
-              >
-                Open Another Pack
-              </button>
-            </div>
+          <h2 className="text-lg font-bold text-zinc-100 text-center">
+            {revealedProduct.title}
+          </h2>
 
-            {/* Buyback Button */}
-            {buybackQuote && !buybackExpired && (
-              <button
-                onClick={() => setShowBuybackModal(true)}
-                className="cursor-pointer relative w-full px-6 py-3 font-semibold text-emerald-400 bg-zinc-950 border border-emerald-500/40 rounded-md shadow-[0_0_25px_-10px_rgba(16,185,129,0.9)] hover:bg-emerald-500 hover:shadow-[0_0_40px_-8px_rgba(16,185,129,1)] hover:text-white transition-all duration-300 flex items-center justify-center gap-2"
-              >
-                <Wallet className="w-4 h-4" />
-                Sell Back for ${(buybackQuote.buybackAmount / 100).toFixed(2)}
-              </button>
-            )}
-
-            {isLoadingQuote && (
-              <div className="text-zinc-500 text-sm">
-                Loading buyback offer...
-              </div>
-            )}
+          <div className="flex gap-2 w-full">
+            <button
+              onClick={handleViewOrder}
+              className="cursor-pointer flex-1 py-2.5 text-sm font-semibold text-gray-400 bg-zinc-950 border border-gray-500 rounded-md hover:bg-gray-500 hover:text-white transition-all duration-300"
+            >
+              View Order
+            </button>
+            <button
+              onClick={handleOpenAnother}
+              className="cursor-pointer flex-1 py-2.5 text-sm font-semibold text-amber-400 bg-zinc-950 border border-amber-500/40 rounded-md hover:bg-amber-500 hover:text-white transition-all duration-300"
+            >
+              Open Another
+            </button>
           </div>
+
+          {buybackQuote && !buybackExpired && (
+            <button
+              onClick={() => setShowBuybackModal(true)}
+              className="cursor-pointer w-full py-2.5 text-sm font-semibold text-emerald-400 bg-zinc-950 border border-emerald-500/40 rounded-md hover:bg-emerald-500 hover:text-white transition-all duration-300 flex items-center justify-center gap-2"
+            >
+              <Wallet className="w-4 h-4" />
+              Sell Back for ${(buybackQuote.buybackAmount / 100).toFixed(2)}
+            </button>
+          )}
+
+          {isLoadingQuote && (
+            <p className="text-zinc-500 text-xs">Loading buyback offer...</p>
+          )}
         </div>
       )}
 
-      {/* Buyback Success */}
       {buybackCompleted && (
-        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-4">
-          <div className="bg-emerald-500/20 border border-emerald-500/40 rounded-xl p-6 text-center">
-            <div className="w-12 h-12 rounded-full bg-emerald-500/30 flex items-center justify-center mx-auto mb-3">
-              <Wallet className="w-6 h-6 text-emerald-400" />
+        <div className="z-50 w-[90vw] max-w-sm mt-6 pb-8">
+          <div className="bg-emerald-500/20 border border-emerald-500/40 rounded-xl p-5 text-center">
+            <div className="w-10 h-10 rounded-full bg-emerald-500/30 flex items-center justify-center mx-auto mb-3">
+              <Wallet className="w-5 h-5 text-emerald-400" />
             </div>
-            <h3 className="text-lg font-semibold text-zinc-100 mb-1">
+            <h3 className="text-base font-semibold text-zinc-100 mb-1">
               ${((buybackQuote?.buybackAmount ?? 0) / 100).toFixed(2)} Added to
               Wallet!
             </h3>
             <p className="text-zinc-400 text-sm mb-4">
               Withdraw anytime from your Wallet page.
             </p>
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <button
                 onClick={() => router.push("/dashboard/wallet")}
-                className="cursor-pointer px-4 py-2 bg-emerald-500 text-white rounded font-medium hover:bg-emerald-600 transition-colors"
+                className="cursor-pointer flex-1 py-2 bg-emerald-500 text-white rounded font-medium text-sm hover:bg-emerald-600 transition-colors"
               >
                 Go to Wallet
               </button>
               <button
                 onClick={handleOpenAnother}
-                className="cursor-pointer px-4 py-2 bg-gray-200 text-gray-700 rounded font-medium hover:bg-gray-300 transition-colors"
+                className="cursor-pointer flex-1 py-2 bg-zinc-800 text-zinc-200 rounded font-medium text-sm hover:bg-zinc-700 transition-colors"
               >
-                Open Another Pack
+                Open Another
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Buyback Modal */}
+      {/* Buyback Modal stays unchanged */}
       {buybackQuote && (
         <BuybackModal
           isOpen={showBuybackModal}

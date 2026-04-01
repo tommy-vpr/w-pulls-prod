@@ -18,8 +18,7 @@ import {
   ShoppingBag,
   LucideIcon,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
-import { signOutAction } from "@/lib/actions/auth.actions";
+import { signOut, useSession } from "next-auth/react";
 import { getInitials } from "@/lib/utils/initials";
 import { CartIcon } from "./CartIcon";
 
@@ -73,6 +72,10 @@ export function Navbar() {
       document.body.style.overflow = "";
     };
   }, [mobileOpen]);
+
+  const handleSignOut = async () => {
+    await signOut({ callbackUrl: "/auth" }); // ← fix redirectTo to callbackUrl
+  };
 
   return (
     <>
@@ -163,7 +166,7 @@ export function Navbar() {
                       ${userMenuOpen ? "shadow-[0_0_20px_rgba(0,255,255,0.2)] border-cyan-400/40" : ""}
                     `}
                   >
-                    {session.user.image ? (
+                    {status === "authenticated" && session.user.image ? (
                       <img
                         src={session.user.image}
                         alt={session.user.name || "Avatar"}
@@ -231,16 +234,13 @@ export function Navbar() {
                           ))}
                         </div>
                         <div className="border-t border-red-400/10 py-1">
-                          <form action={signOutAction}>
-                            <button
-                              type="submit"
-                              className="cursor-pointer flex w-full items-center gap-3 px-4 py-2.5 text-xs uppercase tracking-wider text-rose-400/80 hover:text-rose-400 hover:bg-rose-500/10 transition-all duration-300 group"
-                            >
-                              <LogOut className="h-4 w-4 text-rose-400/50 group-hover:text-rose-400 transition-colors" />
-                              Sign out
-                              <div className="ml-auto w-1 h-1 rounded-full bg-rose-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                            </button>
-                          </form>
+                          <button
+                            onClick={handleSignOut}
+                            className="cursor-pointer flex w-full items-center gap-3 px-4 py-2.5 text-xs uppercase tracking-wider text-rose-400/80 hover:text-rose-400 hover:bg-rose-500/10 transition-all duration-300 group"
+                          >
+                            <LogOut className="h-4 w-4 text-rose-400/50 group-hover:text-rose-400 transition-colors" />
+                            Sign out
+                          </button>
                         </div>
                       </motion.div>
                     )}
@@ -338,7 +338,7 @@ export function Navbar() {
               {/* User info (if logged in) */}
               {session?.user && (
                 <div className="flex items-center gap-3 px-5 py-4 border-b border-cyan-400/10 bg-gradient-to-r from-cyan-400/5 to-transparent">
-                  {session.user.image ? (
+                  {status === "authenticated" && session.user.image ? (
                     <img
                       src={session.user.image}
                       alt={session.user.name || "Avatar"}
@@ -453,15 +453,13 @@ export function Navbar() {
               {/* Footer — sign out or sign in */}
               <div className="border-t border-cyan-400/10 p-4">
                 {session?.user ? (
-                  <form action={signOutAction}>
-                    <button
-                      type="submit"
-                      className="cursor-pointer flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm font-mono uppercase tracking-wider text-rose-400/80 hover:text-rose-400 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all duration-300 group"
-                    >
-                      <LogOut className="h-4 w-4 text-rose-400/50 group-hover:text-rose-400 transition-colors" />
-                      Sign out
-                    </button>
-                  </form>
+                  <button
+                    onClick={handleSignOut}
+                    className="cursor-pointer flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm font-mono uppercase tracking-wider text-rose-400/80 hover:text-rose-400 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all duration-300 group"
+                  >
+                    <LogOut className="h-4 w-4 text-rose-400/50 group-hover:text-rose-400 transition-colors" />
+                    Sign out
+                  </button>
                 ) : (
                   <div className="flex flex-col gap-2">
                     <Link
