@@ -481,26 +481,25 @@ function WithdrawModal({
 
           {!hasPayoutAccount ? (
             // Not connected state
-            <div className="text-center py-8">
-              <div className="w-16 h-16 rounded-full bg-violet-500/20 flex items-center justify-center mx-auto mb-4">
-                <Building className="w-8 h-8 text-violet-400" />
+            <div className="flex flex-col items-center text-center py-4">
+              <div className="w-12 h-12 rounded-full bg-violet-500/20 flex items-center justify-center mb-3">
+                <Building className="w-6 h-6 text-violet-400" />
               </div>
-              <h3 className="text-lg font-medium text-zinc-100 mb-2">
+              <h3 className="text-base font-medium text-zinc-100 mb-1">
                 Connect Your Bank Account
               </h3>
-              <p className="text-sm text-zinc-400 mb-6">
-                You need to connect a bank account through Stripe before you can
-                withdraw funds.
+              <p className="text-xs text-zinc-400 mb-4 max-w-[260px]">
+                Connect a bank account through Stripe to withdraw funds.
               </p>
               <button
                 onClick={() => {
                   onClose();
                   onConnectAccount();
                 }}
-                className="cursor-pointer px-6 py-3 bg-violet-500 hover:bg-violet-600 text-white font-medium rounded-xl transition-colors inline-flex items-center gap-2"
+                className="cursor-pointer px-4 py-2.5 bg-violet-500 hover:bg-violet-600 text-white text-sm font-medium rounded-xl transition-colors inline-flex items-center gap-2"
               >
                 <span>Connect via Stripe</span>
-                <ExternalLink className="w-4 h-4" />
+                <ExternalLink className="w-3.5 h-3.5" />
               </button>
             </div>
           ) : (

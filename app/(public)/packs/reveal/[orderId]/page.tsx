@@ -7,6 +7,8 @@ import { rollTier, pickProductWithBump } from "@/lib/packs/ev";
 import { getPackById } from "@/lib/packs/config";
 import { PackRevealAnimation } from "@/components/reveal/PackRevealAnimation";
 import { PackSlashAnimation } from "@/components/reveal/PackSlashAnimation";
+import { getTierConfig } from "@/lib/tier-config";
+import { PackLoadingSparks } from "@/components/reveal/PackLoadingSparks";
 
 interface RevealPageProps {
   params: Promise<{ orderId: string }>;
@@ -57,13 +59,25 @@ export default async function RevealPage({ params }: RevealPageProps) {
     );
   }
 
+  // if (order.status !== "COMPLETED") {
+  //   return (
+  //     <div className="min-h-screen flex flex-col items-center justify-center p-6 gap-4">
+  //       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary" />
+  //       <p className="text-lg text-muted-foreground">Opening your pack...</p>
+  //       <meta httpEquiv="refresh" content="2" />
+  //     </div>
+  //   );
+  // }
   if (order.status !== "COMPLETED") {
+    const tierColor = order.selectedTier
+      ? getTierConfig(order.selectedTier).hexColor
+      : "#00ffff";
+
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-6 gap-4">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary" />
-        <p className="text-lg text-muted-foreground">Opening your pack...</p>
+      <>
+        <PackLoadingSparks tierColor={tierColor} />
         <meta httpEquiv="refresh" content="2" />
-      </div>
+      </>
     );
   }
 
