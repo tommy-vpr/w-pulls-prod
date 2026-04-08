@@ -237,7 +237,10 @@ export async function resetPasswordAction(formData: FormData) {
 
   await prisma.user.update({
     where: { id: resetToken.userId },
-    data: { password: hashedPassword },
+    data: {
+      password: hashedPassword,
+      emailVerified: new Date(), // mark email as verified — user proved ownership via reset link
+    },
   });
 
   await prisma.passwordResetToken.delete({
