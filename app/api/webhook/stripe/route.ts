@@ -1,4 +1,4 @@
-// app/api/webhooks/stripe/route.ts
+// app/api/webhook/stripe/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import prisma from "@/lib/prisma";
@@ -67,7 +67,9 @@ export async function POST(request: NextRequest) {
         notes: `Wallet deposit via Stripe (${session.id})`,
       });
 
-      console.log(`✅ Wallet deposit: $${(depositAmount / 100).toFixed(2)} → user ${userId}`);
+      console.log(
+        `✅ Wallet deposit: $${(depositAmount / 100).toFixed(2)} → user ${userId}`,
+      );
     } catch (err) {
       console.error("Wallet deposit credit failed:", err);
     }
