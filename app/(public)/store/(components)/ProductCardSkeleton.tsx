@@ -3,24 +3,17 @@
 export function ProductCardSkeleton() {
   return (
     <div>
-      {/* Image Wrapper */}
-      <div className="relative aspect-[3/4] overflow-hidden rounded-xl bg-zinc-800/30 border border-zinc-900 p-2">
-        <div className="relative h-full w-full rounded-lg bg-zinc-900/50">
-          <div className="absolute inset-0 skeleton-shimmer" />
-        </div>
+      {/* Image — no outer case, matches ProductCard */}
+      <div className="relative aspect-[3/4] overflow-hidden rounded-xl bg-zinc-800/30">
+        <div className="absolute inset-0 skeleton-shimmer" />
       </div>
 
-      {/* Content - Outside Image */}
-      <div className="relative mt-2">
-        {/* Tier Badge Skeleton */}
+      {/* Content */}
+      <div className="relative mt-2 px-1">
         <div className="mb-1">
           <div className="h-5 w-20 rounded-lg bg-zinc-900 skeleton-shimmer" />
         </div>
-
-        {/* Title */}
         <div className="h-4 w-3/4 rounded bg-zinc-900 skeleton-shimmer mb-2" />
-
-        {/* Price */}
         <div className="h-5 w-16 rounded bg-zinc-900 skeleton-shimmer" />
       </div>
 

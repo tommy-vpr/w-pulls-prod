@@ -591,7 +591,7 @@ export default function HolographicHub() {
         {/* Hero section with carousel */}
         <section className="relative pt-24">
           {/* Carousel container */}
-          <div className="relative h-[70vh] min-h-[500px] w-full max-w-[1800px] mx-auto">
+          <div className="relative h-[70vh] min-h-[500px] w-full max-w-[1600px] mx-auto">
             {/* HudFrame wrapper */}
             <div className="absolute inset-8">
               <HudFrame

@@ -16,7 +16,9 @@ export function HudFrame({
   className = "",
 }: HudFrameProps) {
   return (
-    <div className={`relative max-h-[60vh] md:max-h-[55vh] ${className}`}>
+    <div
+      className={`relative sm:max-h-[60vh] md:max-h-[62vh] xl:max-h-[55vh] ${className}`}
+    >
       {/* Outer border shape */}
       <div
         className="absolute inset-0"
