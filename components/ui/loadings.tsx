@@ -568,21 +568,21 @@ export function StatsSkeleton({ count = 4 }: { count?: number }) {
  */
 export function OrderDetailSkeleton() {
   return (
-    <div className="space-y-6 max-w-4xl mx-auto animate-pulse">
+    <div className="space-y-6 max-w-4xl mx-auto animate-pulse px-4 sm:px-0">
       {/* Back link */}
       <div className="h-4 w-32 bg-zinc-800 rounded" />
 
       {/* Header */}
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
-        <div className="flex justify-between items-start">
+      <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
           <div className="space-y-2">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <div className="h-7 w-40 bg-zinc-800 rounded" />
               <div className="h-6 w-24 bg-zinc-800 rounded-md" />
             </div>
-            <div className="h-4 w-64 bg-zinc-800/60 rounded" />
+            <div className="h-4 w-48 sm:w-64 bg-zinc-800/60 rounded" />
           </div>
-          <div className="text-right space-y-1">
+          <div className="sm:text-right space-y-1">
             <div className="h-3 w-16 bg-zinc-800 rounded" />
             <div className="h-5 w-32 bg-zinc-800 rounded" />
           </div>
@@ -594,13 +594,13 @@ export function OrderDetailSkeleton() {
         <div className="lg:col-span-2 space-y-6">
           {/* Product card */}
           <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
-            <div className="px-6 py-4 border-b border-zinc-800">
+            <div className="px-4 sm:px-6 py-4 border-b border-zinc-800">
               <div className="h-5 w-24 bg-zinc-800 rounded" />
             </div>
-            <div className="p-6 flex gap-6">
-              <div className="h-40 w-32 bg-zinc-800 rounded-lg" />
-              <div className="flex-1 space-y-3">
-                <div className="h-6 w-48 bg-zinc-800 rounded" />
+            <div className="p-4 sm:p-6 flex gap-4">
+              <div className="h-32 w-24 sm:h-40 sm:w-32 shrink-0 bg-zinc-800 rounded-lg" />
+              <div className="flex-1 min-w-0 space-y-3">
+                <div className="h-6 w-full max-w-[200px] bg-zinc-800 rounded" />
                 <div className="h-4 w-32 bg-zinc-800/60 rounded" />
                 <div className="h-8 w-24 bg-zinc-800 rounded-md" />
                 <div className="h-8 w-20 bg-zinc-800 rounded" />
@@ -610,16 +610,16 @@ export function OrderDetailSkeleton() {
 
           {/* Timeline */}
           <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
-            <div className="px-6 py-4 border-b border-zinc-800">
+            <div className="px-4 sm:px-6 py-4 border-b border-zinc-800">
               <div className="h-5 w-32 bg-zinc-800 rounded" />
             </div>
-            <div className="p-6 space-y-6">
+            <div className="p-4 sm:p-6 space-y-6">
               {Array.from({ length: 3 }).map((_, i) => (
                 <div key={i} className="flex gap-4">
-                  <div className="h-10 w-10 bg-zinc-800 rounded-full" />
-                  <div className="space-y-2">
+                  <div className="h-10 w-10 shrink-0 bg-zinc-800 rounded-full" />
+                  <div className="flex-1 space-y-2">
                     <div className="h-4 w-32 bg-zinc-800 rounded" />
-                    <div className="h-3 w-48 bg-zinc-800/60 rounded" />
+                    <div className="h-3 w-full max-w-[200px] bg-zinc-800/60 rounded" />
                   </div>
                 </div>
               ))}
