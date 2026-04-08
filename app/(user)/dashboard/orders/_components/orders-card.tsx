@@ -173,14 +173,15 @@ export function OrdersCard({ orders, pagination }: OrdersCardProps) {
           const isRevealed = order.status === "COMPLETED" && order.product;
 
           return (
-            <div
+            <Link
               key={order.id}
-              className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 flex gap-3"
+              href={`/dashboard/orders/${order.id}`}
+              className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-3 flex gap-3 hover:border-zinc-700 hover:bg-zinc-800/50 transition-all active:scale-[0.99]"
             >
               {/* Thumbnail */}
               <div className="shrink-0">
                 {isRevealed && order.product?.imageUrl ? (
-                  <div className="relative h-16 w-16 overflow-hidden rounded-lg border border-zinc-700 bg-zinc-800">
+                  <div className="relative h-14 w-14 overflow-hidden rounded-lg border border-zinc-700 bg-zinc-800">
                     <Image
                       src={order.product.imageUrl}
                       alt={order.product.title}
@@ -189,23 +190,19 @@ export function OrdersCard({ orders, pagination }: OrdersCardProps) {
                     />
                   </div>
                 ) : (
-                  <div className="h-16 w-16 rounded-lg border border-zinc-700 bg-zinc-800 flex items-center justify-center">
+                  <div className="h-14 w-14 rounded-lg border border-zinc-700 bg-zinc-800 flex items-center justify-center">
                     <Sparkles className="h-5 w-5 text-zinc-600" />
                   </div>
                 )}
               </div>
 
               {/* Content */}
-              <div className="flex-1 min-w-0 space-y-2">
-                {/* Top row: title + status */}
-                <div className="flex items-start justify-between gap-2">
-                  <Link
-                    href={`/dashboard/orders/${order.id}`}
-                    className="font-medium text-zinc-100 text-sm leading-snug truncate hover:underline transition"
-                  >
-                    {isRevealed ? order.product!.title : "Mystery Card"}
-                  </Link>
-
+              <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+                {/* Row 1: title + status */}
+                <div className="flex items-center justify-between gap-2">
+                  <p className="font-medium text-zinc-100 text-sm truncate">
+                    {isRevealed ? order.product!.title : order.packName}
+                  </p>
                   <span
                     className={cn(
                       "shrink-0 inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-medium border border-current/20",
@@ -218,68 +215,38 @@ export function OrdersCard({ orders, pagination }: OrdersCardProps) {
                   </span>
                 </div>
 
-                {/* Meta row */}
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-500">
-                  <span className="font-mono">
-                    #{order.id.slice(-8).toUpperCase()}
+                {/* Row 2: value + paid + tier */}
+                <div className="flex items-center gap-2 text-xs mt-1">
+                  <span
+                    className={cn(
+                      "font-semibold",
+                      isRevealed ? "text-emerald-400" : "text-zinc-500",
+                    )}
+                  >
+                    {isRevealed
+                      ? `$${Number(order.product!.price).toFixed(2)}`
+                      : "???"}
                   </span>
-                  <span>{order.packName}</span>
+                  <span className="text-zinc-700">·</span>
+                  <span className="text-zinc-500">
+                    Paid ${(order.amount / 100).toFixed(2)}
+                  </span>
                   {order.selectedTier && (
-                    <span
-                      className={cn(
-                        "inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium border",
-                        getTierBadgeClass(order.selectedTier),
-                      )}
-                    >
-                      {tier.label}
-                    </span>
+                    <>
+                      <span className="text-zinc-700">·</span>
+                      <span
+                        className={cn(
+                          "inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium border",
+                          getTierBadgeClass(order.selectedTier),
+                        )}
+                      >
+                        {tier.label}
+                      </span>
+                    </>
                   )}
                 </div>
-
-                {/* Bottom row: value + paid + date + actions */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 text-xs">
-                    <span
-                      className={cn(
-                        "font-semibold",
-                        isRevealed ? "text-emerald-400" : "text-zinc-500",
-                      )}
-                    >
-                      {isRevealed
-                        ? `$${Number(order.product!.price).toFixed(2)}`
-                        : "???"}
-                    </span>
-                    <span className="text-zinc-600">·</span>
-                    <span className="text-zinc-400">
-                      Paid ${(order.amount / 100).toFixed(2)}
-                    </span>
-                    <span className="text-zinc-600">·</span>
-                    <span className="text-zinc-500">
-                      {formatDistanceToNow(new Date(order.createdAt), {
-                        addSuffix: true,
-                      })}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-1 shrink-0">
-                    <Link
-                      href={`/dashboard/orders/${order.id}`}
-                      className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors"
-                    >
-                      <Eye className="h-3 w-3" />
-                    </Link>
-                    {isRevealed && (
-                      <button
-                        onClick={() => handleQuickView(order)}
-                        className="cursor-pointer inline-flex items-center px-2 py-1 rounded-md text-xs font-medium text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors"
-                      >
-                        Card
-                      </button>
-                    )}
-                  </div>
-                </div>
               </div>
-            </div>
+            </Link>
           );
         })}
       </div>

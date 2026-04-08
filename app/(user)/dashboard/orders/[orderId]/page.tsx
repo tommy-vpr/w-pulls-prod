@@ -260,7 +260,7 @@ function PackOrderDetail({
         <div className="space-y-6">
           <PaymentSummary order={order} />
           <ShippingInfo order={order} />
-          <NeedHelp />
+          <NeedHelp order={order} />
         </div>
       </div>
     </div>
@@ -410,7 +410,7 @@ function ProductOrderDetail({
         <div className="space-y-6">
           <PaymentSummary order={order} />
           <ShippingInfo order={order} />
-          <NeedHelp />
+          <NeedHelp order={order} />{" "}
         </div>
       </div>
     </div>
@@ -710,18 +710,54 @@ function ShippingInfo({ order }: { order: any }) {
   );
 }
 
-function NeedHelp() {
+// function NeedHelp() {
+//   return (
+//     <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
+//       <div className="p-6 text-center">
+//         <p className="text-sm text-zinc-400 mb-3">Need help with this order?</p>
+//         <Link
+//           href="/support"
+//           className="inline-flex items-center gap-2 text-sm text-violet-400 hover:text-violet-300 transition-colors"
+//         >
+//           Contact Support
+//           <ExternalLink className="h-3.5 w-3.5" />
+//         </Link>
+//       </div>
+//     </div>
+//   );
+// }
+
+function NeedHelp({ order }: { order: any }) {
   return (
     <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
-      <div className="p-6 text-center">
-        <p className="text-sm text-zinc-400 mb-3">Need help with this order?</p>
-        <Link
-          href="/support"
-          className="inline-flex items-center gap-2 text-sm text-violet-400 hover:text-violet-300 transition-colors"
-        >
-          Contact Support
-          <ExternalLink className="h-3.5 w-3.5" />
-        </Link>
+      <div className="p-6 space-y-4">
+        {/* Email confirmation */}
+        {order.status === "COMPLETED" && order.customerEmail && (
+          <div className="flex items-start gap-2 pb-4 border-b border-zinc-800">
+            <CheckCircle className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-xs font-medium text-zinc-300">
+                Confirmation sent
+              </p>
+              <p className="text-xs text-zinc-500 mt-0.5 break-all">
+                {order.customerEmail}
+              </p>
+            </div>
+          </div>
+        )}
+
+        <div className="text-center">
+          <p className="text-sm text-zinc-400 mb-3">
+            Need help with this order?
+          </p>
+          <Link
+            href="/support"
+            className="inline-flex items-center gap-2 text-sm text-violet-400 hover:text-violet-300 transition-colors"
+          >
+            Contact Support
+            <ExternalLink className="h-3.5 w-3.5" />
+          </Link>
+        </div>
       </div>
     </div>
   );
