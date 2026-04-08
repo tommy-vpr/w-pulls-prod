@@ -198,7 +198,7 @@ export async function forgotPasswordAction(formData: FormData) {
         resetUrl,
         email: user.email,
       }),
-      from: "W-Pulls Security <security@emails.teevong.com>",
+      from: "W-Pulls Security <security@emails.hq.team>",
     });
   } catch (error) {
     console.error("Password reset email failed:", error);
@@ -278,7 +278,7 @@ async function sendVerificationEmail(
       to: email,
       subject: "Your W-Pulls verification code",
       html: verificationEmail({ pin, name }),
-      from: "W-Pulls <no-reply@emails.teevong.com>",
+      from: "W-Pulls <no-reply@emails.hq.team>",
     });
   } catch (error) {
     console.error("Verification email failed:", error);

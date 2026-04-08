@@ -11,7 +11,7 @@ export async function sendEmail({
   to,
   subject,
   html,
-  from = "W-Pulls <no-reply@emails.teevong.com>",
+  from = "W-Pulls <no-reply@emails.hq.team>",
 }: SendEmailParams) {
   try {
     const { error } = await resend.emails.send({

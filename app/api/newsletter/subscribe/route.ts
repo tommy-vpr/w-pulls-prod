@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
 
     // Send welcome email
     await resend.emails.send({
-      from: "W-Pulls <noreply@emails.teevong.com>",
+      from: "W-Pulls <noreply@emails.hq.team>",
       to: email,
       subject: "Welcome to W-Pulls Newsletter! 🎴",
       html: `

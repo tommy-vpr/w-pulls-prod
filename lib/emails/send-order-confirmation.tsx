@@ -219,7 +219,7 @@ export async function sendOrderConfirmationEmail(
 ) {
   try {
     const { error } = await resend.emails.send({
-      from: "W-Pulls <orders@emails.teevong.com>",
+      from: "W-Pulls <orders@emails.hq.team>",
       to: params.to,
       subject: `Order Confirmed - W-Pulls #${params.orderNumber}`,
       html: generateOrderConfirmationHTML(params),
