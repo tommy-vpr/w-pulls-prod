@@ -23,8 +23,19 @@ export default function CollectionsLoading() {
       </div>
 
       {/* Grid — matches sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 */}
-      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
-        <CardSkeleton count={8} />
+      <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} className="flex flex-col gap-2 animate-pulse">
+            {/* Card image */}
+            <div className="relative aspect-[3/4] w-full rounded-lg bg-zinc-800" />
+            {/* Info below */}
+            <div className="px-1 space-y-1.5">
+              <div className="h-4 w-16 bg-zinc-800 rounded" />
+              <div className="h-4 w-3/4 bg-zinc-700 rounded" />
+              <div className="h-4 w-12 bg-zinc-800 rounded" />
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
