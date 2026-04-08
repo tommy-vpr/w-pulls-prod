@@ -16,24 +16,21 @@ export function ProductCard({ product }: ProductCardProps) {
   const tierConfig = getTierConfig(product.tier);
 
   return (
-    <div>
-      <TiltCard>
+    <div className="">
+      <TiltCard className="">
         <Link
           href={`/store/${product.slug}`}
-          className="group relative h-full min-h-[360px] flex flex-col overflow-hidden rounded-xl bg-zinc-900 border 
-        border-zinc-800 transition-all duration-300 hover:border-zinc-700 p-2"
+          className="group relative flex flex-col"
         >
-          {/* Image Wrapper */}
-          <div className="relative p-3 bg-zinc-800 rounded-lg">
+          {/* Image */}
+          <div className="relative aspect-[3/4] h-full rounded-xl overflow-hidden">
             {product.imageUrl ? (
-              <div className="relative aspect-[3/4] w-full">
-                <Image
-                  src={product.imageUrl}
-                  alt={product.title}
-                  fill
-                  className="object-contain"
-                />
-              </div>
+              <Image
+                src={product.imageUrl}
+                alt={product.title}
+                fill
+                className="object-cover"
+              />
             ) : (
               <div className="flex h-full items-center justify-center">
                 <span className="text-zinc-600 text-sm">No image</span>
@@ -70,7 +67,8 @@ export function ProductCard({ product }: ProductCardProps) {
           </span> */}
 
           <p
-            className="text-base font-mono text-[#78ff7c]"
+            // className="text-base font-mono text-[#78ff7c]"
+            className="text-base font-mono text-green-400"
             style={{ textShadow: "0 0 6px rgba(120,255,124,.4)" }}
           >
             ${product.price.toString()}

@@ -38,7 +38,7 @@ export function TiltCard({
     const rotateY = ((x - centerX) / centerX) * tiltAmount;
 
     setTransform(
-      `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(${scale}, ${scale}, ${scale})`
+      `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(${scale}, ${scale}, ${scale})`,
     );
 
     // Update glare position
@@ -64,7 +64,7 @@ export function TiltCard({
       onMouseLeave={handleMouseLeave}
       className={cn(
         "relative transition-transform duration-200 ease-out",
-        className
+        className,
       )}
       style={{
         transform: transform,
