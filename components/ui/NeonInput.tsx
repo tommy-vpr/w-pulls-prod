@@ -10,14 +10,12 @@ interface NeonInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   accentColor?: "cyan" | "fuchsia" | "emerald" | "amber";
 }
 
-interface NeonTextareaProps
-  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+interface NeonTextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label: string;
   accentColor?: "cyan" | "fuchsia" | "emerald" | "amber";
 }
 
-interface NeonSelectProps
-  extends React.SelectHTMLAttributes<HTMLSelectElement> {
+interface NeonSelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   label: string;
   options: { value: string; label: string }[];
   accentColor?: "cyan" | "fuchsia" | "emerald" | "amber";
@@ -108,7 +106,7 @@ export function NeonInput({
             props.onBlur?.(e);
           }}
           className={`
-            w-full bg-transparent px-4 py-3 text-sm text-white
+            w-full bg-transparent px-4 py-3 text-base text-white
             placeholder:text-cyan-100/30
             focus:outline-none
             ${Icon ? "pl-10" : ""}
@@ -168,7 +166,7 @@ export function NeonTextarea({
             props.onBlur?.(e);
           }}
           className={`
-            w-full bg-transparent px-4 py-3 text-sm text-white
+            w-full bg-transparent px-4 py-3 text-base text-white
             placeholder:text-cyan-100/30
             focus:outline-none
             resize-none
@@ -229,7 +227,7 @@ export function NeonSelect({
             props.onBlur?.(e);
           }}
           className={`
-            w-full bg-transparent px-4 py-3 text-sm text-white
+            w-full bg-transparent px-4 py-3 text-base text-white
             focus:outline-none
             appearance-none cursor-pointer
             [&>option]:bg-slate-900 [&>option]:text-white
