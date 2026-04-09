@@ -15,7 +15,6 @@ import {
   ShoppingBag,
   Sparkles,
 } from "lucide-react";
-import confetti from "canvas-confetti";
 import { useCartStore } from "@/lib/cart/cart.store";
 
 interface OrderItem {
@@ -62,35 +61,6 @@ export function OrderSuccessContent({
   useEffect(() => {
     // Clear cart on successful order
     clearCart();
-
-    // Trigger confetti on mount
-    setShowConfetti(true);
-
-    const duration = 3000;
-    const end = Date.now() + duration;
-
-    const colors = ["#00ffff", "#ff00ff", "#ffffff"];
-
-    (function frame() {
-      confetti({
-        particleCount: 3,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0 },
-        colors,
-      });
-      confetti({
-        particleCount: 3,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1 },
-        colors,
-      });
-
-      if (Date.now() < end) {
-        requestAnimationFrame(frame);
-      }
-    })();
   }, [clearCart]);
 
   return (

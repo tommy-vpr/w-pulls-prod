@@ -7,13 +7,9 @@ import { orderAbandonQueue } from "@/lib/queue/orderAbandon.queue";
 
 export async function POST(request: NextRequest) {
   try {
+    // Auth is optional — guests can checkout too
     const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 },
-      );
-    }
+    const userId = session?.user?.id ?? null;
 
     const { items } = await request.json();
 
@@ -26,7 +22,7 @@ export async function POST(request: NextRequest) {
 
     const products = await prisma.product.findMany({
       where: {
-        id: { in: items.map((i) => i.productId) },
+        id: { in: items.map((i: any) => i.productId) },
         isActive: true,
       },
     });
@@ -39,22 +35,22 @@ export async function POST(request: NextRequest) {
     }
 
     const amount = products.reduce((sum, product) => {
-      const item = items.find((i) => i.productId === product.id)!;
+      const item = items.find((i: any) => i.productId === product.id)!;
       return sum + Number(product.price) * item.quantity;
     }, 0);
 
     const order = await prisma.order.create({
       data: {
         type: "PRODUCT",
-        userId: session.user.id,
+        userId: userId, // null for guests
         amount: Math.round(amount * 100),
         subtotal: Math.round(amount * 100),
         status: "PENDING",
-        customerName: session.user.name ?? null,
-        customerEmail: session.user.email ?? null,
+        customerName: session?.user?.name ?? null,
+        customerEmail: session?.user?.email ?? null,
         items: {
           create: products.map((product) => {
-            const item = items.find((i) => i.productId === product.id)!;
+            const item = items.find((i: any) => i.productId === product.id)!;
             return {
               productId: product.id,
               quantity: item.quantity,
@@ -65,36 +61,32 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // After prisma.order.create(...)
     await orderAbandonQueue.add(
       "abandon-check",
       { orderId: order.id },
       {
         delay: 1 * 60 * 1000,
-        jobId: `abandon_${order.id}`, // ✅ no colon
+        jobId: `abandon_${order.id}`,
       },
     );
 
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: "payment",
-
-      // Enable automatic tax calculation
       automatic_tax: { enabled: true },
 
-      // Collect shipping address
+      // Collect email for guests
+      ...(userId ? {} : { customer_email: undefined }),
+      customer_creation: userId ? undefined : "always",
+
       shipping_address_collection: {
         allowed_countries: ["US"],
       },
 
-      // Shipping options
       shipping_options: [
         {
           shipping_rate_data: {
             type: "fixed_amount",
-            fixed_amount: {
-              amount: 0,
-              currency: "usd",
-            },
+            fixed_amount: { amount: 0, currency: "usd" },
             display_name: "Standard Shipping",
             delivery_estimate: {
               minimum: { unit: "business_day", value: 5 },
@@ -105,10 +97,7 @@ export async function POST(request: NextRequest) {
         {
           shipping_rate_data: {
             type: "fixed_amount",
-            fixed_amount: {
-              amount: 999, // $9.99
-              currency: "usd",
-            },
+            fixed_amount: { amount: 999, currency: "usd" },
             display_name: "Express Shipping",
             delivery_estimate: {
               minimum: { unit: "business_day", value: 2 },
@@ -119,10 +108,7 @@ export async function POST(request: NextRequest) {
         {
           shipping_rate_data: {
             type: "fixed_amount",
-            fixed_amount: {
-              amount: 1999, // $19.99
-              currency: "usd",
-            },
+            fixed_amount: { amount: 1999, currency: "usd" },
             display_name: "Overnight Shipping",
             delivery_estimate: {
               minimum: { unit: "business_day", value: 1 },
@@ -133,8 +119,7 @@ export async function POST(request: NextRequest) {
       ],
 
       line_items: products.map((product) => {
-        const item = items.find((i) => i.productId === product.id)!;
-
+        const item = items.find((i: any) => i.productId === product.id)!;
         const imageUrl =
           product.imageUrl && product.imageUrl.startsWith("http")
             ? product.imageUrl
@@ -145,7 +130,7 @@ export async function POST(request: NextRequest) {
           price_data: {
             currency: "usd",
             unit_amount: Math.round(Number(product.price) * 100),
-            tax_behavior: "exclusive",
+            tax_behavior: "exclusive" as const,
             product_data: {
               name: product.title,
               ...(imageUrl && { images: [imageUrl] }),
@@ -161,11 +146,10 @@ export async function POST(request: NextRequest) {
       metadata: {
         orderId: order.id,
         orderType: "PRODUCT",
-        userId: session.user.id,
+        userId: userId ?? "", // empty string for guests
       },
     });
 
-    // Store Stripe session ID
     await prisma.order.update({
       where: { id: order.id },
       data: { stripeSessionId: checkoutSession.id },
