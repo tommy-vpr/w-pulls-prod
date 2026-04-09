@@ -1,8 +1,10 @@
+import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css";
+
 import { SessionProvider } from "@/components/providers/session-provider";
 import { Orbitron, Rajdhani } from "next/font/google";
+import { GTMNoScript, GTMScript } from "@/components/analytics/GTM";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -37,9 +39,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <GTMScript />
+      </head>
       <body
         className={`${inter.className} ${orbitron.variable} ${rajdhani.variable} bg-[#0a0a0f]`}
       >
+        <GTMNoScript />
         <SessionProvider>{children}</SessionProvider>
       </body>
     </html>
