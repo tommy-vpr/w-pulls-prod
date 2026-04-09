@@ -10,6 +10,22 @@ import { ProductImageZoom } from "./(components)/ProductImageZoom";
 import { RelatedProducts } from "./(components)/RelatedProducts";
 import { MetalTierBadge } from "../(components)/Metaltierbadge";
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const product = await prisma.product.findFirst({
+    where: { slug },
+    select: { title: true },
+  });
+
+  return {
+    title: product ? product.title : "Product",
+  };
+}
+
 interface ProductPageProps {
   params: Promise<{
     slug: string;
@@ -267,7 +283,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                         "font-bold",
                         product.inventory > 0
                           ? "text-cyan-400"
-                          : "text-rose-400"
+                          : "text-rose-400",
                       )}
                       style={{
                         textShadow:

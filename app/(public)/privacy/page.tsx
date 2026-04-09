@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Privacy Policy | W-Pulls",
+  title: "Privacy Policy",
   description: "Privacy Policy for W-Pulls card system",
 };
 

@@ -7,7 +7,7 @@ import prisma from "@/lib/prisma";
 import { WalletDashboard } from "./(components)/WalletDashboard";
 
 export const metadata = {
-  title: "Wallet | W-Pulls",
+  title: "Wallet",
   description: "Manage your wallet balance and withdrawals",
 };
 

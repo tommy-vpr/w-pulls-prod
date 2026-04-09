@@ -2,13 +2,23 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Mail, Loader2, ArrowLeft, CheckCircle, ShieldCheck } from "lucide-react";
+import {
+  Mail,
+  Loader2,
+  ArrowLeft,
+  CheckCircle,
+  ShieldCheck,
+} from "lucide-react";
 import {
   verifyEmailAction,
   resendVerificationAction,
 } from "@/lib/actions/auth.actions";
 import Link from "next/link";
 import Image from "next/image";
+
+export const metadata = {
+  title: "Verify email",
+};
 
 export default function VerifyEmailPage() {
   const searchParams = useSearchParams();
@@ -58,7 +68,10 @@ export default function VerifyEmailPage() {
 
   const handlePaste = (e: React.ClipboardEvent) => {
     e.preventDefault();
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    const pasted = e.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, 6);
 
     if (pasted.length > 0) {
       const newDigits = [...digits];
@@ -196,9 +209,7 @@ export default function VerifyEmailPage() {
                   We sent a 6-digit code to
                 </p>
                 {email && (
-                  <p className="text-white font-medium text-sm mt-1">
-                    {email}
-                  </p>
+                  <p className="text-white font-medium text-sm mt-1">{email}</p>
                 )}
               </div>
 
@@ -207,7 +218,9 @@ export default function VerifyEmailPage() {
                 {digits.map((digit, index) => (
                   <input
                     key={index}
-                    ref={(el) => { inputRefs.current[index] = el; }}
+                    ref={(el) => {
+                      inputRefs.current[index] = el;
+                    }}
                     type="text"
                     inputMode="numeric"
                     maxLength={1}
@@ -221,11 +234,12 @@ export default function VerifyEmailPage() {
                       bg-white/5 border-2 transition-all duration-200
                       text-white outline-none
                       disabled:opacity-50
-                      ${error
-                        ? "border-red-500/50 focus:border-red-400"
-                        : digit
-                          ? "border-cyan-500/50"
-                          : "border-white/10 focus:border-cyan-400"
+                      ${
+                        error
+                          ? "border-red-500/50 focus:border-red-400"
+                          : digit
+                            ? "border-cyan-500/50"
+                            : "border-white/10 focus:border-cyan-400"
                       }
                     `}
                   />

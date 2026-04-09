@@ -8,6 +8,11 @@ import { SearchInput } from "./(components)/SearchInput";
 import { StoreContent } from "./(components)/StoreContent";
 import { ActiveFilters } from "./(components)/Activefilters";
 
+export const metadata = {
+  title: "Shop",
+  description: "Browse our collection of cards",
+};
+
 interface StorePageProps {
   searchParams: Promise<{
     page?: string;

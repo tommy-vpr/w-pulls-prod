@@ -3,6 +3,10 @@ import { AuthForm } from "@/components/auth/auth-form";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
+export const metadata = {
+  title: "Sign In",
+};
+
 export default async function AuthPage() {
   const session = await auth();
 

@@ -17,6 +17,10 @@ import { cn } from "@/lib/utils";
 import { orderService, SerializedOrder } from "@/lib/services/order.service";
 import { RecentOrdersGrid } from "@/components/ui/user/recent-orders-grid";
 
+export const metadata = {
+  title: "Dashboard",
+};
+
 export default async function UserDashboardPage() {
   const session = await requireAuth();
 

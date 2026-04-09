@@ -14,6 +14,10 @@ import { useCartStore } from "@/lib/cart/cart.store";
 import { useEffect, useState } from "react";
 import { CheckoutButton } from "./(components)/CheckoutButton";
 
+export const metadata = {
+  title: "Cart",
+};
+
 type CartProduct = {
   id: string;
   title: string;
@@ -141,12 +145,12 @@ export default function CartPage() {
       }
       return acc;
     },
-    []
+    [],
   );
 
   const subtotal = merged.reduce(
     (sum, p) => sum + Number(p.price) * p.quantity,
-    0
+    0,
   );
 
   const itemCount = merged.reduce((sum, p) => sum + p.quantity, 0);

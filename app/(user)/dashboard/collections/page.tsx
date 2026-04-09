@@ -5,11 +5,15 @@ import { collectionService } from "@/lib/services/collection.service";
 import { CollectionGrid } from "@/components/collections/collection-grid";
 import { CollectionStats } from "@/components/collections/collection-stats";
 
+export const metadata = {
+  title: "My Collection",
+};
+
 export default async function CollectionPage() {
   const session = await requireAuth();
 
   const { summary, items } = await collectionService.getUserCollection(
-    session.user.id
+    session.user.id,
   );
 
   return (

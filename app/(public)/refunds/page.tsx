@@ -1,11 +1,11 @@
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Privacy Policy | W-Pulls",
-  description: "Privacy Policy for W-Pulls card system",
+  title: "Refund Policy",
+  description: "Refund policy for W-Pulls card system",
 };
 
-export default function PrivacyPage() {
+export default function RefundsPage() {
   return (
     <div className="min-h-screen bg-[#030812] pt-24 pb-16">
       <div className="max-w-3xl mx-auto px-6">
@@ -14,116 +14,97 @@ export default function PrivacyPage() {
             className="font-orbitron text-3xl md:text-4xl font-bold text-cyan-400 mb-3"
             style={{ textShadow: "0 0 20px rgba(0,255,255,0.4)" }}
           >
-            Privacy Policy
+            Refund Policy
           </h1>
           <p className="text-zinc-500 font-mono text-sm">
             Last updated: April 2026
           </p>
         </div>
 
-        <div className="space-y-8 text-zinc-300 leading-relaxed">
-          <section>
-            <h2 className="text-lg font-semibold text-cyan-300 mb-3 font-mono uppercase tracking-wider">
-              1. Information We Collect
-            </h2>
-            <p className="text-zinc-400 text-sm">
-              We collect information you provide directly, including your name,
-              email address, and payment information when you register or make a
-              purchase. We also collect usage data such as pages visited,
-              actions taken, and device information to improve our service.
+        <div className="space-y-8">
+          {/* Notice banner */}
+          <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
+            <p className="text-amber-400 text-sm font-mono">
+              ⚠ All pack purchases are final. Please read this policy carefully
+              before purchasing.
             </p>
-          </section>
+          </div>
 
-          <section>
-            <h2 className="text-lg font-semibold text-cyan-300 mb-3 font-mono uppercase tracking-wider">
-              2. How We Use Your Information
-            </h2>
-            <p className="text-zinc-400 text-sm">
-              We use your information to process transactions, maintain your
-              account, send transactional emails, prevent fraud, and improve the
-              W-Pulls platform. We do not sell your personal data to third
-              parties.
-            </p>
-          </section>
+          <div className="space-y-8 text-zinc-300 leading-relaxed">
+            <section>
+              <h2 className="text-lg font-semibold text-cyan-300 mb-3 font-mono uppercase tracking-wider">
+                No Refunds on Pack Purchases
+              </h2>
+              <p className="text-zinc-400 text-sm">
+                Due to the digital and randomized nature of pack pulls, all
+                purchases are final and non-refundable. Once a pack has been
+                purchased and the card has been revealed, we are unable to issue
+                refunds. This policy exists because the outcome is determined at
+                the time of purchase.
+              </p>
+            </section>
 
-          <section>
-            <h2 className="text-lg font-semibold text-cyan-300 mb-3 font-mono uppercase tracking-wider">
-              3. Payment Information
-            </h2>
-            <p className="text-zinc-400 text-sm">
-              Payment processing is handled by Stripe. W-Pulls does not store
-              your full credit card details. Stripe's privacy policy governs the
-              handling of your payment information. We store only transaction
-              references and amounts necessary for order management.
-            </p>
-          </section>
+            <section>
+              <h2 className="text-lg font-semibold text-cyan-300 mb-3 font-mono uppercase tracking-wider">
+                Buyback Option
+              </h2>
+              <p className="text-zinc-400 text-sm">
+                Instead of a refund, W-Pulls offers a buyback system. After
+                revealing your card, you have a limited time window to sell it
+                back to us for a percentage of its value. The buyback amount is
+                credited to your wallet and can be withdrawn once the hold
+                period clears.
+              </p>
+            </section>
 
-          <section>
-            <h2 className="text-lg font-semibold text-cyan-300 mb-3 font-mono uppercase tracking-wider">
-              4. Cookies
-            </h2>
-            <p className="text-zinc-400 text-sm">
-              We use cookies and similar technologies to maintain your session,
-              remember preferences, and analyze usage patterns. You can control
-              cookie settings through your browser, though disabling cookies may
-              affect platform functionality.
-            </p>
-          </section>
+            <section>
+              <h2 className="text-lg font-semibold text-cyan-300 mb-3 font-mono uppercase tracking-wider">
+                Technical Issues
+              </h2>
+              <p className="text-zinc-400 text-sm">
+                If you experience a technical issue that prevents you from
+                accessing your purchased pack or card, please contact support
+                immediately at{" "}
+                <a
+                  href="mailto:support@wpulls.com"
+                  className="text-cyan-400 hover:text-cyan-300 transition-colors"
+                >
+                  support@wpulls.com
+                </a>
+                . We will investigate and resolve legitimate technical issues on
+                a case-by-case basis.
+              </p>
+            </section>
 
-          <section>
-            <h2 className="text-lg font-semibold text-cyan-300 mb-3 font-mono uppercase tracking-wider">
-              5. Data Retention
-            </h2>
-            <p className="text-zinc-400 text-sm">
-              We retain your account data for as long as your account is active
-              or as needed to provide services. You may request deletion of your
-              account and associated data at any time through the Settings page
-              or by contacting support.
-            </p>
-          </section>
+            <section>
+              <h2 className="text-lg font-semibold text-cyan-300 mb-3 font-mono uppercase tracking-wider">
+                Unauthorized Charges
+              </h2>
+              <p className="text-zinc-400 text-sm">
+                If you believe your account was used without your authorization,
+                contact us immediately. We take fraud seriously and will work
+                with you and your payment provider to resolve unauthorized
+                charges.
+              </p>
+            </section>
 
-          <section>
-            <h2 className="text-lg font-semibold text-cyan-300 mb-3 font-mono uppercase tracking-wider">
-              6. Third-Party Services
-            </h2>
-            <p className="text-zinc-400 text-sm">
-              We use third-party services including Stripe (payments), Google
-              (authentication), Resend (email), and Google Cloud Storage
-              (images). Each service has its own privacy policy governing data
-              they collect.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-semibold text-cyan-300 mb-3 font-mono uppercase tracking-wider">
-              7. Your Rights
-            </h2>
-            <p className="text-zinc-400 text-sm">
-              You have the right to access, correct, or delete your personal
-              data. To exercise these rights, contact us at{" "}
-              <a
-                href="mailto:privacy@wpulls.com"
-                className="text-cyan-400 hover:text-cyan-300 transition-colors"
-              >
-                privacy@wpulls.com
-              </a>
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-semibold text-cyan-300 mb-3 font-mono uppercase tracking-wider">
-              8. Contact
-            </h2>
-            <p className="text-zinc-400 text-sm">
-              For privacy-related questions, contact us at{" "}
-              <a
-                href="mailto:privacy@wpulls.com"
-                className="text-cyan-400 hover:text-cyan-300 transition-colors"
-              >
-                privacy@wpulls.com
-              </a>
-            </p>
-          </section>
+            <section>
+              <h2 className="text-lg font-semibold text-cyan-300 mb-3 font-mono uppercase tracking-wider">
+                Contact Us
+              </h2>
+              <p className="text-zinc-400 text-sm">
+                For refund-related inquiries, contact{" "}
+                <a
+                  href="mailto:support@wpulls.com"
+                  className="text-cyan-400 hover:text-cyan-300 transition-colors"
+                >
+                  support@wpulls.com
+                </a>
+                . Please include your order ID and account email in your
+                message.
+              </p>
+            </section>
+          </div>
         </div>
       </div>
     </div>

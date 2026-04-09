@@ -8,6 +8,11 @@ import { HudFrame } from "@/components/ui/HudFrame";
 import { TierBreakdownChart } from "./(components)/Tierbreakdownchart";
 import { PackOddsBreakdown } from "./(components)/Packoddsbreakdown";
 
+export const metadata = {
+  title: "Open Packs",
+  description: "Choose your pack and reveal your card",
+};
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // HOLOGRAPHIC HUB UI - Futuristic Trading Card Interface
 // ═══════════════════════════════════════════════════════════════════════════════
