@@ -23,7 +23,10 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export const metadata: Metadata = {
-  title: "WPulls",
+  title: {
+    default: "WPulls",
+    template: "%s | WPulls",
+  },
   description: "W every pull",
   icons: {
     icon: "/images/w-pull-logo.png", // 32x32 or 48x48

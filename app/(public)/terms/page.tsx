@@ -1,13 +1,13 @@
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Terms of Service | W-Pulls",
+  title: "Terms of Service",
   description: "Terms of Service for W-Pulls card system",
 };
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-[#030812] pt-24 pb-16">
+    <div className="min-h-screen pt-24 pb-16">
       <div className="max-w-3xl mx-auto px-6">
         <div className="mb-10">
           <h1

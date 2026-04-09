@@ -2,6 +2,11 @@ export const dynamic = "force-dynamic";
 import { requireAuth } from "@/lib/auth-utils";
 import prisma from "@/lib/prisma";
 import { SettingsForm } from "@/components/settings/settings-form";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Setting",
+};
 
 export default async function SettingsPage() {
   const session = await requireAuth();

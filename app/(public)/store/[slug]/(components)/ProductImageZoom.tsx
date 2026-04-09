@@ -104,7 +104,7 @@ export function ProductImageZoom({
             }}
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.2 }}
-            className="relative w-full h-full"
+            className="relative w-full h-full rounded-2xl overflow-hidden"
           >
             <Image
               src={src}
@@ -132,20 +132,6 @@ export function ProductImageZoom({
           </motion.div>
         </div>
 
-        {/* Scanline Overlay */}
-        {/* <div
-          className="absolute inset-0 pointer-events-none opacity-30"
-          style={{
-            background: `repeating-linear-gradient(
-              to bottom,
-              rgba(120,255,124,0.03) 0px,
-              rgba(120,255,124,0.03) 1px,
-              rgba(0,0,0,0.05) 2px,
-              rgba(0,0,0,0.05) 3px
-            )`,
-          }}
-        /> */}
-
         {/* Interaction Indicator */}
         <div
           className="absolute bottom-4 right-4 p-2 rounded-lg border border-[rgba(120,255,124,.35)] opacity-70 group-hover:opacity-100 transition-opacity"
@@ -160,18 +146,6 @@ export function ProductImageZoom({
             style={{ filter: "drop-shadow(0 0 2px rgba(120,255,124,.4))" }}
           />
         </div>
-
-        {/* Tier Glow (hover only) */}
-        {/* <div
-          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-          style={{
-            background: `radial-gradient(
-              circle at ${hoverPosition.x}% ${hoverPosition.y}%,
-              ${tierColor}15 0%,
-              transparent 50%
-            )`,
-          }}
-        /> */}
       </div>
     </div>
   );

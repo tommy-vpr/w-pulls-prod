@@ -12,7 +12,7 @@ import { OrdersTable } from "./_components/orders-table";
 import { OrdersCard } from "./_components/orders-card";
 
 export const metadata: Metadata = {
-  title: "My Orders | WPulls",
+  title: "My Orders",
   description: "View your mystery pack orders",
 };
 

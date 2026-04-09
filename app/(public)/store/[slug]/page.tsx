@@ -10,6 +10,22 @@ import { ProductImageZoom } from "./(components)/ProductImageZoom";
 import { RelatedProducts } from "./(components)/RelatedProducts";
 import { MetalTierBadge } from "../(components)/Metaltierbadge";
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const product = await prisma.product.findFirst({
+    where: { slug },
+    select: { title: true },
+  });
+
+  return {
+    title: product ? product.title : "Product",
+  };
+}
+
 interface ProductPageProps {
   params: Promise<{
     slug: string;
@@ -53,34 +69,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   return (
     <div className="min-h-screen relative pt-12 bg-slate-950">
-      {/* Scanline Overlay */}
-      {/* <div
-        className="fixed inset-0 pointer-events-none z-[1]"
-        style={{
-          background: `repeating-linear-gradient(
-            to bottom,
-            rgba(120,255,124,0.05) 0px,
-            rgba(120,255,124,0.05) 1px,
-            rgba(0,0,0,0.08) 2px,
-            rgba(0,0,0,0.08) 3px
-          )`,
-          mixBlendMode: "screen",
-        }}
-      /> */}
-
-      {/* Starfield Background */}
-      <div
-        className="fixed inset-0 pointer-events-none z-0"
-        style={{
-          background: `
-            radial-gradient(2px 2px at 20% 30%, rgba(255,255,255,.6), transparent 60%),
-            radial-gradient(1.5px 1.5px at 70% 20%, rgba(255,255,255,.5), transparent 60%),
-            radial-gradient(1.2px 1.2px at 40% 80%, rgba(255,255,255,.4), transparent 60%),
-            radial-gradient(1.2px 1.2px at 85% 65%, rgba(255,255,255,.35), transparent 60%)
-          `,
-        }}
-      />
-
       <div className="relative z-[2] max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-20">
         {/* Breadcrumbs */}
         <nav
@@ -135,18 +123,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <div className="flex flex-col">
             {/* Tier Badge */}
             <div className="mb-4">
-              {/* <span
-                className="inline-flex items-center rounded-lg px-3 py-1.5 font-mono text-xs font-bold uppercase tracking-wider border"
-                style={{
-                  color: tierColor,
-                  background: `linear-gradient(180deg, ${tierColor}15, ${tierColor}08)`,
-                  borderColor: `${tierColor}60`,
-                  boxShadow: `inset 0 0 12px ${tierColor}20, 0 0 12px ${tierColor}25`,
-                  textShadow: `0 0 8px ${tierColor}60`,
-                }}
-              >
-                {tierConfig.label}
-              </span> */}
               <MetalTierBadge label={tierConfig.label} tier={product.tier} />
             </div>
 
@@ -157,7 +133,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
             {/* Price */}
             <div className="flex items-baseline gap-3 mb-6">
-              <span className="text-2xl sm:text-3xl font-mono text-gray-300">
+              <span className="text-lg sm:text-xl font-mono text-gray-300">
                 ${product.price.toString()}
               </span>
               {product.inventory > 0 && product.inventory <= 5 && (
@@ -267,7 +243,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                         "font-bold",
                         product.inventory > 0
                           ? "text-cyan-400"
-                          : "text-rose-400"
+                          : "text-rose-400",
                       )}
                       style={{
                         textShadow:

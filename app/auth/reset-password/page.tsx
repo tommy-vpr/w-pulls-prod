@@ -6,6 +6,10 @@ import prisma from "@/lib/prisma";
 import { ResetPasswordForm } from "./(components)/ResetPasswordForm";
 import { auth } from "@/lib/auth";
 
+export const metadata = {
+  title: "Reset password",
+};
+
 interface ResetPasswordPageProps {
   searchParams: Promise<{ token?: string }>;
 }

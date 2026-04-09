@@ -4,7 +4,7 @@ import { HolographicBackground } from "@/components/ui/HolographicBackground";
 import { SupportContent } from "@/components/support/SupportContent";
 
 export const metadata = {
-  title: "Support | W-Pulls",
+  title: "Support",
   description: "W-Pulls support center and help resources",
 };
 

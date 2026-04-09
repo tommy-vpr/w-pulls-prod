@@ -8,6 +8,10 @@ import { HolographicBackground } from "@/components/ui/HolographicBackground";
 import { OrderSuccessContent } from "@/components/checkout/OrderSuccessContent";
 import { sendOrderConfirmationEmail } from "@/lib/emails/send-order-confirmation";
 
+export const metadata = {
+  title: "Order Confirmed",
+};
+
 interface Props {
   searchParams: Promise<{ session_id?: string }>;
 }

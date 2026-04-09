@@ -1,13 +1,13 @@
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Privacy Policy | W-Pulls",
+  title: "Privacy Policy",
   description: "Privacy Policy for W-Pulls card system",
 };
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-[#030812] pt-24 pb-16">
+    <div className="min-h-screen pt-24 pb-16">
       <div className="max-w-3xl mx-auto px-6">
         <div className="mb-10">
           <h1

@@ -4,7 +4,7 @@ import { HolographicBackground } from "@/components/ui/HolographicBackground";
 import { ContactContent } from "@/components/contact/ContactContent";
 
 export const metadata = {
-  title: "Contact | W-Pulls",
+  title: "Contact",
   description: "Get in touch with the W-Pulls team",
 };
 
