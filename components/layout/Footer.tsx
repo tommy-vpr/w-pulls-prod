@@ -13,7 +13,6 @@ const FOOTER_LINKS = {
   support: [
     { label: "FAQ", href: "/faq" },
     { label: "Contact", href: "/contact" },
-    { label: "Discord", href: "#", external: true },
     { label: "Support", href: "/support" },
   ],
   legal: [
@@ -140,9 +139,6 @@ export function Footer() {
                         className="text-sm text-cyan-100/50 hover:text-cyan-300 transition-colors duration-300 flex items-center gap-1"
                       >
                         {link.label}
-                        {link.external && (
-                          <ExternalLink className="w-3 h-3 text-cyan-400/40" />
-                        )}
                       </Link>
                     </li>
                   ))}

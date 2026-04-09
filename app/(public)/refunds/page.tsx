@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function RefundsPage() {
   return (
-    <div className="min-h-screen bg-[#030812] pt-24 pb-16">
+    <div className="min-h-screen pt-24 pb-16">
       <div className="max-w-3xl mx-auto px-6">
         <div className="mb-10">
           <h1

@@ -10,6 +10,13 @@ import { PackSlashAnimation } from "@/components/reveal/PackSlashAnimation";
 import { getTierConfig } from "@/lib/tier-config";
 import { PackLoadingSparks } from "@/components/reveal/PackLoadingSparks";
 
+export async function generateMetadata({ params }: RevealPageProps) {
+  const { orderId } = await params;
+  return {
+    title: "Opening Pack",
+  };
+}
+
 interface RevealPageProps {
   params: Promise<{ orderId: string }>;
   searchParams: Promise<{ session_id?: string }>;

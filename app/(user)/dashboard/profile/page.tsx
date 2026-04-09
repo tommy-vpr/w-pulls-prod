@@ -4,6 +4,11 @@ import prisma from "@/lib/prisma";
 import { format } from "date-fns";
 import Link from "next/link";
 import { IconSettings } from "@tabler/icons-react";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Profile",
+};
 
 export default async function ProfilePage() {
   const session = await requireAuth();

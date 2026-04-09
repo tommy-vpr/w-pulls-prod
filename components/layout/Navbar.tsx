@@ -105,9 +105,9 @@ export function Navbar() {
                 </div>
                 <div className="absolute -inset-1 rounded-lg bg-gradient-to-br from-cyan-400/30 to-fuchsia-500/20 blur-md -z-10 opacity-60" />
               </div>
-              <div className="flex flex-col">
+              <div className="hidden md:flex flex-col">
                 <span className="font-bold text-base text-white tracking-widest">
-                  W-Pulls
+                  WPulls
                 </span>
                 <span className="text-[9px] uppercase tracking-[0.2em] text-cyan-400/50 -mt-0.5">
                   Card System
@@ -275,7 +275,7 @@ export function Navbar() {
           </nav>
 
           {/* Bottom accent */}
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/3 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/4 h-[6px] bg-cyan-400/50 blur-md" />
         </div>
       </header>
