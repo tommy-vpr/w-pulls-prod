@@ -59,6 +59,10 @@ export interface SerializedProduct {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  weight?: string | null;
+  weightUnit?: string | null;
+  wmsVariantId?: string | null;
+  inventorySyncedAt?: string | null;
 }
 
 // Helper to serialize Product for client components
@@ -68,6 +72,10 @@ export function serializeProduct(product: Product): SerializedProduct {
     price: product.price.toString(),
     createdAt: product.createdAt.toISOString(),
     updatedAt: product.updatedAt.toISOString(),
+    weight: product.weight?.toString() ?? null,
+    weightUnit: product.weightUnit ?? null,
+    wmsVariantId: product.wmsVariantId ?? null,
+    inventorySyncedAt: product.inventorySyncedAt?.toISOString() ?? null,
   };
 }
 

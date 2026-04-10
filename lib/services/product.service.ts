@@ -52,7 +52,7 @@ export class ProductService {
         imageUrl: input.imageUrl || null,
         category: input.category || null,
         tier: input.tier || "COMMON",
-        sku: input.sku || null,
+        sku: input.sku,
         inventory: parseInt(input.inventory || "0"),
         isActive: input.isActive ?? true,
         weight: input.weight ? parseFloat(input.weight) : 0.3,
@@ -175,7 +175,7 @@ export class ProductService {
           category: input.category || null,
         }),
         ...(input.tier !== undefined && { tier: input.tier }),
-        ...(input.sku !== undefined && { sku: input.sku || null }),
+        ...(input.sku !== undefined && { sku: input.sku }),
         ...(input.inventory && { inventory: parseInt(input.inventory) }),
         ...(input.isActive !== undefined && { isActive: input.isActive }),
         ...(input.weight !== undefined && {
