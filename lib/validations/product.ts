@@ -14,7 +14,11 @@ export const createProductSchema = z.object({
   imageUrl: z.string().url("Invalid image URL").optional().nullable(),
   category: productCategorySchema,
   tier: z.nativeEnum(ProductTier),
-  sku: z.string().max(50).optional().nullable(),
+  sku: z
+    .string()
+    .min(1, "SKU is required")
+    .max(50)
+    .regex(/^[A-Z0-9-]+$/, "SKU must be uppercase, numbers, hyphens only"),
   inventory: z
     .string()
     .refine((val) => !isNaN(parseInt(val)) && parseInt(val) >= 0, {
@@ -23,6 +27,15 @@ export const createProductSchema = z.object({
     .optional()
     .default("0"),
   isActive: z.boolean().optional().default(true),
+  weight: z
+    .string()
+    .refine((val) => !val || (!isNaN(parseFloat(val)) && parseFloat(val) > 0), {
+      message: "Weight must be a positive number",
+    })
+    .optional()
+    .nullable()
+    .default("0.3"),
+  weightUnit: z.enum(["oz", "lb", "g"]).default("oz"),
 });
 
 export const updateProductSchema = createProductSchema.partial().extend({

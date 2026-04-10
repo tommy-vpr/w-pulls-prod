@@ -6,14 +6,26 @@ import { Expand } from "lucide-react";
 import { SerializedCollectionItem } from "@/lib/services/collection.service";
 import { cn } from "@/lib/utils";
 import { getTierConfig, getTierBadgeClass } from "@/lib/tier-config";
+import { ItemDisposition } from "@prisma/client";
 
 interface CollectionCardProps {
   item: SerializedCollectionItem;
   onQuickView: () => void;
+  // Ship selection props
+  isSelected?: boolean;
+  onToggleSelect?: (orderItemId: string) => void;
+  selectionMode?: boolean;
 }
 
-export function CollectionCard({ item, onQuickView }: CollectionCardProps) {
+export function CollectionCard({
+  item,
+  onQuickView,
+  isSelected = false,
+  onToggleSelect,
+  selectionMode = false,
+}: CollectionCardProps) {
   const tier = getTierConfig(item.tier);
+  const isShippable = item.disposition === ItemDisposition.KEPT;
 
   return (
     <div className="group flex flex-col gap-2">
@@ -23,9 +35,41 @@ export function CollectionCard({ item, onQuickView }: CollectionCardProps) {
           "relative rounded-lg overflow-hidden border bg-zinc-900/60 transition-all",
           item.isSoldBack
             ? "border-zinc-800/50 opacity-75"
-            : "border-zinc-800 hover:border-zinc-700 hover:bg-zinc-800/50 hover:shadow-lg hover:shadow-black/20",
+            : isSelected
+              ? "border-cyan-400/60 shadow-lg shadow-cyan-400/10"
+              : "border-zinc-800 hover:border-zinc-700 hover:bg-zinc-800/50 hover:shadow-lg hover:shadow-black/20",
         )}
       >
+        {/* Selection checkbox — only for KEPT items */}
+        {isShippable && onToggleSelect && (
+          <button
+            onClick={() => onToggleSelect(item.orderItemId)}
+            className="cursor-pointer absolute top-2 right-2 z-20 w-5 h-5 rounded flex items-center justify-center transition-all"
+            style={{
+              background: isSelected ? "rgba(0,255,255,1)" : "rgba(0,0,0,.6)",
+              border: isSelected
+                ? "1px solid rgba(0,255,255,.8)"
+                : "1px solid rgba(255,255,255,.3)",
+            }}
+          >
+            {isSelected && (
+              <svg
+                className="w-3 h-3 text-black"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={3}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            )}
+          </button>
+        )}
+
         <div className="relative aspect-[3/4]">
           {item.imageUrl ? (
             <Image
@@ -64,8 +108,28 @@ export function CollectionCard({ item, onQuickView }: CollectionCardProps) {
             </div>
           )}
 
-          {/* Hover Overlay */}
-          {!item.isSoldBack && (
+          {/* Ship Requested Overlay */}
+          {item.disposition === ItemDisposition.SHIP_REQUESTED && (
+            <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-cyan-400 font-bold text-sm font-mono">
+                  SHIP REQUESTED
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Shipped Overlay */}
+          {item.disposition === ItemDisposition.SHIPPED && (
+            <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
+              <span className="text-blue-400 font-bold text-sm font-mono">
+                SHIPPED
+              </span>
+            </div>
+          )}
+
+          {/* Hover Overlay — only when not in selection mode and not sold */}
+          {!item.isSoldBack && !selectionMode && (
             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
               <button
                 onClick={onQuickView}

@@ -17,6 +17,7 @@ import {
 import { ActionResponse } from "@/types/product";
 import Link from "next/link";
 import { SerializedProduct } from "@/types/product";
+import { LabelInputContainer } from "./labels/LabelInputContainer";
 
 interface ProductFormProps {
   product?: SerializedProduct | null;
@@ -308,6 +309,31 @@ export function ProductForm({ product, mode }: ProductFormProps) {
                 {errors.inventory && (
                   <p className="text-sm text-red-400">{errors.inventory[0]}</p>
                 )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <LabelInputContainer>
+                  <Label htmlFor="weight">Weight (oz)</Label>
+                  <Input
+                    id="weight"
+                    name="weight"
+                    type="number"
+                    step="0.01"
+                    defaultValue={product?.weight ?? "0.3"}
+                    placeholder="0.3"
+                  />
+                </LabelInputContainer>
+                <LabelInputContainer>
+                  <Label htmlFor="weightUnit">Unit</Label>
+                  <select
+                    name="weightUnit"
+                    defaultValue={product?.weightUnit || "oz"}
+                  >
+                    <option value="oz">oz</option>
+                    <option value="lb">lb</option>
+                    <option value="g">g</option>
+                  </select>
+                </LabelInputContainer>
               </div>
             </div>
           </div>

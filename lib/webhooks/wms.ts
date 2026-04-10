@@ -1,0 +1,95 @@
+// Create or add to existing lib/webhooks/wms.ts
+
+import { Product } from "@prisma/client";
+
+export async function triggerWMSProductCreated(product: Product) {
+  const wmsUrl = process.env.WMS_PRODUCT_WEBHOOK_URL;
+  const secret = process.env.WMS_WEBHOOK_SECRET;
+  if (!wmsUrl || !secret || !product.sku) return;
+
+  await fetch(wmsUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": secret,
+      "x-source": "wpulls",
+    },
+    body: JSON.stringify({
+      event: "product.created",
+      wpullsProductId: product.id,
+      sku: product.sku,
+      name: product.title,
+      imageUrl: product.imageUrl,
+      weight: product.weight ? Number(product.weight) : 0.3,
+      weightUnit: product.weightUnit ?? "oz",
+      sellingPrice: Number(product.price),
+      initialInventory: product.inventory,
+    }),
+  }).catch((err) => console.error("[WMS] Product webhook failed:", err));
+}
+
+export async function triggerWMSInventoryAdjusted(
+  sku: string,
+  newQuantity: number,
+) {
+  const wmsUrl = process.env.WMS_PRODUCT_WEBHOOK_URL?.replace(
+    "/products",
+    "/inventory",
+  );
+  const secret = process.env.WMS_WEBHOOK_SECRET;
+  if (!wmsUrl || !secret) return;
+
+  await fetch(wmsUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "x-api-key": secret },
+    body: JSON.stringify({
+      event: "inventory.adjusted",
+      sku,
+      newQuantity,
+      reason: "MANUAL_ADJUSTMENT",
+    }),
+  }).catch((err) => console.error("[WMS] Inventory webhook failed:", err));
+}
+
+export async function triggerWMSShipmentWebhook(shipmentRequest: any) {
+  const wmsUrl = process.env.WMS_WEBHOOK_URL;
+  const secret = process.env.WMS_WEBHOOK_SECRET;
+  if (!wmsUrl || !secret) throw new Error("WMS webhook not configured");
+
+  const res = await fetch(wmsUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": secret,
+      "x-source": "wpulls",
+    },
+    body: JSON.stringify({
+      event: "shipment.requested",
+      shipmentRequestId: shipmentRequest.id,
+      customerName: shipmentRequest.shippingName,
+      customerEmail: shipmentRequest.user?.email,
+      shippingAddress: {
+        name: shipmentRequest.shippingName,
+        line1: shipmentRequest.shippingLine1,
+        line2: shipmentRequest.shippingLine2,
+        city: shipmentRequest.shippingCity,
+        state: shipmentRequest.shippingState,
+        postalCode: shipmentRequest.shippingPostal,
+        country: shipmentRequest.shippingCountry,
+      },
+      shippingMethod: shipmentRequest.shippingMethod,
+      shippingFeePaid: shipmentRequest.shippingFeeAmount,
+      items: shipmentRequest.items.map((item: any) => ({
+        orderItemId: item.orderItemId,
+        orderId: item.orderItem.orderId,
+        sku: item.product.sku,
+        title: item.product.title,
+        tier: item.product.tier,
+        imageUrl: item.product.imageUrl,
+      })),
+    }),
+  });
+
+  if (!res.ok) throw new Error(`WMS webhook failed: ${res.status}`);
+  console.log(`[WMS] ✅ Shipment webhook fired for ${shipmentRequest.id}`);
+}

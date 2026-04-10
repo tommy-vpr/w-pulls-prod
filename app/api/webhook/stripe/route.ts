@@ -77,6 +77,63 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true });
   }
 
+  // --------------- Shipment ------------------
+
+  if (session.metadata?.type === "shipping_fee") {
+    const { shipmentRequestId } = session.metadata;
+    const shipmentRequest = await prisma.shipmentRequest.update({
+      where: { id: shipmentRequestId },
+      data: { status: "PAID", paidAt: new Date() },
+      include: {
+        items: { include: { orderItem: true, product: true } },
+        user: true,
+      },
+    });
+    try {
+      const { triggerWMSShipmentWebhook } = await import("@/lib/webhooks/wms");
+      await triggerWMSShipmentWebhook(shipmentRequest);
+      await prisma.shipmentRequest.update({
+        where: { id: shipmentRequestId },
+        data: { status: "SENT_TO_WMS" },
+      });
+
+      // Send shipment confirmed email
+      if (shipmentRequest.user?.email) {
+        const { sendShipmentConfirmedEmail } =
+          await import("@/lib/emails/send-shipment-confirmed");
+        sendShipmentConfirmedEmail({
+          to: shipmentRequest.user.email,
+          customerName: shipmentRequest.user.name ?? "Customer",
+          shipmentRequestId: shipmentRequest.id,
+          shippingMethod: shipmentRequest.shippingMethod,
+          shippingFeeAmount: shipmentRequest.shippingFeeAmount,
+          shippingAddress: {
+            name: shipmentRequest.shippingName,
+            line1: shipmentRequest.shippingLine1,
+            line2: shipmentRequest.shippingLine2,
+            city: shipmentRequest.shippingCity,
+            state: shipmentRequest.shippingState,
+            postal: shipmentRequest.shippingPostal,
+            country: shipmentRequest.shippingCountry,
+          },
+          items: shipmentRequest.items.map((i) => ({
+            title: i.product.title,
+            imageUrl: i.product.imageUrl,
+            tier: i.product.tier,
+          })),
+        }).catch((err) =>
+          console.error("[Email] Shipment confirmed failed:", err),
+        );
+      }
+    } catch (err) {
+      console.error("[Webhook] WMS shipment failed:", err);
+      await prisma.shipmentRequest.update({
+        where: { id: shipmentRequestId },
+        data: { status: "FAILED" },
+      });
+    }
+    return NextResponse.json({ received: true });
+  }
   // ---- Handle order checkouts ----
   const orderId = session.metadata?.orderId;
   if (!orderId) {
@@ -145,110 +202,3 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({ received: true });
 }
-
-// // Add queue for order fulfillment
-// import { NextRequest, NextResponse } from "next/server";
-// import { stripe } from "@/lib/stripe";
-// import prisma from "@/lib/prisma";
-// import Stripe from "stripe";
-// import { packRevealQueue } from "@/lib/queue/packReveal.queue";
-// import { productFulfillmentQueue } from "@/lib/queue/productFulfillment.queue";
-// import { sendOrderConfirmationEmail } from "@/lib/emails/send-order-confirmation";
-// import { getProductImageUrl } from "@/lib/utils/productImage";
-
-// export async function POST(request: NextRequest) {
-//   const body = await request.text();
-//   const signature = request.headers.get("stripe-signature")!;
-
-//   let event: Stripe.Event;
-
-//   try {
-//     event = stripe.webhooks.constructEvent(
-//       body,
-//       signature,
-//       process.env.STRIPE_WEBHOOK_SECRET!,
-//     );
-//   } catch (err) {
-//     console.error("Webhook signature verification failed:", err);
-//     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
-//   }
-
-//   if (event.type !== "checkout.session.completed") {
-//     return NextResponse.json({ received: true });
-//   }
-
-//   const session = event.data.object as Stripe.Checkout.Session;
-
-//   const fullSession = await stripe.checkout.sessions.retrieve(session.id, {
-//     expand: ["total_details", "shipping_cost"],
-//   });
-
-//   if (!fullSession.amount_total) {
-//     console.error("Missing amount_total for session", fullSession.id);
-//     return NextResponse.json({ received: true });
-//   }
-
-//   const orderId = session.metadata?.orderId;
-//   if (!orderId) {
-//     return NextResponse.json({ received: true });
-//   }
-
-//   const order = await prisma.order.findUnique({
-//     where: { id: orderId },
-//   });
-
-//   // 🔒 Idempotency guard
-//   if (!order || order.status !== "PENDING") {
-//     return NextResponse.json({ received: true });
-//   }
-
-//   const nextStatus = "PROCESSING";
-
-//   await prisma.order.update({
-//     where: { id: orderId },
-//     data: {
-//       status: nextStatus,
-//       stripeSessionId: fullSession.id,
-
-//       // 💰 money
-//       subtotal: fullSession.amount_subtotal ?? 0,
-//       tax: fullSession.total_details?.amount_tax ?? 0,
-//       shipping: fullSession.shipping_cost?.amount_total ?? 0,
-//       amount: fullSession.amount_total,
-
-//       // 📧 SOURCE OF TRUTH
-//       customerEmail: fullSession.customer_details?.email ?? order.customerEmail,
-//       customerName: fullSession.customer_details?.name ?? order.customerName,
-//     },
-//   });
-
-//   const orderNumber = order.orderNumber.toString();
-
-//   // 🔀 Branch by order type
-//   if (order.type === "PRODUCT") {
-//     await productFulfillmentQueue.add(
-//       "fulfill-product",
-//       { orderId },
-//       { jobId: orderId },
-//     );
-//   }
-
-//   if (order.type === "PACK") {
-//     const packId = session.metadata?.packId;
-//     if (!packId) {
-//       console.error("Missing packId for PACK order", orderId);
-//       return NextResponse.json({ received: true });
-//     }
-
-//     await packRevealQueue.add(
-//       "assign-reveal",
-//       { orderId, packId, stripeSessionId: fullSession.id },
-//       { jobId: orderId },
-//     );
-
-//     // ⚠️ Don't send email here - pack hasn't been revealed yet!
-//     // Move email to packReveal.worker.ts AFTER the product is assigned
-//   }
-
-//   return NextResponse.json({ received: true });
-// }

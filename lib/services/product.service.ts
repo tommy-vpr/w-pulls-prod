@@ -24,7 +24,7 @@ export class ProductService {
    * Create a new product with auto-generated slug
    */
   async createProduct(
-    input: CreateProductInput
+    input: CreateProductInput,
   ): Promise<ActionResponse<Product>> {
     try {
       // Generate unique slug from title
@@ -55,10 +55,19 @@ export class ProductService {
         sku: input.sku || null,
         inventory: parseInt(input.inventory || "0"),
         isActive: input.isActive ?? true,
+        weight: input.weight ? parseFloat(input.weight) : 0.3,
+        weightUnit: input.weightUnit ?? "oz",
       });
 
       // Log audit
       await auditService.logProductCreated(product);
+
+      if (product.sku) {
+        const { triggerWMSProductCreated } = await import("@/lib/webhooks/wms");
+        triggerWMSProductCreated(product).catch((err) =>
+          console.error("[WMS] Product sync failed (non-fatal):", err),
+        );
+      }
 
       return { success: true, data: product };
     } catch (error) {
@@ -74,7 +83,7 @@ export class ProductService {
    * Update an existing product
    */
   async updateProduct(
-    input: UpdateProductInput
+    input: UpdateProductInput,
   ): Promise<ActionResponse<Product>> {
     try {
       const existingProduct = await this.repository.findById(input.id);
@@ -169,11 +178,26 @@ export class ProductService {
         ...(input.sku !== undefined && { sku: input.sku || null }),
         ...(input.inventory && { inventory: parseInt(input.inventory) }),
         ...(input.isActive !== undefined && { isActive: input.isActive }),
+        ...(input.weight !== undefined && {
+          weight: input.weight ? parseFloat(input.weight) : null,
+        }),
+        ...(input.weightUnit !== undefined && { weightUnit: input.weightUnit }),
       });
 
       // Log audit
       if (changes.length > 0) {
         await auditService.logProductUpdated(product.id, changes);
+      }
+
+      // Sync inventory change to WMS
+      const inventoryChange = changes.find((c) => c.field === "inventory");
+      if (inventoryChange && product.sku) {
+        const { triggerWMSInventoryAdjusted } =
+          await import("@/lib/webhooks/wms");
+        triggerWMSInventoryAdjusted(product.sku, product.inventory).catch(
+          (err) =>
+            console.error("[WMS] Inventory sync failed (non-fatal):", err),
+        );
       }
 
       return { success: true, data: product };
@@ -248,7 +272,7 @@ export class ProductService {
    */
   async getProducts(
     filters: ProductFilters = {},
-    pagination: PaginationParams = {}
+    pagination: PaginationParams = {},
   ): Promise<ActionResponse<PaginatedResult<Product>>> {
     try {
       const result = await this.repository.findMany(filters, pagination);
