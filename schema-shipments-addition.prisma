@@ -1,0 +1,73 @@
+////////////////////
+// SHIPMENTS
+////////////////////
+
+enum ShipmentStatus {
+  PENDING       // Created, awaiting payment
+  PAID          // Shipping fee paid via Stripe
+  SENT_TO_WMS   // Webhook fired to WMS successfully
+  IN_PROGRESS   // WMS acknowledged and is processing
+  SHIPPED       // Label generated, tracking number received
+  DELIVERED     // Delivered (optional - from ShipEngine tracking)
+  FAILED        // Something went wrong
+}
+
+model ShipmentRequest {
+  id     String         @id @default(cuid())
+  userId String
+  user   User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status ShipmentStatus @default(PENDING)
+
+  // Shipping address (editable at request time, prefilled from last order)
+  shippingName    String
+  shippingLine1   String
+  shippingLine2   String?
+  shippingCity    String
+  shippingState   String
+  shippingPostal  String
+  shippingCountry String   @default("US")
+
+  // Shipping fee (separate Stripe transaction)
+  shippingMethod    String   // STANDARD | EXPRESS | OVERNIGHT
+  shippingFeeAmount Int      // cents
+  stripeSessionId   String?
+  paidAt            DateTime?
+
+  // WMS reference
+  wmsOrderId        String?
+
+  // Tracking (pushed back from WMS after label generated)
+  trackingNumber    String?
+  trackingCarrier   String?
+  trackingUrl       String?
+  shippedAt         DateTime?
+
+  items     ShipmentRequestItem[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([stripeSessionId])
+  @@index([wmsOrderId])
+}
+
+model ShipmentRequestItem {
+  id                String          @id @default(cuid())
+  shipmentRequestId String
+  shipmentRequest   ShipmentRequest @relation(fields: [shipmentRequestId], references: [id], onDelete: Cascade)
+
+  // Link back to the original order item
+  orderItemId       String
+  orderItem         OrderItem       @relation(fields: [orderItemId], references: [id])
+
+  // Denormalized for quick access in WMS payload
+  productId         String
+  product           Product         @relation(fields: [productId], references: [id])
+
+  createdAt         DateTime        @default(now())
+
+  @@index([shipmentRequestId])
+  @@index([orderItemId])
+  @@index([productId])
+}

@@ -24,7 +24,7 @@ export class ProductService {
    * Create a new product with auto-generated slug
    */
   async createProduct(
-    input: CreateProductInput
+    input: CreateProductInput,
   ): Promise<ActionResponse<Product>> {
     try {
       // Generate unique slug from title
@@ -60,6 +60,13 @@ export class ProductService {
       // Log audit
       await auditService.logProductCreated(product);
 
+      if (product.sku) {
+        const { triggerWMSProductCreated } = await import("@/lib/webhooks/wms");
+        triggerWMSProductCreated(product).catch((err) =>
+          console.error("[WMS] Product sync failed (non-fatal):", err),
+        );
+      }
+
       return { success: true, data: product };
     } catch (error) {
       console.error("Error creating product:", error);
@@ -74,7 +81,7 @@ export class ProductService {
    * Update an existing product
    */
   async updateProduct(
-    input: UpdateProductInput
+    input: UpdateProductInput,
   ): Promise<ActionResponse<Product>> {
     try {
       const existingProduct = await this.repository.findById(input.id);
@@ -248,7 +255,7 @@ export class ProductService {
    */
   async getProducts(
     filters: ProductFilters = {},
-    pagination: PaginationParams = {}
+    pagination: PaginationParams = {},
   ): Promise<ActionResponse<PaginatedResult<Product>>> {
     try {
       const result = await this.repository.findMany(filters, pagination);

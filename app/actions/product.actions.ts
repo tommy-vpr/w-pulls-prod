@@ -21,7 +21,7 @@ import { ProductCategory, ProductTier } from "@prisma/client";
  * Create a new product
  */
 export async function createProductAction(
-  formData: FormData
+  formData: FormData,
 ): Promise<ActionResponse<SerializedProduct>> {
   const rawData = {
     title: formData.get("title") as string,
@@ -33,6 +33,8 @@ export async function createProductAction(
     sku: formData.get("sku") as string,
     inventory: formData.get("inventory") as string,
     isActive: formData.get("isActive") === "true",
+    weight: formData.get("weight") as string,
+    weightUnit: formData.get("weightUnit") as string,
   };
 
   const validation = createProductSchema.safeParse(rawData);
@@ -61,7 +63,7 @@ export async function createProductAction(
  * Update an existing product
  */
 export async function updateProductAction(
-  formData: FormData
+  formData: FormData,
 ): Promise<ActionResponse<SerializedProduct>> {
   const rawData = {
     id: formData.get("id") as string,
@@ -103,7 +105,7 @@ export async function updateProductAction(
  * Delete a product
  */
 export async function deleteProductAction(
-  id: string
+  id: string,
 ): Promise<ActionResponse<SerializedProduct>> {
   const result = await productService.deleteProduct(id);
 
@@ -119,7 +121,7 @@ export async function deleteProductAction(
  * Get product by ID
  */
 export async function getProductByIdAction(
-  id: string
+  id: string,
 ): Promise<ActionResponse<SerializedProduct>> {
   const result = await productService.getProductById(id);
 
@@ -134,7 +136,7 @@ export async function getProductByIdAction(
  * Get product by slug
  */
 export async function getProductBySlugAction(
-  slug: string
+  slug: string,
 ): Promise<ActionResponse<SerializedProduct>> {
   const result = await productService.getProductBySlug(slug);
 
@@ -150,7 +152,7 @@ export async function getProductBySlugAction(
  */
 export async function getProductsAction(
   filters: ProductFilters = {},
-  pagination: PaginationParams = {}
+  pagination: PaginationParams = {},
 ): Promise<ActionResponse<PaginatedResult<SerializedProduct>>> {
   const result = await productService.getProducts(filters, pagination);
 
@@ -178,7 +180,7 @@ export async function getCategoriesAction(): Promise<ActionResponse<string[]>> {
  * Toggle product active status
  */
 export async function toggleProductStatusAction(
-  id: string
+  id: string,
 ): Promise<ActionResponse<SerializedProduct>> {
   const result = await productService.toggleProductStatus(id);
 
