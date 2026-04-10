@@ -55,6 +55,8 @@ export class ProductService {
         sku: input.sku || null,
         inventory: parseInt(input.inventory || "0"),
         isActive: input.isActive ?? true,
+        weight: input.weight ? parseFloat(input.weight) : 0.3,
+        weightUnit: input.weightUnit ?? "oz",
       });
 
       // Log audit
@@ -176,11 +178,26 @@ export class ProductService {
         ...(input.sku !== undefined && { sku: input.sku || null }),
         ...(input.inventory && { inventory: parseInt(input.inventory) }),
         ...(input.isActive !== undefined && { isActive: input.isActive }),
+        ...(input.weight !== undefined && {
+          weight: input.weight ? parseFloat(input.weight) : null,
+        }),
+        ...(input.weightUnit !== undefined && { weightUnit: input.weightUnit }),
       });
 
       // Log audit
       if (changes.length > 0) {
         await auditService.logProductUpdated(product.id, changes);
+      }
+
+      // Sync inventory change to WMS
+      const inventoryChange = changes.find((c) => c.field === "inventory");
+      if (inventoryChange && product.sku) {
+        const { triggerWMSInventoryAdjusted } =
+          await import("@/lib/webhooks/wms");
+        triggerWMSInventoryAdjusted(product.sku, product.inventory).catch(
+          (err) =>
+            console.error("[WMS] Inventory sync failed (non-fatal):", err),
+        );
       }
 
       return { success: true, data: product };

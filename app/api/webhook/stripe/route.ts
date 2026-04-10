@@ -96,6 +96,35 @@ export async function POST(request: NextRequest) {
         where: { id: shipmentRequestId },
         data: { status: "SENT_TO_WMS" },
       });
+
+      // Send shipment confirmed email
+      if (shipmentRequest.user?.email) {
+        const { sendShipmentConfirmedEmail } =
+          await import("@/lib/emails/send-shipment-confirmed");
+        sendShipmentConfirmedEmail({
+          to: shipmentRequest.user.email,
+          customerName: shipmentRequest.user.name ?? "Customer",
+          shipmentRequestId: shipmentRequest.id,
+          shippingMethod: shipmentRequest.shippingMethod,
+          shippingFeeAmount: shipmentRequest.shippingFeeAmount,
+          shippingAddress: {
+            name: shipmentRequest.shippingName,
+            line1: shipmentRequest.shippingLine1,
+            line2: shipmentRequest.shippingLine2,
+            city: shipmentRequest.shippingCity,
+            state: shipmentRequest.shippingState,
+            postal: shipmentRequest.shippingPostal,
+            country: shipmentRequest.shippingCountry,
+          },
+          items: shipmentRequest.items.map((i) => ({
+            title: i.product.title,
+            imageUrl: i.product.imageUrl,
+            tier: i.product.tier,
+          })),
+        }).catch((err) =>
+          console.error("[Email] Shipment confirmed failed:", err),
+        );
+      }
     } catch (err) {
       console.error("[Webhook] WMS shipment failed:", err);
       await prisma.shipmentRequest.update({
@@ -105,7 +134,6 @@ export async function POST(request: NextRequest) {
     }
     return NextResponse.json({ received: true });
   }
-
   // ---- Handle order checkouts ----
   const orderId = session.metadata?.orderId;
   if (!orderId) {

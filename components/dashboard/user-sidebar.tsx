@@ -8,6 +8,7 @@ import {
   Settings,
   LogOut,
   ChevronUp,
+  Truck,
   User,
   ShoppingBag,
   Sparkles,
@@ -40,6 +41,7 @@ const navItems = [
   { label: "My Wallet", href: "/dashboard/wallet", icon: Wallet },
   { label: "Open Packs", href: "/packs", icon: Sparkles },
   { label: "Collections", href: "/dashboard/collections", icon: Copy },
+  { label: "Shipments", href: "/dashboard/shipments", icon: Truck },
   { label: "Profile", href: "/dashboard/profile", icon: User },
   { label: "Settings", href: "/dashboard/settings", icon: Settings },
 ];

@@ -109,6 +109,19 @@ export default async function RevealPage({ params }: RevealPageProps) {
         orderId={order.id}
         packTopImage={`/images/pack-top.png`}
         packBottomImage={`/images/pack-bottom.png`}
+        defaultShippingAddress={
+          order.shippingLine1
+            ? {
+                name: order.customerName ?? "",
+                line1: order.shippingLine1,
+                line2: order.shippingLine2 ?? undefined,
+                city: order.shippingCity ?? "",
+                state: order.shippingState ?? "",
+                postal: order.shippingPostal ?? "",
+                country: order.shippingCountry ?? "US",
+              }
+            : undefined
+        }
       />
     </div>
   );

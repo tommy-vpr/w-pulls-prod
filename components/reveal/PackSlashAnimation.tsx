@@ -7,8 +7,13 @@ import { cn } from "@/lib/utils";
 import { SerializedProduct } from "@/types/product";
 import { getTierConfig } from "@/lib/tier-config";
 import { BuybackModal } from "./BuybackModal";
-import { PackLoadingScreen } from "./PackinLoadingScreen";
 import { PackLoadingSparks } from "./PackLoadingSparks";
+import { Truck } from "lucide-react";
+import {
+  ShipModal,
+  type ShipItem,
+  type DefaultAddress,
+} from "@/components/shipments/ShipModal";
 
 type AnimationStage = "idle" | "tearing" | "revealing" | "done";
 
@@ -41,6 +46,7 @@ interface PackRevealAnimationProps {
   orderId: string;
   packTopImage?: string;
   packBottomImage?: string;
+  defaultShippingAddress?: DefaultAddress;
 }
 
 // ============================================
@@ -240,42 +246,6 @@ function CardBack() {
     </div>
   );
 }
-// interface CardBackProps {
-//   tier: {
-//     label: string;
-//     hexColor: string;
-//   };
-// }
-
-// function CardBack({ tier }: CardBackProps) {
-//   return (
-//     <div
-//       className="w-full h-full rounded-xl flex items-center justify-center overflow-hidden"
-//       style={{
-//         background: `linear-gradient(135deg, ${tier.hexColor}90 0%, ${tier.hexColor}40 50%, ${tier.hexColor}90 100%)`,
-//       }}
-//     >
-//       <div className="relative">
-//         <div className="absolute inset-0 opacity-10">
-//           {[...Array(6)].map((_, i) => (
-//             <div
-//               key={i}
-//               className="absolute rounded-full border border-white"
-//               style={{
-//                 width: `${80 + i * 30}px`,
-//                 height: `${80 + i * 30}px`,
-//                 top: "50%",
-//                 left: "50%",
-//                 transform: "translate(-50%, -50%)",
-//               }}
-//             />
-//           ))}
-//         </div>
-//         <Sparkles className="h-16 w-16 text-white/50" />
-//       </div>
-//     </div>
-//   );
-// }
 
 // ============================================
 // SlashEffect Component
@@ -593,6 +563,7 @@ export function PackSlashAnimation({
   tier,
   packName,
   orderId,
+  defaultShippingAddress,
   packTopImage = "/images/pack-top.png",
   packBottomImage = "/images/pack-bottom.png",
 }: PackRevealAnimationProps) {
@@ -620,6 +591,8 @@ export function PackSlashAnimation({
   const [buybackCompleted, setBuybackCompleted] = useState(false);
 
   const [imagesLoaded, setImagesLoaded] = useState(false);
+
+  const [showShipModal, setShowShipModal] = useState(false);
 
   useEffect(() => {
     let loaded = 0;
@@ -1056,12 +1029,6 @@ export function PackSlashAnimation({
         }
       `}</style>
 
-      {/* Pack Name Header */}
-      {/* <div className="absolute top-20 left-1/2 -translate-x-1/2 text-center z-50">
-        <p className="text-zinc-500 text-sm">Opening</p>
-        <h1 className="text-2xl font-bold text-zinc-100">{packName}</h1>
-      </div> */}
-
       <div className="relative w-[300px] h-[450px] shrink-0">
         <div style={getGlowStyles()} />
 
@@ -1226,6 +1193,15 @@ export function PackSlashAnimation({
                 Open Another
               </button>
             </div>
+            <div className="w-full">
+              <button
+                onClick={() => setShowShipModal(true)}
+                className="cursor-pointer w-full py-2.5 text-sm font-semibold text-cyan-400 bg-zinc-950 border border-cyan-500/40 rounded-md hover:bg-cyan-500 hover:text-white transition-all duration-300 flex items-center justify-center gap-2"
+              >
+                <Truck className="w-4 h-4" />
+                Ship to Me
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -1245,6 +1221,24 @@ export function PackSlashAnimation({
             (new Date(buybackQuote.expiresAt).getTime() - Date.now()) / 1000,
           )}
           accentColor="#10b981"
+        />
+      )}
+
+      {/* Shipping modal */}
+      {showShipModal && revealedProduct && revealedOrderItemId && (
+        <ShipModal
+          isOpen={showShipModal}
+          onClose={() => setShowShipModal(false)}
+          items={[
+            {
+              orderItemId: revealedOrderItemId,
+              productId: revealedProduct.id,
+              title: revealedProduct.title,
+              imageUrl: revealedProduct.imageUrl ?? null,
+              tier: tier,
+            },
+          ]}
+          defaultAddress={defaultShippingAddress}
         />
       )}
     </div>
