@@ -313,7 +313,9 @@ export function ProductForm({ product, mode }: ProductFormProps) {
 
               <div className="grid grid-cols-2 gap-4">
                 <LabelInputContainer>
-                  <Label htmlFor="weight">Weight (oz)</Label>
+                  <Label htmlFor="weight" className="text-zinc-300">
+                    Weight (oz)
+                  </Label>
                   <Input
                     id="weight"
                     name="weight"
@@ -321,11 +323,15 @@ export function ProductForm({ product, mode }: ProductFormProps) {
                     step="0.01"
                     defaultValue={product?.weight ?? "0.3"}
                     placeholder="0.3"
+                    className="text-zinc-300"
                   />
                 </LabelInputContainer>
                 <LabelInputContainer>
-                  <Label htmlFor="weightUnit">Unit</Label>
+                  <Label htmlFor="weightUnit" className="text-zinc-300">
+                    Unit
+                  </Label>
                   <select
+                    className="text-zinc-300 border border-border p-1.5 rounded-md"
                     name="weightUnit"
                     defaultValue={product?.weightUnit || "oz"}
                   >

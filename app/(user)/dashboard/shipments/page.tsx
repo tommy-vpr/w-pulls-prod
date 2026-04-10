@@ -18,59 +18,50 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export const metadata = {
-  title: "Shipments",
-};
+export const metadata = { title: "Shipments" };
 
 const STATUS_CONFIG: Record<
   ShipmentStatus,
-  { label: string; color: string; border: string; icon: any }
+  { label: string; className: string; icon: any }
 > = {
   PENDING: {
     label: "Pending",
-    color: "text-zinc-400",
-    border: "border-zinc-700",
+    className: "bg-zinc-800 text-zinc-400 border-zinc-700",
     icon: Clock,
   },
   PAID: {
     label: "Paid",
-    color: "text-yellow-400",
-    border: "border-yellow-500/40",
+    className: "bg-amber-900/30 text-amber-400 border-amber-700/50",
     icon: Clock,
   },
   SENT_TO_WMS: {
     label: "Processing",
-    color: "text-cyan-400",
-    border: "border-cyan-500/40",
+    className: "bg-zinc-800/50 text-zinc-300 border-zinc-700",
     icon: Loader2,
   },
   IN_PROGRESS: {
     label: "In Progress",
-    color: "text-blue-400",
-    border: "border-blue-500/40",
+    className: "bg-zinc-800/50 text-zinc-300 border-zinc-700",
     icon: Package,
   },
   SHIPPED: {
     label: "Shipped",
-    color: "text-emerald-400",
-    border: "border-emerald-500/40",
+    className: "bg-emerald-900/30 text-emerald-400 border-emerald-700/50",
     icon: Truck,
   },
   DELIVERED: {
     label: "Delivered",
-    color: "text-emerald-400",
-    border: "border-emerald-500/40",
+    className: "bg-emerald-900/30 text-emerald-400 border-emerald-700/50",
     icon: CheckCircle2,
   },
   FAILED: {
     label: "Failed",
-    color: "text-red-400",
-    border: "border-red-500/40",
+    className: "bg-red-900/30 text-red-400 border-red-700/50",
     icon: AlertCircle,
   },
 };
 
-const CARRIER_URLS: Record<string, (tracking: string) => string> = {
+const CARRIER_URLS: Record<string, (t: string) => string> = {
   ups: (t) => `https://www.ups.com/track?tracknum=${t}`,
   fedex: (t) => `https://www.fedex.com/fedextrack/?trknbr=${t}`,
   stamps_com: (t) =>
@@ -97,9 +88,7 @@ export default async function ShipmentsPage() {
     include: {
       items: {
         include: {
-          product: {
-            select: { title: true, imageUrl: true, tier: true },
-          },
+          product: { select: { title: true, imageUrl: true, tier: true } },
         },
       },
     },
@@ -110,21 +99,25 @@ export default async function ShipmentsPage() {
     <div className="max-w-3xl mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white font-mono">Shipments</h1>
+        <h1 className="text-2xl font-bold text-zinc-100">Shipments</h1>
         <p className="text-zinc-500 text-sm mt-1">
           Track your physical card shipments
         </p>
       </div>
 
       {shipments.length === 0 ? (
-        <div className="text-center py-16 text-zinc-500">
-          <Truck className="w-12 h-12 mx-auto mb-4 opacity-30" />
-          <p className="font-mono">No shipments yet.</p>
-          <p className="text-sm mt-1">
+        <div className="flex flex-col items-center justify-center py-16 text-center rounded-xl border border-zinc-800 bg-zinc-900/50">
+          <div className="rounded-full bg-zinc-800 p-4 mb-4">
+            <Truck className="w-8 h-8 text-zinc-500" />
+          </div>
+          <h3 className="text-lg font-medium text-zinc-100">
+            No shipments yet
+          </h3>
+          <p className="text-zinc-500 mt-1 text-sm">
             Ship cards from your{" "}
             <Link
               href="/dashboard/collections"
-              className="text-cyan-400 hover:underline"
+              className="text-zinc-300 hover:underline"
             >
               collection
             </Link>{" "}
@@ -148,18 +141,13 @@ export default async function ShipmentsPage() {
             return (
               <div
                 key={shipment.id}
-                className="rounded-xl overflow-hidden"
-                style={{
-                  background:
-                    "linear-gradient(180deg, rgba(12,20,28,.95), rgba(6,12,18,.95))",
-                  border: "1px solid rgba(255,255,255,.08)",
-                }}
+                className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden"
               >
                 {/* Header row */}
-                <div className="flex items-center justify-between px-5 py-3 border-b border-white/5">
+                <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-800">
                   <div className="flex items-center gap-2">
-                    <Truck className="w-4 h-4 text-zinc-500" />
-                    <span className="text-xs font-mono text-zinc-500">
+                    <Truck className="w-4 h-4 text-zinc-600" />
+                    <span className="text-xs text-zinc-500 font-mono">
                       {new Date(shipment.createdAt).toLocaleDateString(
                         "en-US",
                         {
@@ -170,14 +158,11 @@ export default async function ShipmentsPage() {
                       )}
                     </span>
                   </div>
-                  {/* Status badge */}
                   <span
                     className={cn(
-                      "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium border",
-                      config.color,
-                      config.border,
+                      "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border",
+                      config.className,
                     )}
-                    style={{ background: "rgba(0,0,0,.4)" }}
                   >
                     <StatusIcon
                       className={cn(
@@ -189,8 +174,9 @@ export default async function ShipmentsPage() {
                   </span>
                 </div>
 
-                {/* Items */}
+                {/* Body */}
                 <div className="px-5 py-4">
+                  {/* Items */}
                   <div className="flex gap-2 flex-wrap mb-4">
                     {shipment.items.map((item) => (
                       <div key={item.id} className="flex items-center gap-2">
@@ -200,22 +186,22 @@ export default async function ShipmentsPage() {
                             alt={item.product.title}
                             width={40}
                             height={40}
-                            className="rounded object-cover w-10 h-10 border border-white/10"
+                            className="rounded-lg object-cover w-10 h-10 border border-zinc-800"
                           />
                         ) : (
-                          <div className="w-10 h-10 rounded bg-zinc-800 border border-white/10 flex items-center justify-center">
+                          <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center">
                             <Package className="w-4 h-4 text-zinc-600" />
                           </div>
                         )}
-                        <span className="text-xs text-zinc-400 font-mono max-w-[120px] truncate">
+                        <span className="text-xs text-zinc-400 max-w-[120px] truncate">
                           {item.product.title}
                         </span>
                       </div>
                     ))}
                   </div>
 
-                  {/* Shipping to */}
-                  <p className="text-xs text-zinc-600 font-mono">
+                  {/* Address */}
+                  <p className="text-xs text-zinc-600">
                     {shipment.shippingName} · {shipment.shippingCity},{" "}
                     {shipment.shippingState} {shipment.shippingPostal}
                   </p>
@@ -232,21 +218,27 @@ export default async function ShipmentsPage() {
                           href={trackUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300 transition-colors font-mono"
+                          className="inline-flex items-center gap-1 text-xs text-zinc-300 hover:text-zinc-100 transition-colors"
                         >
-                          Track
-                          <ExternalLink className="w-3 h-3" />
+                          Track <ExternalLink className="w-3 h-3" />
                         </a>
                       )}
                     </div>
                   )}
 
-                  {/* Shipping method + fee */}
+                  {/* Method + fee */}
                   <div className="mt-2 flex items-center gap-3">
-                    <span className="text-xs text-zinc-600 font-mono capitalize">
+                    <span className="text-xs text-zinc-600 capitalize">
                       {shipment.shippingMethod.toLowerCase().replace("_", " ")}
                     </span>
-                    <span className="text-xs text-zinc-600 font-mono">
+                    <span
+                      className={cn(
+                        "text-xs font-medium",
+                        shipment.shippingFeeAmount === 0
+                          ? "text-emerald-400"
+                          : "text-zinc-500",
+                      )}
+                    >
                       {shipment.shippingFeeAmount === 0
                         ? "Free"
                         : `$${(shipment.shippingFeeAmount / 100).toFixed(2)}`}
