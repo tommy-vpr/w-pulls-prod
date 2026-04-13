@@ -60,7 +60,4 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 COPY --from=deps /app/node_modules/.prisma ./node_modules/.prisma
 
-# Compile TS → JS
-RUN npx tsc --project tsconfig.worker.json
-
-CMD ["node", "dist/workers/index.js"]
+CMD ["npx", "tsx", "workers/index.ts"]
