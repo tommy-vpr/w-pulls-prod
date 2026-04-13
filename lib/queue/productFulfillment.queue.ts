@@ -5,6 +5,7 @@ export const productFulfillmentQueue = new Queue("product-fulfillment", {
   connection,
   defaultJobOptions: {
     removeOnComplete: true,
+    removeOnFail: 50,
     attempts: 3,
     backoff: {
       type: "exponential",

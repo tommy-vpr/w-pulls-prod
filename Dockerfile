@@ -56,13 +56,11 @@ CMD ["node", "server.js"]
 # ---------- Worker (BullMQ background jobs) ----------
 FROM base AS worker
 WORKDIR /app
-
-ENV NODE_ENV=production
-
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-
-# Copy already-generated prisma client from deps
 COPY --from=deps /app/node_modules/.prisma ./node_modules/.prisma
 
-CMD ["npx", "tsx", "workers/index.ts"]
+# Compile TS → JS
+RUN npx tsc --project tsconfig.worker.json
+
+CMD ["node", "dist/workers/index.js"]
