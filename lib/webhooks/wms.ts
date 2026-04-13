@@ -127,7 +127,7 @@ export async function triggerWMSProductOrder(order: {
     },
     body: JSON.stringify({
       wpullsOrderId: order.id,
-      orderNumber: `WPULLS-ORDER-${String(order.orderNumber)}`,
+      orderNumber: `#WPULLS-${String(order.orderNumber)}`,
       customerName: order.customerName ?? "W-Pulls Customer",
       customerEmail: order.customerEmail ?? null,
       totalAmount: (order.amount ?? 0) / 100,
