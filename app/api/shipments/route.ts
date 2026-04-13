@@ -4,9 +4,6 @@ import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { ItemDisposition } from "@prisma/client";
 
-// ─── GET /api/shipments ───────────────────────────────────────────────────────
-// List all shipment requests for the authenticated user
-
 export async function GET() {
   const session = await auth();
   if (!session?.user?.id) {
@@ -27,9 +24,7 @@ export async function GET() {
               sku: true,
             },
           },
-          orderItem: {
-            select: { orderId: true },
-          },
+          orderItem: { select: { orderId: true } },
         },
       },
     },
@@ -38,20 +33,6 @@ export async function GET() {
 
   return NextResponse.json({ success: true, shipments });
 }
-
-// ─── POST /api/shipments ──────────────────────────────────────────────────────
-// Create a ShipmentRequest
-// Body: {
-//   items: [{ orderItemId: string }],
-//   shippingName: string,
-//   shippingLine1: string,
-//   shippingLine2?: string,
-//   shippingCity: string,
-//   shippingState: string,
-//   shippingPostal: string,
-//   shippingCountry: string,
-//   shippingMethod: "STANDARD" | "EXPRESS" | "OVERNIGHT"
-// }
 
 export async function POST(request: NextRequest) {
   try {
@@ -73,7 +54,6 @@ export async function POST(request: NextRequest) {
       shippingMethod,
     } = body;
 
-    // ── Validate input ────────────────────────────────────────────────────────
     if (!Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
         { error: "At least one item is required" },
@@ -103,13 +83,9 @@ export async function POST(request: NextRequest) {
 
     const orderItemIds: string[] = items.map((i: any) => i.orderItemId);
 
-    // ── Validate each OrderItem ───────────────────────────────────────────────
     const orderItems = await prisma.orderItem.findMany({
       where: { id: { in: orderItemIds } },
-      include: {
-        order: true,
-        product: true,
-      },
+      include: { order: true, product: true },
     });
 
     if (orderItems.length !== orderItemIds.length) {
@@ -120,18 +96,35 @@ export async function POST(request: NextRequest) {
     }
 
     for (const item of orderItems) {
-      // Must belong to this user
       if (item.order.userId !== session.user.id) {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       }
-      // Order must be completed and revealed
-      if (item.order.status !== "COMPLETED" || !item.order.revealedAt) {
+
+      if (item.order.status !== "COMPLETED") {
         return NextResponse.json(
-          { error: `Order ${item.order.orderNumber} is not yet revealed` },
+          { error: `Order ${item.order.orderNumber} is not completed` },
           { status: 400 },
         );
       }
-      // Item must be KEPT — not already sold back or shipping
+
+      // PACK orders require reveal — PRODUCT orders do not
+      if (item.order.type === "PACK" && !item.order.revealedAt) {
+        return NextResponse.json(
+          {
+            error: `Order ${item.order.orderNumber} has not been revealed yet`,
+          },
+          { status: 400 },
+        );
+      }
+
+      // PRODUCT orders are fulfilled automatically via WMS
+      if (item.order.type === "PRODUCT") {
+        return NextResponse.json(
+          { error: `Product orders are fulfilled automatically` },
+          { status: 400 },
+        );
+      }
+
       if (item.disposition !== ItemDisposition.KEPT) {
         return NextResponse.json(
           {
@@ -140,7 +133,7 @@ export async function POST(request: NextRequest) {
           { status: 400 },
         );
       }
-      // Product must have a SKU (required for WMS)
+
       if (!item.product.sku) {
         return NextResponse.json(
           { error: `Product ${item.product.title} is missing a SKU` },
@@ -149,7 +142,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // ── Shipping fee amount ───────────────────────────────────────────────────
     const SHIPPING_FEE: Record<string, number> = {
       STANDARD: 0,
       EXPRESS: 999,
@@ -157,9 +149,8 @@ export async function POST(request: NextRequest) {
     };
     const shippingFeeAmount = SHIPPING_FEE[shippingMethod];
 
-    // ── Create ShipmentRequest + mark items ───────────────────────────────────
     const shipmentRequest = await prisma.$transaction(async (tx) => {
-      const request = await tx.shipmentRequest.create({
+      const req = await tx.shipmentRequest.create({
         data: {
           userId: session.user.id,
           status: "PENDING",
@@ -181,13 +172,12 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      // Mark each OrderItem as SHIP_REQUESTED
       await tx.orderItem.updateMany({
         where: { id: { in: orderItemIds } },
         data: { disposition: ItemDisposition.SHIP_REQUESTED },
       });
 
-      return request;
+      return req;
     });
 
     return NextResponse.json({

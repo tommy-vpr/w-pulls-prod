@@ -32,7 +32,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true });
   }
 
-  // Idempotency: skip if this event was already processed
   const isNew = await claimWebhookEvent(event.id);
   if (!isNew) {
     console.log(`⏭️ Webhook event ${event.id} already processed, skipping`);
@@ -46,7 +45,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true });
   }
 
-  // ---- Handle wallet deposits ----
+  // ── Wallet deposits ──────────────────────────────────────────────────────────
   if (session.metadata?.type === "wallet_deposit") {
     const userId = session.metadata.userId;
     const depositAmount = parseInt(session.metadata.depositAmount, 10);
@@ -77,8 +76,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true });
   }
 
-  // --------------- Shipment ------------------
-
+  // ── Shipping fee ─────────────────────────────────────────────────────────────
   if (session.metadata?.type === "shipping_fee") {
     const { shipmentRequestId } = session.metadata;
     const shipmentRequest = await prisma.shipmentRequest.update({
@@ -97,7 +95,6 @@ export async function POST(request: NextRequest) {
         data: { status: "SENT_TO_WMS" },
       });
 
-      // Send shipment confirmed email
       if (shipmentRequest.user?.email) {
         const { sendShipmentConfirmedEmail } =
           await import("@/lib/emails/send-shipment-confirmed");
@@ -134,21 +131,19 @@ export async function POST(request: NextRequest) {
     }
     return NextResponse.json({ received: true });
   }
-  // ---- Handle order checkouts ----
+
+  // ── Order checkouts ──────────────────────────────────────────────────────────
   const orderId = session.metadata?.orderId;
   if (!orderId) {
     return NextResponse.json({ received: true });
   }
 
-  const order = await prisma.order.findUnique({
-    where: { id: orderId },
-  });
+  const order = await prisma.order.findUnique({ where: { id: orderId } });
 
   if (!order || order.status !== "PENDING") {
     return NextResponse.json({ received: true });
   }
 
-  // New location in stripe@18+ API
   const address = session.collected_information?.shipping_details?.address;
 
   await prisma.order.update({
@@ -156,15 +151,12 @@ export async function POST(request: NextRequest) {
     data: {
       status: "PROCESSING",
       stripeSessionId: session.id,
-
       subtotal: session.amount_subtotal ?? 0,
       tax: session.total_details?.amount_tax ?? 0,
       shipping: session.shipping_cost?.amount_total ?? 0,
       amount: session.amount_total,
-
       customerEmail: session.customer_details?.email ?? order.customerEmail,
       customerName: session.customer_details?.name ?? order.customerName,
-
       shippingLine1: address?.line1 ?? null,
       shippingLine2: address?.line2 ?? null,
       shippingCity: address?.city ?? null,
@@ -180,6 +172,29 @@ export async function POST(request: NextRequest) {
       { orderId },
       { jobId: orderId },
     );
+
+    // Fire WMS order for pick/pack/ship
+    try {
+      const fullOrder = await prisma.order.findUnique({
+        where: { id: orderId },
+        include: {
+          items: {
+            include: {
+              product: { select: { sku: true, title: true, imageUrl: true } },
+            },
+          },
+        },
+      });
+
+      if (fullOrder) {
+        const { triggerWMSProductOrder } = await import("@/lib/webhooks/wms");
+        triggerWMSProductOrder(fullOrder).catch((err) =>
+          console.error("[WMS] Product order webhook failed (non-fatal):", err),
+        );
+      }
+    } catch (err) {
+      console.error("[WMS] Product order fetch failed:", err);
+    }
   }
 
   if (order.type === "PACK") {
@@ -191,11 +206,7 @@ export async function POST(request: NextRequest) {
 
     await packRevealQueue.add(
       "assign-reveal",
-      {
-        orderId,
-        packId,
-        stripeSessionId: session.id,
-      },
+      { orderId, packId, stripeSessionId: session.id },
       { jobId: orderId },
     );
   }

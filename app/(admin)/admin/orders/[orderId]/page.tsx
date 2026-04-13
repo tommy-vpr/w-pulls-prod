@@ -14,6 +14,8 @@ import {
   XCircle,
   RotateCcw,
   ExternalLink,
+  ShoppingBag,
+  Sparkles,
 } from "lucide-react";
 import { getOrderById } from "@/lib/actions/order.actions";
 import { OrderActions } from "./_components/order-actions";
@@ -28,9 +30,7 @@ export async function generateMetadata({
   params,
 }: OrderDetailPageProps): Promise<Metadata> {
   const { orderId } = await params;
-  return {
-    title: `Order ${orderId.slice(0, 8)} | Dashboard`,
-  };
+  return { title: `Order ${orderId.slice(0, 8)} | Dashboard` };
 }
 
 const statusConfig: Record<
@@ -42,6 +42,12 @@ const statusConfig: Record<
     icon: Clock,
     className: "bg-amber-900/30 text-amber-400 border-amber-700/50",
     timelineClassName: "bg-amber-900/30 text-amber-400",
+  },
+  PROCESSING: {
+    label: "Processing",
+    icon: Clock,
+    className: "bg-blue-900/30 text-blue-400 border-blue-700/50",
+    timelineClassName: "bg-blue-900/30 text-blue-400",
   },
   COMPLETED: {
     label: "Completed",
@@ -69,13 +75,10 @@ export default async function OrderDetailPage({
   const { orderId } = await params;
   const result = await getOrderById(orderId);
 
-  if (!result.success || !result.data) {
-    notFound();
-  }
+  if (!result.success || !result.data) notFound();
 
   const order = result.data;
-  const item = order.items[0];
-  const product = item?.product ?? null;
+  const isProduct = order.type === "PRODUCT";
   const status = statusConfig[order.status] || statusConfig.PENDING;
   const StatusIcon = status.icon;
   const tier = order.selectedTier ? getTierConfig(order.selectedTier) : null;
@@ -86,7 +89,7 @@ export default async function OrderDetailPage({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link
-            href="/dashboard/orders"
+            href="/admin/orders"
             className="inline-flex items-center justify-center h-10 w-10 rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -106,6 +109,12 @@ export default async function OrderDetailPage({
                 <StatusIcon className="mr-1 h-3 w-3" />
                 {status.label}
               </span>
+              {isProduct && (
+                <span className="inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium border border-violet-700/50 bg-violet-900/30 text-violet-400">
+                  <ShoppingBag className="mr-1 h-3 w-3" />
+                  Direct Purchase
+                </span>
+              )}
             </div>
             <p className="text-zinc-500 font-mono text-sm">ID: {order.id}</p>
           </div>
@@ -116,69 +125,151 @@ export default async function OrderDetailPage({
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Product Card */}
+          {/* Items Card — handles both single and multi-item */}
           <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
-            <div className="px-6 py-4 border-b border-zinc-800 flex items-center gap-2">
-              <Package className="h-5 w-5 text-zinc-400" />
-              <h2 className="text-lg font-semibold text-zinc-100">
-                Product Details
-              </h2>
-            </div>
-            <div className="p-6">
-              <div className="flex gap-4">
-                {product?.imageUrl ? (
-                  <div className="relative h-32 w-32 overflow-hidden rounded-lg bg-zinc-800 border border-zinc-700 shrink-0">
-                    <Image
-                      src={product.imageUrl}
-                      alt={product.title}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
+            <div className="px-6 py-4 border-b border-zinc-800 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {isProduct ? (
+                  <ShoppingBag className="h-5 w-5 text-zinc-400" />
                 ) : (
-                  <div className="h-32 w-32 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center shrink-0">
-                    <Package className="h-8 w-8 text-zinc-600" />
-                  </div>
+                  <Sparkles className="h-5 w-5 text-zinc-400" />
                 )}
-                <div className="flex-1 space-y-2">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-semibold text-lg text-zinc-100">
-                        {product?.title || "Unknown Product"}
-                      </h3>
-                      <p className="text-sm text-zinc-500">
-                        From: {order.packName}
-                      </p>
-                    </div>
-                    {product && (
-                      <Link
-                        href={`/dashboard/products/${product.id}`}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-700 bg-zinc-800 text-sm text-zinc-300 hover:bg-zinc-700 hover:text-zinc-100 transition-colors"
-                      >
-                        <ExternalLink className="h-3 w-3" />
-                        View Product
-                      </Link>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-4">
-                    {order.selectedTier && tier && (
-                      <span
-                        className={cn(
-                          "inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium border",
-                          getTierBadgeClass(order.selectedTier),
-                        )}
-                      >
-                        {tier.label}
-                      </span>
-                    )}
-
-                    <span className="text-2xl font-bold text-zinc-100">
-                      ${Number(product?.price || 0).toFixed(2)}
-                    </span>
-                  </div>
-                </div>
+                <h2 className="text-lg font-semibold text-zinc-100">
+                  {isProduct ? "Order Items" : "Product Details"}
+                </h2>
               </div>
+              {isProduct && (
+                <span className="text-sm text-zinc-500">
+                  {order.items.reduce((s, i) => s + i.quantity, 0)} item
+                  {order.items.reduce((s, i) => s + i.quantity, 0) !== 1
+                    ? "s"
+                    : ""}
+                </span>
+              )}
             </div>
+
+            {isProduct ? (
+              // Multi-item product order
+              <div className="divide-y divide-zinc-800">
+                {order.items.map((item) => (
+                  <div key={item.id} className="p-6 flex gap-4">
+                    <div className="relative shrink-0">
+                      {item.product?.imageUrl ? (
+                        <div className="relative h-20 w-20 overflow-hidden rounded-lg bg-zinc-800 border border-zinc-700">
+                          <Image
+                            src={item.product.imageUrl}
+                            alt={item.product.title}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="h-20 w-20 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center">
+                          <Package className="h-6 w-6 text-zinc-600" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <h3 className="font-semibold text-zinc-100">
+                            {item.product?.title ?? "Unknown Product"}
+                          </h3>
+                          {item.product?.id && (
+                            <Link
+                              href={`/admin/products/${item.product.id}`}
+                              className="inline-flex items-center gap-1 mt-1 text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+                            >
+                              <ExternalLink className="h-3 w-3" />
+                              View Product
+                            </Link>
+                          )}
+                        </div>
+                        <p className="font-semibold text-zinc-100 shrink-0">
+                          ${(Number(item.unitPrice) * item.quantity).toFixed(2)}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3 mt-2 text-sm text-zinc-500">
+                        <span>Qty: {item.quantity}</span>
+                        <span>@ ${Number(item.unitPrice).toFixed(2)} each</span>
+                        {item.product?.tier && (
+                          <span
+                            className={cn(
+                              "inline-flex items-center rounded px-2 py-0.5 text-xs font-medium border",
+                              getTierBadgeClass(item.product.tier),
+                            )}
+                          >
+                            {getTierConfig(item.product.tier).label}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              // Single pack order — show first item
+              <div className="p-6">
+                {(() => {
+                  const item = order.items[0];
+                  const product = item?.product ?? null;
+                  return (
+                    <div className="flex gap-4">
+                      {product?.imageUrl ? (
+                        <div className="relative h-32 w-32 overflow-hidden rounded-lg bg-zinc-800 border border-zinc-700 shrink-0">
+                          <Image
+                            src={product.imageUrl}
+                            alt={product.title}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="h-32 w-32 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center shrink-0">
+                          <Package className="h-8 w-8 text-zinc-600" />
+                        </div>
+                      )}
+                      <div className="flex-1 space-y-2">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h3 className="font-semibold text-lg text-zinc-100">
+                              {product?.title || "Unknown Product"}
+                            </h3>
+                            <p className="text-sm text-zinc-500">
+                              From: {order.packName}
+                            </p>
+                          </div>
+                          {product && (
+                            <Link
+                              href={`/admin/products/${product.id}`}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-700 bg-zinc-800 text-sm text-zinc-300 hover:bg-zinc-700 hover:text-zinc-100 transition-colors"
+                            >
+                              <ExternalLink className="h-3 w-3" />
+                              View Product
+                            </Link>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-4">
+                          {order.selectedTier && tier && (
+                            <span
+                              className={cn(
+                                "inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium border",
+                                getTierBadgeClass(order.selectedTier),
+                              )}
+                            >
+                              {tier.label}
+                            </span>
+                          )}
+                          <span className="text-2xl font-bold text-zinc-100">
+                            ${Number(product?.price || 0).toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
           </div>
 
           {/* Customer Card */}
@@ -215,7 +306,7 @@ export default async function OrderDetailPage({
                       </p>
                     </div>
                     <Link
-                      href={`/dashboard/users/${order.user.id}`}
+                      href={`/admin/users/${order.user.id}`}
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-700 bg-zinc-800 text-sm text-zinc-300 hover:bg-zinc-700 hover:text-zinc-100 transition-colors"
                     >
                       View Profile
@@ -272,118 +363,85 @@ export default async function OrderDetailPage({
 
         {/* Sidebar */}
         <div className="space-y-6">
-          {/* Timeline Card */}
+          {/* Timeline */}
           <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
             <div className="px-6 py-4 border-b border-zinc-800">
               <h2 className="text-lg font-semibold text-zinc-100">
                 Order Timeline
               </h2>
             </div>
-            <div className="p-6">
-              <div className="space-y-4">
-                <div className="flex gap-3">
-                  <div className="flex flex-col items-center">
-                    <div className="h-8 w-8 rounded-full bg-violet-900/30 flex items-center justify-center">
-                      <Package className="h-4 w-4 text-violet-400" />
-                    </div>
-                    <div className="w-px h-full bg-zinc-800" />
+            <div className="p-6 space-y-4">
+              <div className="flex gap-3">
+                <div className="flex flex-col items-center">
+                  <div className="h-8 w-8 rounded-full bg-violet-900/30 flex items-center justify-center">
+                    <Package className="h-4 w-4 text-violet-400" />
                   </div>
-                  <div className="pb-4">
-                    <p className="font-medium text-zinc-100">Order Created</p>
+                  <div className="w-px h-full bg-zinc-800" />
+                </div>
+                <div className="pb-4">
+                  <p className="font-medium text-zinc-100">Order Created</p>
+                  <p className="text-sm text-zinc-500">
+                    {format(
+                      new Date(order.createdAt),
+                      "MMM d, yyyy 'at' h:mm a",
+                    )}
+                  </p>
+                </div>
+              </div>
+              {order.status === "COMPLETED" && (
+                <div className="flex gap-3">
+                  <div className="h-8 w-8 rounded-full bg-emerald-900/30 flex items-center justify-center shrink-0">
+                    <CheckCircle className="h-4 w-4 text-emerald-400" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-zinc-100">
+                      Payment Completed
+                    </p>
                     <p className="text-sm text-zinc-500">
                       {format(
-                        new Date(order.createdAt),
+                        new Date(order.updatedAt),
                         "MMM d, yyyy 'at' h:mm a",
                       )}
                     </p>
                   </div>
                 </div>
-
-                {order.status === "COMPLETED" && (
-                  <div className="flex gap-3">
-                    <div className="flex flex-col items-center">
-                      <div className="h-8 w-8 rounded-full bg-emerald-900/30 flex items-center justify-center">
-                        <CheckCircle className="h-4 w-4 text-emerald-400" />
-                      </div>
-                    </div>
-                    <div>
-                      <p className="font-medium text-zinc-100">
-                        Payment Completed
-                      </p>
-                      <p className="text-sm text-zinc-500">
-                        {format(
-                          new Date(order.updatedAt),
-                          "MMM d, yyyy 'at' h:mm a",
-                        )}
-                      </p>
-                    </div>
+              )}
+              {order.status === "FAILED" && (
+                <div className="flex gap-3">
+                  <div className="h-8 w-8 rounded-full bg-red-900/30 flex items-center justify-center shrink-0">
+                    <XCircle className="h-4 w-4 text-red-400" />
                   </div>
-                )}
-
-                {order.status === "FAILED" && (
-                  <div className="flex gap-3">
-                    <div className="flex flex-col items-center">
-                      <div className="h-8 w-8 rounded-full bg-red-900/30 flex items-center justify-center">
-                        <XCircle className="h-4 w-4 text-red-400" />
-                      </div>
-                    </div>
-                    <div>
-                      <p className="font-medium text-zinc-100">
-                        Payment Failed
-                      </p>
-                      <p className="text-sm text-zinc-500">
-                        {format(
-                          new Date(order.updatedAt),
-                          "MMM d, yyyy 'at' h:mm a",
-                        )}
-                      </p>
-                    </div>
+                  <div>
+                    <p className="font-medium text-zinc-100">Payment Failed</p>
+                    <p className="text-sm text-zinc-500">
+                      {format(
+                        new Date(order.updatedAt),
+                        "MMM d, yyyy 'at' h:mm a",
+                      )}
+                    </p>
                   </div>
-                )}
-
-                {order.status === "REFUNDED" && (
-                  <div className="flex gap-3">
-                    <div className="flex flex-col items-center">
-                      <div className="h-8 w-8 rounded-full bg-zinc-800 flex items-center justify-center">
-                        <RotateCcw className="h-4 w-4 text-zinc-400" />
-                      </div>
-                    </div>
-                    <div>
-                      <p className="font-medium text-zinc-100">
-                        Order Refunded
-                      </p>
-                      <p className="text-sm text-zinc-500">
-                        {format(
-                          new Date(order.updatedAt),
-                          "MMM d, yyyy 'at' h:mm a",
-                        )}
-                      </p>
-                    </div>
+                </div>
+              )}
+              {order.status === "REFUNDED" && (
+                <div className="flex gap-3">
+                  <div className="h-8 w-8 rounded-full bg-zinc-800 flex items-center justify-center shrink-0">
+                    <RotateCcw className="h-4 w-4 text-zinc-400" />
                   </div>
-                )}
-
-                {order.status === "PENDING" && (
-                  <div className="flex gap-3">
-                    <div className="flex flex-col items-center">
-                      <div className="h-8 w-8 rounded-full bg-amber-900/30 flex items-center justify-center">
-                        <Clock className="h-4 w-4 text-amber-400" />
-                      </div>
-                    </div>
-                    <div>
-                      <p className="font-medium text-zinc-100">
-                        Awaiting Payment
-                      </p>
-                      <p className="text-sm text-zinc-500">
-                        Waiting for confirmation
-                      </p>
-                    </div>
+                  <div>
+                    <p className="font-medium text-zinc-100">Order Refunded</p>
+                    <p className="text-sm text-zinc-500">
+                      {format(
+                        new Date(order.updatedAt),
+                        "MMM d, yyyy 'at' h:mm a",
+                      )}
+                    </p>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Quick Info Card */}
+          {/* Quick Info */}
           <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
             <div className="px-6 py-4 border-b border-zinc-800">
               <h2 className="text-lg font-semibold text-zinc-100">
@@ -392,16 +450,27 @@ export default async function OrderDetailPage({
             </div>
             <div className="p-6 space-y-3">
               <div className="flex justify-between">
-                <span className="text-zinc-500">Pack ID</span>
-                <span className="font-mono text-sm text-zinc-400">
-                  {order.packId ? `${order.packId.slice(0, 8)}...` : "—"}
+                <span className="text-zinc-500">Type</span>
+                <span className="text-sm text-zinc-300">
+                  {isProduct ? "Product" : "Pack"}
                 </span>
               </div>
               <div className="border-t border-zinc-800" />
+              {!isProduct && (
+                <>
+                  <div className="flex justify-between">
+                    <span className="text-zinc-500">Pack ID</span>
+                    <span className="font-mono text-sm text-zinc-400">
+                      {order.packId ? `${order.packId.slice(0, 8)}...` : "—"}
+                    </span>
+                  </div>
+                  <div className="border-t border-zinc-800" />
+                </>
+              )}
               <div className="flex justify-between">
-                <span className="text-zinc-500">Product ID</span>
-                <span className="font-mono text-sm text-zinc-400">
-                  {product?.id ? `${product.id.slice(0, 8)}...` : "—"}
+                <span className="text-zinc-500">Items</span>
+                <span className="text-sm text-zinc-300">
+                  {order.items.length}
                 </span>
               </div>
               <div className="border-t border-zinc-800" />

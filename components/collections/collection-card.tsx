@@ -34,7 +34,7 @@ export function CollectionCard({
           item.isSoldBack
             ? "border-zinc-800/50 opacity-60"
             : isSelected
-              ? "border-emerald-500 ring-2 ring-emerald-500 ring-offset-3 ring-offset-black"
+              ? "border-emerald-500 ring-2 ring-emerald-500 ring-offset-2 ring-offset-black"
               : "border-zinc-800 hover:border-zinc-700 hover:bg-zinc-800/50",
         )}
       >
@@ -143,29 +143,6 @@ export function CollectionCard({
                   <Truck className="h-3.5 w-3.5" />
                   Select to Ship
                 </button>
-              </div>
-            )}
-
-          {/* Selection mode hover overlay — subtle add indicator */}
-          {!item.isSoldBack &&
-            selectionMode &&
-            isShippable &&
-            onToggleSelect && (
-              <div className="absolute inset-0 z-20">
-                {/* Invisible click target */}
-                <button
-                  onClick={() => onToggleSelect(item.orderItemId)}
-                  className="absolute inset-0 cursor-pointer"
-                />
-                {/* Hover ring hint — only on unselected cards */}
-                {!isSelected && (
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                    <div className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-500 border border-zinc-700 text-white text-xs font-medium">
-                      <Truck className="h-3.5 w-3.5" />
-                      Add to shipment
-                    </div>
-                  </div>
-                )}
               </div>
             )}
 

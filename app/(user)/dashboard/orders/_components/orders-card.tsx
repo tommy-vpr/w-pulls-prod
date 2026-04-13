@@ -14,6 +14,7 @@ import {
   XCircle,
   RotateCcw,
   Eye,
+  ShoppingBag,
   LucideIcon,
 } from "lucide-react";
 import {
@@ -41,18 +42,13 @@ interface OrdersCardProps {
 
 const statusConfig: Record<
   OrderStatus,
-  {
-    icon: LucideIcon;
-    color: string;
-    bgColor: string;
-    label: string;
-  }
+  { icon: LucideIcon; color: string; bgColor: string; label: string }
 > = {
   COMPLETED: {
     icon: CheckCircle,
     color: "text-emerald-400",
     bgColor: "bg-emerald-900/40",
-    label: "Revealed",
+    label: "Completed",
   },
   PENDING: {
     icon: Clock,
@@ -85,6 +81,82 @@ const statusConfig: Record<
     label: "Abandoned",
   },
 };
+
+// ─── Stacked thumbnails for multi-item product orders ────────────────────────
+function StackedImages({
+  items,
+  size = 48,
+}: {
+  items: SerializedOrder["items"];
+  size?: number;
+}) {
+  const max = 5;
+  const shown = items.slice(0, max);
+  const extra = items.length - max;
+  const hasExtra = extra > 0;
+  const totalSlots = shown.length + (hasExtra ? 1 : 0);
+  const offset = Math.floor(size * 0.35);
+  const containerWidth = size + (totalSlots - 1) * offset;
+
+  return (
+    <div
+      className="relative shrink-0"
+      style={{ width: `${containerWidth}px`, height: `${size}px` }}
+    >
+      {shown.map((item, i) => (
+        <div
+          key={item.id}
+          className="absolute rounded-lg border border-zinc-700 bg-zinc-800 overflow-hidden"
+          style={{
+            width: `${size}px`,
+            height: `${size}px`,
+            left: i * offset,
+            zIndex: shown.length - i,
+            boxShadow: "-2px 0 6px rgba(0,0,0,0.5)",
+          }}
+        >
+          {item.product?.imageUrl ? (
+            <Image
+              src={item.product.imageUrl}
+              alt={item.product.title}
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <ShoppingBag className="w-3 h-3 text-zinc-600" />
+            </div>
+          )}
+        </div>
+      ))}
+
+      {hasExtra && (
+        <div
+          className="absolute rounded-lg bg-zinc-900 border border-zinc-600 border-dashed flex flex-col items-center justify-center gap-0.5"
+          style={{
+            width: `${size}px`,
+            height: `${size}px`,
+            left: max * offset,
+            zIndex: 0,
+          }}
+        >
+          <span
+            className="text-zinc-500 font-bold leading-none"
+            style={{ fontSize: size * 0.2 }}
+          >
+            ···
+          </span>
+          <span
+            className="text-zinc-400 font-semibold leading-none"
+            style={{ fontSize: size * 0.22 }}
+          >
+            +{extra}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function OrdersCard({ orders, pagination }: OrdersCardProps) {
   const router = useRouter();
@@ -163,14 +235,32 @@ export function OrdersCard({ orders, pagination }: OrdersCardProps) {
 
   return (
     <div className="space-y-4">
-      {/* ── MOBILE CARD LIST (hidden on md+) ── */}
+      {/* ── MOBILE CARD LIST ── */}
       <div className="flex flex-col gap-3 md:hidden">
         {orders.map((order) => {
+          const isProduct = order.type === "PRODUCT";
           const tier = getTierConfig(order.selectedTier);
           const status =
             statusConfig[order.status as OrderStatus] || statusConfig.PENDING;
           const StatusIcon = status.icon;
           const isRevealed = order.status === "COMPLETED" && order.product;
+
+          // Value: for product orders sum all item prices × qty
+          const productValue = isProduct
+            ? order.items.reduce(
+                (sum, i) => sum + Number(i.product?.price ?? 0) * i.quantity,
+                0,
+              )
+            : null;
+
+          // Title
+          const title = isProduct
+            ? order.items.length === 1
+              ? (order.items[0]?.product?.title ?? "Product Order")
+              : `${order.items.length} items`
+            : isRevealed
+              ? order.product!.title
+              : order.packName;
 
           return (
             <Link
@@ -180,7 +270,9 @@ export function OrdersCard({ orders, pagination }: OrdersCardProps) {
             >
               {/* Thumbnail */}
               <div className="shrink-0">
-                {isRevealed && order.product?.imageUrl ? (
+                {isProduct ? (
+                  <StackedImages items={order.items} size={56} />
+                ) : isRevealed && order.product?.imageUrl ? (
                   <div className="relative h-14 w-14 overflow-hidden rounded-lg border border-zinc-700 bg-zinc-800">
                     <Image
                       src={order.product.imageUrl}
@@ -198,10 +290,9 @@ export function OrdersCard({ orders, pagination }: OrdersCardProps) {
 
               {/* Content */}
               <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
-                {/* Row 1: title + status */}
                 <div className="flex items-center justify-between gap-2">
                   <p className="font-medium text-zinc-100 text-sm truncate">
-                    {isRevealed ? order.product!.title : order.packName}
+                    {title}
                   </p>
                   <span
                     className={cn(
@@ -215,33 +306,47 @@ export function OrdersCard({ orders, pagination }: OrdersCardProps) {
                   </span>
                 </div>
 
-                {/* Row 2: value + paid + tier */}
                 <div className="flex items-center gap-2 text-xs mt-1">
-                  <span
-                    className={cn(
-                      "font-semibold",
-                      isRevealed ? "text-emerald-400" : "text-zinc-500",
-                    )}
-                  >
-                    {isRevealed
-                      ? `$${Number(order.product!.price).toFixed(2)}`
-                      : "???"}
-                  </span>
-                  <span className="text-zinc-700">·</span>
-                  <span className="text-zinc-500">
-                    Paid ${(order.amount / 100).toFixed(2)}
-                  </span>
-                  {order.selectedTier && (
+                  {isProduct ? (
                     <>
+                      <span className="font-semibold text-zinc-300">
+                        {order.items.length} item
+                        {order.items.length !== 1 ? "s" : ""}
+                      </span>
                       <span className="text-zinc-700">·</span>
+                      <span className="text-zinc-500">
+                        Paid ${(order.amount / 100).toFixed(2)}
+                      </span>
+                    </>
+                  ) : (
+                    <>
                       <span
                         className={cn(
-                          "inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium border",
-                          getTierBadgeClass(order.selectedTier),
+                          "font-semibold",
+                          isRevealed ? "text-emerald-400" : "text-zinc-500",
                         )}
                       >
-                        {tier.label}
+                        {isRevealed
+                          ? `$${Number(order.product!.price).toFixed(2)}`
+                          : "???"}
                       </span>
+                      <span className="text-zinc-700">·</span>
+                      <span className="text-zinc-500">
+                        Paid ${(order.amount / 100).toFixed(2)}
+                      </span>
+                      {order.selectedTier && (
+                        <>
+                          <span className="text-zinc-700">·</span>
+                          <span
+                            className={cn(
+                              "inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium border",
+                              getTierBadgeClass(order.selectedTier),
+                            )}
+                          >
+                            {tier.label}
+                          </span>
+                        </>
+                      )}
                     </>
                   )}
                 </div>
@@ -251,13 +356,13 @@ export function OrdersCard({ orders, pagination }: OrdersCardProps) {
         })}
       </div>
 
-      {/* ── DESKTOP TABLE (hidden below md) ── */}
+      {/* ── DESKTOP TABLE ── */}
       <div className="hidden md:block rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow className="border-zinc-800 hover:bg-transparent">
-              <TableHead className="text-zinc-400">Card</TableHead>
-              <TableHead className="text-zinc-400">Pack</TableHead>
+              <TableHead className="text-zinc-400">Order</TableHead>
+              <TableHead className="text-zinc-400">Pack / Product</TableHead>
               <TableHead className="text-zinc-400">Tier</TableHead>
               <TableHead className="text-zinc-400">Value</TableHead>
               <TableHead className="text-zinc-400">Paid</TableHead>
@@ -270,6 +375,7 @@ export function OrdersCard({ orders, pagination }: OrdersCardProps) {
           </TableHeader>
           <TableBody>
             {orders.map((order) => {
+              const isProduct = order.type === "PRODUCT";
               const tier = getTierConfig(order.selectedTier);
               const status =
                 statusConfig[order.status as OrderStatus] ||
@@ -277,16 +383,34 @@ export function OrdersCard({ orders, pagination }: OrdersCardProps) {
               const StatusIcon = status.icon;
               const isRevealed = order.status === "COMPLETED" && order.product;
 
+              const totalItemValue = isProduct
+                ? order.items.reduce(
+                    (sum, i) =>
+                      sum + Number(i.product?.price ?? 0) * i.quantity,
+                    0,
+                  )
+                : null;
+
+              const title = isProduct
+                ? order.items.length === 1
+                  ? (order.items[0]?.product?.title ?? "Product Order")
+                  : `${order.items.length} items`
+                : isRevealed
+                  ? order.product!.title
+                  : "Mystery Card";
+
               return (
                 <TableRow
                   key={order.id}
                   className="border-zinc-800 hover:bg-zinc-800/50 transition-colors"
                 >
-                  {/* Card/Product */}
+                  {/* Image + ID */}
                   <TableCell>
                     <div className="flex items-center gap-3">
-                      {isRevealed && order.product?.imageUrl ? (
-                        <div className="relative h-12 w-12 overflow-hidden rounded-lg bg-zinc-800 border border-zinc-700">
+                      {isProduct ? (
+                        <StackedImages items={order.items} size={48} />
+                      ) : isRevealed && order.product?.imageUrl ? (
+                        <div className="relative h-12 w-12 overflow-hidden rounded-lg bg-zinc-800 border border-zinc-700 shrink-0">
                           <Image
                             src={order.product.imageUrl}
                             alt={order.product.title}
@@ -295,13 +419,13 @@ export function OrdersCard({ orders, pagination }: OrdersCardProps) {
                           />
                         </div>
                       ) : (
-                        <div className="h-12 w-12 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center">
+                        <div className="h-12 w-12 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center shrink-0">
                           <Sparkles className="h-5 w-5 text-zinc-600" />
                         </div>
                       )}
                       <div>
                         <p className="font-medium text-zinc-100 truncate max-w-[180px]">
-                          {isRevealed ? order.product!.title : "Mystery Card"}
+                          {title}
                         </p>
                         <p className="text-xs text-zinc-500 font-mono">
                           #{order.id.slice(-8).toUpperCase()}
@@ -310,14 +434,16 @@ export function OrdersCard({ orders, pagination }: OrdersCardProps) {
                     </div>
                   </TableCell>
 
-                  {/* Pack */}
+                  {/* Pack / Product label */}
                   <TableCell>
-                    <span className="text-zinc-300">{order.packName}</span>
+                    <span className="text-zinc-300">
+                      {isProduct ? "Direct Purchase" : order.packName}
+                    </span>
                   </TableCell>
 
                   {/* Tier */}
                   <TableCell>
-                    {order.selectedTier ? (
+                    {!isProduct && order.selectedTier ? (
                       <span
                         className={cn(
                           "inline-flex items-center rounded-md px-2 py-1 text-xs font-medium border",
@@ -333,16 +459,22 @@ export function OrdersCard({ orders, pagination }: OrdersCardProps) {
 
                   {/* Value */}
                   <TableCell>
-                    <span
-                      className={cn(
-                        "font-semibold",
-                        isRevealed ? "text-emerald-400" : "text-zinc-500",
-                      )}
-                    >
-                      {isRevealed
-                        ? `$${Number(order.product!.price).toFixed(2)}`
-                        : "???"}
-                    </span>
+                    {isProduct ? (
+                      <span className="font-semibold text-zinc-300">
+                        ${totalItemValue!.toFixed(2)}
+                      </span>
+                    ) : (
+                      <span
+                        className={cn(
+                          "font-semibold",
+                          isRevealed ? "text-emerald-400" : "text-zinc-500",
+                        )}
+                      >
+                        {isRevealed
+                          ? `$${Number(order.product!.price).toFixed(2)}`
+                          : "???"}
+                      </span>
+                    )}
                   </TableCell>
 
                   {/* Paid */}
@@ -385,7 +517,7 @@ export function OrdersCard({ orders, pagination }: OrdersCardProps) {
                         <Eye className="h-3.5 w-3.5" />
                         Details
                       </Link>
-                      {isRevealed && (
+                      {!isProduct && isRevealed && (
                         <button
                           onClick={() => handleQuickView(order)}
                           className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-200 hover:text-gray-300 hover:bg-gray-900/30 transition-colors"
@@ -402,10 +534,8 @@ export function OrdersCard({ orders, pagination }: OrdersCardProps) {
         </Table>
       </div>
 
-      {/* Pagination */}
       <Pagination />
 
-      {/* Order Detail Modal */}
       <OrderModal
         order={selectedOrder}
         isOpen={isModalOpen}

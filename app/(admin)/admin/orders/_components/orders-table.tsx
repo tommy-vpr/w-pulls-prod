@@ -16,6 +16,8 @@ import {
   RotateCcw,
   ChevronLeft,
   ChevronRight,
+  ShoppingBag,
+  Sparkles,
 } from "lucide-react";
 import {
   Table,
@@ -75,6 +77,11 @@ const statusConfig: Record<
     icon: CheckCircle,
     className: "bg-emerald-900/30 text-emerald-400 border-emerald-700/50",
   },
+  PROCESSING: {
+    label: "Processing",
+    icon: Clock,
+    className: "bg-blue-900/30 text-blue-400 border-blue-700/50",
+  },
   FAILED: {
     label: "Failed",
     icon: XCircle,
@@ -86,6 +93,83 @@ const statusConfig: Record<
     className: "bg-zinc-800 text-zinc-400 border-zinc-700",
   },
 };
+
+// Stacked card thumbnails for multi-item product orders
+function StackedImages({
+  items,
+  size = 40,
+}: {
+  items: SerializedOrder["items"];
+  size?: number;
+}) {
+  const max = 5;
+  const shown = items.slice(0, max);
+  const extra = items.length - max;
+  const hasExtra = extra > 0;
+  const totalSlots = shown.length + (hasExtra ? 1 : 0);
+  const offset = Math.floor(size * 0.35);
+  const containerWidth = size + (totalSlots - 1) * offset;
+
+  return (
+    <div
+      className="relative shrink-0"
+      style={{ width: `${containerWidth}px`, height: `${size}px` }}
+    >
+      {shown.map((item, i) => (
+        <div
+          key={item.id}
+          className="absolute rounded-lg border border-zinc-700 bg-zinc-800 overflow-hidden"
+          style={{
+            width: `${size}px`,
+            height: `${size}px`,
+            left: i * offset,
+            zIndex: shown.length - i,
+            boxShadow: "-2px 0 6px rgba(0,0,0,0.5)",
+          }}
+        >
+          {item.product?.imageUrl ? (
+            <Image
+              src={item.product.imageUrl}
+              alt={item.product.title}
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <ShoppingBag className="w-3 h-3 text-zinc-600" />
+            </div>
+          )}
+        </div>
+      ))}
+
+      {/* +N overflow indicator */}
+      {hasExtra && (
+        <div
+          className="absolute rounded-lg bg-zinc-900 border border-zinc-600 border-dashed flex flex-col items-center justify-center gap-0.5"
+          style={{
+            width: `${size}px`,
+            height: `${size}px`,
+            left: max * offset,
+            zIndex: 0,
+          }}
+        >
+          <span
+            className="text-zinc-500 font-bold leading-none"
+            style={{ fontSize: size * 0.2 }}
+          >
+            ···
+          </span>
+          <span
+            className="text-zinc-400 font-semibold leading-none"
+            style={{ fontSize: size * 0.22 }}
+          >
+            +{extra}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function OrdersTable({ orders, pagination }: OrdersTableProps) {
   const router = useRouter();
@@ -99,32 +183,23 @@ export function OrdersTable({ orders, pagination }: OrdersTableProps) {
   const handlePageChange = (newPage: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("page", newPage.toString());
-    startTransition(() => {
-      router.push(`${pathname}?${params.toString()}`);
-    });
+    startTransition(() => router.push(`${pathname}?${params.toString()}`));
   };
 
   const handleStatusUpdate = async (orderId: string, status: any) => {
     startTransition(async () => {
       const result = await updateOrderStatus(orderId, status);
-      if (result.success) {
-        toast.success("Order status updated");
-      } else {
-        toast.error(result.error || "Failed to update status");
-      }
+      if (result.success) toast.success("Order status updated");
+      else toast.error(result.error || "Failed to update status");
     });
   };
 
   const handleRefund = async () => {
     if (!selectedOrderId) return;
-
     startTransition(async () => {
       const result = await refundOrder(selectedOrderId);
-      if (result.success) {
-        toast.success("Order refunded successfully");
-      } else {
-        toast.error(result.error || "Failed to refund order");
-      }
+      if (result.success) toast.success("Order refunded successfully");
+      else toast.error(result.error || "Failed to refund order");
       setRefundDialogOpen(false);
       setSelectedOrderId(null);
     });
@@ -132,14 +207,10 @@ export function OrdersTable({ orders, pagination }: OrdersTableProps) {
 
   const handleDelete = async () => {
     if (!selectedOrderId) return;
-
     startTransition(async () => {
       const result = await deleteOrder(selectedOrderId);
-      if (result.success) {
-        toast.success("Order deleted successfully");
-      } else {
-        toast.error(result.error || "Failed to delete order");
-      }
+      if (result.success) toast.success("Order deleted successfully");
+      else toast.error(result.error || "Failed to delete order");
       setDeleteDialogOpen(false);
       setSelectedOrderId(null);
     });
@@ -177,23 +248,30 @@ export function OrdersTable({ orders, pagination }: OrdersTableProps) {
           </TableHeader>
           <TableBody>
             {orders.map((order) => {
+              const isProduct = order.type === "PRODUCT";
               const status = statusConfig[order.status] || statusConfig.PENDING;
               const StatusIcon = status.icon;
               const product = order.items[0]?.product ?? null;
+
+              const productTitle = isProduct
+                ? order.items.length === 1
+                  ? (order.items[0]?.product?.title ?? "Product Order")
+                  : `${order.items.length} items`
+                : (product?.title ?? null);
 
               return (
                 <TableRow
                   key={order.id}
                   className="border-zinc-800 hover:bg-zinc-800/50 transition-colors"
                 >
-                  {/* Order ID & Pack */}
+                  {/* Order ID */}
                   <TableCell>
                     <div>
                       <p className="font-mono text-xs text-zinc-500">
                         {order.id.slice(0, 8)}...
                       </p>
                       <p className="font-medium text-zinc-100">
-                        {order.packName}
+                        {isProduct ? "Direct Purchase" : order.packName}
                       </p>
                     </div>
                   </TableCell>
@@ -213,8 +291,10 @@ export function OrdersTable({ orders, pagination }: OrdersTableProps) {
                   {/* Product */}
                   <TableCell>
                     <div className="flex items-center gap-3">
-                      {product?.imageUrl ? (
-                        <div className="relative h-10 w-10 overflow-hidden rounded-lg bg-zinc-800 border border-zinc-700">
+                      {isProduct ? (
+                        <StackedImages items={order.items} size={40} />
+                      ) : product?.imageUrl ? (
+                        <div className="relative h-10 w-10 overflow-hidden rounded-lg bg-zinc-800 border border-zinc-700 shrink-0">
                           <Image
                             src={product.imageUrl}
                             alt={product.title}
@@ -223,12 +303,12 @@ export function OrdersTable({ orders, pagination }: OrdersTableProps) {
                           />
                         </div>
                       ) : (
-                        <div className="h-10 w-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center">
-                          <span className="text-xs text-zinc-500">?</span>
+                        <div className="h-10 w-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center shrink-0">
+                          <Sparkles className="h-4 w-4 text-zinc-600" />
                         </div>
                       )}
                       <span className="font-medium text-zinc-100 truncate max-w-[150px]">
-                        {product?.title ?? (
+                        {productTitle ?? (
                           <span className="text-zinc-500">Not assigned</span>
                         )}
                       </span>
@@ -237,11 +317,11 @@ export function OrdersTable({ orders, pagination }: OrdersTableProps) {
 
                   {/* Tier */}
                   <TableCell>
-                    {order.selectedTier ? (
+                    {!isProduct && order.selectedTier ? (
                       <span
                         className={cn(
                           "inline-flex items-center rounded-md px-2 py-1 text-xs font-medium border",
-                          getTierBadgeClass(order.selectedTier)
+                          getTierBadgeClass(order.selectedTier),
                         )}
                       >
                         {getTierConfig(order.selectedTier).label}
@@ -263,7 +343,7 @@ export function OrdersTable({ orders, pagination }: OrdersTableProps) {
                     <span
                       className={cn(
                         "inline-flex items-center rounded-md px-2 py-1 text-xs font-medium border",
-                        status.className
+                        status.className,
                       )}
                     >
                       <StatusIcon className="mr-1 h-3 w-3" />
@@ -396,9 +476,8 @@ export function OrdersTable({ orders, pagination }: OrdersTableProps) {
               Refund Order
             </AlertDialogTitle>
             <AlertDialogDescription className="text-zinc-400">
-              Are you sure you want to refund this order? This will mark the
-              order as refunded. You may need to process the actual refund in
-              Stripe separately.
+              Are you sure you want to refund this order? You may need to
+              process the actual refund in Stripe separately.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
