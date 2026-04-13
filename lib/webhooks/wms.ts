@@ -66,11 +66,11 @@ export async function triggerWMSShipmentWebhook(shipmentRequest: any) {
       customerEmail: shipmentRequest.user?.email,
       shippingAddress: {
         name: shipmentRequest.shippingName,
-        line1: shipmentRequest.shippingLine1,
-        line2: shipmentRequest.shippingLine2,
+        address1: shipmentRequest.shippingLine1, // ← was line1
+        address2: shipmentRequest.shippingLine2, // ← was line2
         city: shipmentRequest.shippingCity,
         state: shipmentRequest.shippingState,
-        postalCode: shipmentRequest.shippingPostal,
+        zip: shipmentRequest.shippingPostal, // ← was postalCode
         country: shipmentRequest.shippingCountry,
       },
       shippingMethod: shipmentRequest.shippingMethod,
@@ -132,11 +132,12 @@ export async function triggerWMSProductOrder(order: {
       customerEmail: order.customerEmail ?? null,
       totalAmount: (order.amount ?? 0) / 100,
       shippingAddress: {
-        line1: order.shippingLine1,
-        line2: order.shippingLine2,
+        name: order.customerName ?? "W-Pulls Customer",
+        address1: order.shippingLine1, // ← was line1
+        address2: order.shippingLine2, // ← was line2
         city: order.shippingCity,
         state: order.shippingState,
-        postal: order.shippingPostal,
+        zip: order.shippingPostal, // ← was postal
         country: order.shippingCountry ?? "US",
       },
       items: order.items.map((i) => ({
