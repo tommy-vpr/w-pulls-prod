@@ -13,7 +13,8 @@
     "skipLibCheck": true,
     "strict": true,
     "resolveJsonModule": true,
-    "noEmit": false
+    "noEmit": false,
+    "jsx": "react-jsx"
   },
   "include": ["workers/**/*", "lib/**/*", "types/**/*"],
   "exclude": ["node_modules", ".next", "app", "components"]
