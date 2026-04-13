@@ -143,9 +143,8 @@ export function CollectionGrid({
       {/* Sticky ship bar */}
       {selectedIds.size > 0 && (
         <div className="fixed bottom-0 left-0 right-0 lg:left-64 z-40 p-4 pointer-events-none">
-          <div className="max-w-lg mx-auto">
-            {/* Only the bar itself captures pointer events */}
-            <div className="flex items-center justify-between px-5 py-3 rounded-xl bg-zinc-900 border border-zinc-700 shadow-2xl pointer-events-auto">
+          <div className="max-w-lg mx-auto pointer-events-auto">
+            <div className="flex items-center justify-between px-5 py-3 rounded-xl bg-zinc-900 border border-zinc-700 shadow-2xl">
               <span className="text-sm text-zinc-400">
                 <span className="text-zinc-100 font-semibold">
                   {selectedIds.size}

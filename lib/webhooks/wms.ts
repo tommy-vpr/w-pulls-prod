@@ -1,12 +1,10 @@
-// Create or add to existing lib/webhooks/wms.ts
-
+// lib/webhooks/wms.ts
 import { Product } from "@prisma/client";
 
 export async function triggerWMSProductCreated(product: Product) {
   const wmsUrl = process.env.WMS_PRODUCT_WEBHOOK_URL;
   const secret = process.env.WMS_WEBHOOK_SECRET;
   if (!wmsUrl || !secret || !product.sku) return;
-
   await fetch(wmsUrl, {
     method: "POST",
     headers: {
@@ -38,7 +36,6 @@ export async function triggerWMSInventoryAdjusted(
   );
   const secret = process.env.WMS_WEBHOOK_SECRET;
   if (!wmsUrl || !secret) return;
-
   await fetch(wmsUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json", "x-api-key": secret },
@@ -55,7 +52,6 @@ export async function triggerWMSShipmentWebhook(shipmentRequest: any) {
   const wmsUrl = process.env.WMS_WEBHOOK_URL;
   const secret = process.env.WMS_WEBHOOK_SECRET;
   if (!wmsUrl || !secret) throw new Error("WMS webhook not configured");
-
   const res = await fetch(wmsUrl, {
     method: "POST",
     headers: {
@@ -89,7 +85,73 @@ export async function triggerWMSShipmentWebhook(shipmentRequest: any) {
       })),
     }),
   });
-
   if (!res.ok) throw new Error(`WMS webhook failed: ${res.status}`);
   console.log(`[WMS] ✅ Shipment webhook fired for ${shipmentRequest.id}`);
+}
+
+export async function triggerWMSProductOrder(order: {
+  id: string;
+  orderNumber: number;
+  customerName: string | null;
+  customerEmail: string | null;
+  amount: number;
+  shippingLine1: string | null;
+  shippingLine2: string | null;
+  shippingCity: string | null;
+  shippingState: string | null;
+  shippingPostal: string | null;
+  shippingCountry: string | null;
+  items: Array<{
+    product: {
+      sku: string | null;
+      title: string;
+      imageUrl: string | null;
+    } | null;
+    quantity: number;
+    unitPrice: any;
+  }>;
+}) {
+  const url = process.env.WMS_PRODUCT_ORDER_WEBHOOK_URL;
+  const secret = process.env.WMS_WEBHOOK_SECRET;
+
+  if (!url || !secret) {
+    console.warn("[WMS] Product order webhook not configured — skipping");
+    return;
+  }
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": secret,
+    },
+    body: JSON.stringify({
+      wpullsOrderId: order.id,
+      orderNumber: `WPULLS-PROD-${String(order.orderNumber)}`,
+      customerName: order.customerName ?? "W-Pulls Customer",
+      customerEmail: order.customerEmail ?? null,
+      totalAmount: (order.amount ?? 0) / 100,
+      shippingAddress: {
+        line1: order.shippingLine1,
+        line2: order.shippingLine2,
+        city: order.shippingCity,
+        state: order.shippingState,
+        postal: order.shippingPostal,
+        country: order.shippingCountry ?? "US",
+      },
+      items: order.items.map((i) => ({
+        sku: i.product?.sku ?? null,
+        title: i.product?.title ?? "Unknown",
+        imageUrl: i.product?.imageUrl ?? null,
+        quantity: i.quantity,
+        unitPrice: Number(i.unitPrice),
+      })),
+    }),
+  });
+
+  if (!res.ok) {
+    console.error(`[WMS] Product order webhook failed: ${res.status}`);
+  } else {
+    console.log(`[WMS] ✅ Product order sent to WMS: ${order.orderNumber}`);
+  }
 }
