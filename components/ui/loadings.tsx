@@ -29,7 +29,7 @@ const textSizeClasses = {
 
 export const ProductDetailLoading = () => {
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
+    <div className="space-y-6 max-w-6xl mx-auto">
       {/* Back Link */}
       <Skeleton className="h-4 w-32 bg-zinc-800" />
 
