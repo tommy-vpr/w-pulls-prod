@@ -60,4 +60,6 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 COPY --from=deps /app/node_modules/.prisma ./node_modules/.prisma
 
-CMD ["npx", "tsx", "workers/index.ts"]
+# Compile TS → JS
+RUN npm run worker:build
+CMD ["node", "dist/workers/index.js"]

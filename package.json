@@ -13,6 +13,7 @@
     "db:migrate": "prisma migrate dev",
     "seed": "tsx prisma/seed.ts",
     "worker": "tsx --watch workers/index.ts",
+    "worker:build": "tsc --project tsconfig.worker.json && tsc-alias -p tsconfig.worker.json",
     "reconcile": "tsx scripts/reconcile-wallets.ts",
     "cleanup:webhooks": "tsx scripts/cleanup-webhook-events.ts"
   },
