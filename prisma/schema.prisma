@@ -24,6 +24,7 @@ model User {
   // Stripe Connect for payouts
   stripeConnectedAccountId String?
   stripeConnectOnboardedAt DateTime?
+  stripeCustomerId String? @unique
 
   shipmentRequests    ShipmentRequest[]
 

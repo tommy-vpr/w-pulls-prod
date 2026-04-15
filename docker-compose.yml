@@ -70,5 +70,17 @@ services:
     restart: unless-stopped
     mem_limit: 800m
 
+  migrator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: migrator
+    environment:
+      - DATABASE_URL=${DIRECT_URL} # always use direct, never pooler for migrations
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: no # run once and exit
+
 volumes:
   redis-data:
