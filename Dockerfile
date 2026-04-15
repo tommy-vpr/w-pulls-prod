@@ -63,3 +63,13 @@ COPY --from=deps /app/node_modules/.prisma ./node_modules/.prisma
 # Compile TS → JS
 RUN npm run worker:build
 CMD ["node", "dist/workers/index.js"]
+
+# ---------- Migrator ----------
+FROM base AS migrator
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY prisma ./prisma/
+COPY --from=deps /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=deps /app/node_modules/@prisma ./node_modules/@prisma
+
+CMD ["npx", "prisma", "migrate", "deploy"]

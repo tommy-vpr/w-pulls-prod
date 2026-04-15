@@ -6,11 +6,13 @@ import { getPackById } from "@/lib/packs/config";
 import { auditService } from "@/lib/services/audit.service";
 import { auth } from "@/lib/auth";
 import { orderAbandonQueue } from "@/lib/queue/orderAbandon.queue";
+import { getOrCreateStripeCustomer } from "@/lib/stripe/customer";
 
 export async function POST(request: NextRequest) {
   try {
     const session = await auth();
 
+    // Auth check FIRST before anything else
     if (!session?.user?.id) {
       return NextResponse.json(
         {
@@ -21,6 +23,13 @@ export async function POST(request: NextRequest) {
         { status: 401 },
       );
     }
+
+    // Now safe to use session.user
+    const customerId = await getOrCreateStripeCustomer(
+      session.user.id,
+      session.user.email!,
+      session.user.name,
+    );
 
     const { packId } = await request.json();
     const pack = getPackById(packId);
@@ -63,16 +72,14 @@ export async function POST(request: NextRequest) {
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: "payment",
       payment_method_types: ["card"],
-      // customer_email: session.user.email ?? undefined,
-
-      // Enable automatic tax calculation
+      customer: customerId, // ← adds this
       automatic_tax: { enabled: true },
-
-      // Collect shipping address (required for tax calculation on physical goods)
+      payment_intent_data: {
+        setup_future_usage: "off_session", // ← adds this
+      },
       shipping_address_collection: {
         allowed_countries: ["US"],
       },
-
       line_items: [
         {
           quantity: 1,

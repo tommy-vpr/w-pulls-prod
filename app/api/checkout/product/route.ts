@@ -4,12 +4,22 @@ import prisma from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
 import { auth } from "@/lib/auth";
 import { orderAbandonQueue } from "@/lib/queue/orderAbandon.queue";
+import { getOrCreateStripeCustomer } from "@/lib/stripe/customer";
 
 export async function POST(request: NextRequest) {
   try {
     // Auth is optional — guests can checkout too
     const session = await auth();
     const userId = session?.user?.id ?? null;
+
+    // Get/create Stripe customer BEFORE creating order
+    const customerId = userId
+      ? await getOrCreateStripeCustomer(
+          userId,
+          session?.user?.email!,
+          session?.user?.name,
+        )
+      : null;
 
     const { items } = await request.json();
 
@@ -42,7 +52,7 @@ export async function POST(request: NextRequest) {
     const order = await prisma.order.create({
       data: {
         type: "PRODUCT",
-        userId: userId, // null for guests
+        userId: userId,
         amount: Math.round(amount * 100),
         subtotal: Math.round(amount * 100),
         status: "PENDING",
@@ -65,7 +75,7 @@ export async function POST(request: NextRequest) {
       "abandon-check",
       { orderId: order.id },
       {
-        delay: 1 * 60 * 1000,
+        delay: 30 * 60 * 1000,
         jobId: `abandon_${order.id}`,
       },
     );
@@ -74,14 +84,20 @@ export async function POST(request: NextRequest) {
       mode: "payment",
       automatic_tax: { enabled: true },
 
-      // Collect email for guests
-      ...(userId ? {} : { customer_email: undefined }),
-      customer_creation: userId ? undefined : "always",
+      ...(customerId
+        ? {
+            customer: customerId,
+            customer_update: {
+              shipping: "auto", // ← saves collected shipping address back to Customer
+              address: "auto", // ← saves billing address too
+            },
+            payment_intent_data: { setup_future_usage: "off_session" },
+          }
+        : {
+            customer_creation: "always",
+          }),
 
-      shipping_address_collection: {
-        allowed_countries: ["US"],
-      },
-
+      shipping_address_collection: { allowed_countries: ["US"] },
       shipping_options: [
         {
           shipping_rate_data: {
@@ -146,7 +162,7 @@ export async function POST(request: NextRequest) {
       metadata: {
         orderId: order.id,
         orderType: "PRODUCT",
-        userId: userId ?? "", // empty string for guests
+        userId: userId ?? "",
       },
     });
 
