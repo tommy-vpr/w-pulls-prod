@@ -73,6 +73,10 @@ export async function POST(request: NextRequest) {
       mode: "payment",
       payment_method_types: ["card"],
       customer: customerId, // ← adds this
+      customer_update: {
+        shipping: "auto",
+        address: "auto",
+      },
       automatic_tax: { enabled: true },
       payment_intent_data: {
         setup_future_usage: "off_session", // ← adds this
