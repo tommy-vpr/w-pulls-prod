@@ -1138,7 +1138,8 @@ export function PackSlashAnimation({
           <div className="flex gap-2 w-full">
             <button
               onClick={handleViewOrder}
-              className="cursor-pointer flex-1 py-2.5 text-sm font-semibold text-gray-400 bg-zinc-950 border border-gray-500 rounded-md hover:bg-gray-500 hover:text-white transition-all duration-300"
+              className="cursor-pointer flex-1 py-2.5 text-sm font-semibold text-gray-300 bg-zinc-950 border 
+              border-gray-300 rounded-md hover:bg-gray-300 hover:text-gray-800 transition-all duration-300"
             >
               View Order
             </button>
@@ -1153,12 +1154,25 @@ export function PackSlashAnimation({
           {buybackQuote && !buybackExpired && (
             <button
               onClick={() => setShowBuybackModal(true)}
-              className="cursor-pointer w-full py-2.5 text-sm font-semibold text-emerald-400 bg-zinc-950 border border-emerald-500/40 rounded-md hover:bg-emerald-500 hover:text-white transition-all duration-300 flex items-center justify-center gap-2"
+              className="cursor-pointer w-full py-2.5 text-sm font-semibold text-emerald-400 bg-zinc-950 
+              border border-emerald-500 rounded-md hover:bg-emerald-500 hover:text-white transition-all duration-300 flex items-center justify-center gap-2"
             >
               <Wallet className="w-4 h-4" />
               Sell Back for ${(buybackQuote.buybackAmount / 100).toFixed(2)}
             </button>
           )}
+
+          <div className="w-full">
+            <button
+              onClick={() => setShowShipModal(true)}
+              className="cursor-pointer w-full py-2.5 text-sm font-semibold text-gray-200 bg-zinc-950 border 
+              border-gray-300 rounded-md hover:bg-gray-300 hover:text-gray-800 transition-all duration-300 
+              flex items-center justify-center gap-2"
+            >
+              <Truck className="w-4 h-4" />
+              Ship to Me
+            </button>
+          </div>
 
           {isLoadingQuote && (
             <p className="text-zinc-500 text-xs">Loading buyback offer...</p>
@@ -1188,18 +1202,9 @@ export function PackSlashAnimation({
               </button>
               <button
                 onClick={handleOpenAnother}
-                className="cursor-pointer flex-1 py-2 bg-zinc-800 text-zinc-200 rounded font-medium text-sm hover:bg-zinc-700 transition-colors"
+                className="cursor-pointer flex-1 py-2 bg-gray-200 text-gray-700 rounded font-medium text-sm hover:bg-zinc-700 transition-colors"
               >
                 Open Another
-              </button>
-            </div>
-            <div className="w-full">
-              <button
-                onClick={() => setShowShipModal(true)}
-                className="cursor-pointer w-full py-2.5 text-sm font-semibold text-cyan-400 bg-zinc-950 border border-cyan-500/40 rounded-md hover:bg-cyan-500 hover:text-white transition-all duration-300 flex items-center justify-center gap-2"
-              >
-                <Truck className="w-4 h-4" />
-                Ship to Me
               </button>
             </div>
           </div>

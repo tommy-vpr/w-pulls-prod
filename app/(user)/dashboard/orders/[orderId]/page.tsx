@@ -150,6 +150,10 @@ function PackOrderDetail({
                   {status.label}
                 </span>
               </div>
+              {/* Order number */}
+              <p className="text-emerald-500 mb-1">
+                Order #{order.orderNumber}
+              </p>
               <div className="flex items-center gap-2">
                 <p className="text-zinc-500 font-mono text-sm">{order.id}</p>
                 <CopyButton text={order.id} />
