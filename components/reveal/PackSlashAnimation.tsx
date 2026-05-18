@@ -573,7 +573,6 @@ export function PackSlashAnimation({
 
   // Sound Effect Tearing
   const tearSoundRef = useRef<HTMLAudioElement | null>(null);
-  const winningSoundRef = useRef<HTMLAudioElement | null>(null);
 
   const [revealedProduct, setRevealedProduct] =
     useState<SerializedProduct | null>(null);
@@ -618,10 +617,6 @@ export function PackSlashAnimation({
     tearSoundRef.current = new Audio("/audio/tearing-effect.mp3");
     tearSoundRef.current.preload = "auto";
     tearSoundRef.current.volume = 0.5;
-
-    winningSoundRef.current = new Audio("/audio/winning-sound.mp3");
-    winningSoundRef.current.preload = "auto";
-    winningSoundRef.current.volume = 0.5;
   }, []);
 
   // Play when stage becomes "tearing"
@@ -629,16 +624,6 @@ export function PackSlashAnimation({
     if (stage === "tearing" && tearSoundRef.current) {
       tearSoundRef.current.currentTime = 0;
       tearSoundRef.current.play().catch((err) => {
-        console.warn("Audio play failed:", err);
-      });
-    }
-  }, [stage]);
-
-  // Play winning sound when stage becomes "revealing"
-  useEffect(() => {
-    if (stage === "done" && winningSoundRef.current) {
-      winningSoundRef.current.currentTime = 0;
-      winningSoundRef.current.play().catch((err) => {
         console.warn("Audio play failed:", err);
       });
     }
