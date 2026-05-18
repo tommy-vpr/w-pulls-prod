@@ -64,6 +64,7 @@ const worker = new Worker(
     const selectedProduct = pickProductWithBump({
       products,
       rolledTier,
+      packPriceCents: pack.price,
     });
 
     if (!selectedProduct) {

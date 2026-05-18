@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     event = stripe.webhooks.constructEvent(
       body,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      process.env.STRIPE_WEBHOOK_SECRET!,
     );
   } catch (error) {
     console.error("Webhook signature verification failed:", error);
@@ -96,6 +96,7 @@ export async function POST(request: NextRequest) {
   const selectedProduct = pickProductWithBump({
     products,
     rolledTier,
+    packPriceCents: pack.price,
   });
 
   if (!selectedProduct) {
@@ -163,7 +164,7 @@ export async function POST(request: NextRequest) {
     selectedProduct.id,
     selectedProduct.inventory,
     selectedProduct.inventory - 1,
-    `Pack purchase: ${order.packName ?? "Unknown Pack"}`
+    `Pack purchase: ${order.packName ?? "Unknown Pack"}`,
   );
 
   return NextResponse.json({ received: true });
