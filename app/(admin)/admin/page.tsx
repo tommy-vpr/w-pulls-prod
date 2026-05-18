@@ -26,6 +26,7 @@ export default async function PacksAdminPage() {
       odds: pack.odds,
       minTier: pack.minTier,
       allowedTiers: pack.allowedTiers,
+      packPriceCents: pack.price,
       products,
     });
 

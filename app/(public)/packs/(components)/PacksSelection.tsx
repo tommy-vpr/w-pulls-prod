@@ -1,12 +1,10 @@
 "use client";
 
 import { useEffect, useState, useRef, useMemo } from "react";
-import { Carousel3D } from "@/components/layout/Carousel3D";
 import { PackCard } from "@/components/packs/pack-card";
 import { PACK_CONFIGS } from "@/lib/packs/config";
-import { HudFrame } from "@/components/ui/HudFrame";
-import { TierBreakdownChart } from "./Tierbreakdownchart";
 import { PackOddsBreakdown } from "./Packoddsbreakdown";
+import { PackOddsTable } from "./Packoddstable";
 
 export const metadata = {
   title: "Open Packs",
@@ -556,10 +554,10 @@ export default function PacksSelection() {
                 SELECT YOUR PACK
               </span>
             </h1>
-            <p className="font-rajdhani text-lg md:text-xl text-cyan-100/60 max-w-2xl mx-auto">
+            {/* <p className="font-rajdhani text-lg md:text-xl text-cyan-100/60 max-w-2xl mx-auto">
               Initialize card revelation sequence. Higher tier packs unlock
               enhanced probability matrices.
-            </p>
+            </p> */}
           </div>
         </section>
 
@@ -576,7 +574,7 @@ export default function PacksSelection() {
             </div>
 
             {/* Pack cards grid */}
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 items-stretch">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 items-stretch">
               {PACK_CONFIGS.map((pack, index) => (
                 <div
                   key={pack.id}
@@ -605,7 +603,7 @@ export default function PacksSelection() {
 
         <section className="w-full max-w-6xl mx-auto">
           {/* <TierBreakdownChart odds={PACK_CONFIGS[0].odds} /> */}
-          <PackOddsBreakdown />
+          <PackOddsTable />
         </section>
 
         {/* Bottom info bar */}

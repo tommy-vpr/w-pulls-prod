@@ -6,6 +6,7 @@ import { PackCard } from "@/components/packs/pack-card";
 import { PACK_CONFIGS } from "@/lib/packs/config";
 import { HudFrame } from "@/components/ui/HudFrame";
 import { NewsletterSignup } from "@/components/ui/NewsletterSignup";
+import { PackOddsTable } from "./packs/(components)/Packoddstable";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // HOLOGRAPHIC HUB UI - Futuristic Trading Card Interface
@@ -684,28 +685,21 @@ export default function HolographicHub() {
 
           {/* Title section */}
           <div className="text-center px-6 -mt-8 relative z-10 mt-8">
-            {/* <h1 className="font-orbitron text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
-              <span className="holo-text">SELECT YOUR PACK</span>
-            </h1> */}
             <h1 className="font-orbitron text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
               <span
                 className="text-cyan-400"
                 style={{
                   textShadow: `
-        0 0 10px rgba(0, 255, 255, 0.7),
-        0 0 20px rgba(0, 255, 255, 0.5),
-        0 0 40px rgba(0, 255, 255, 0.3),
-        0 0 80px rgba(0, 255, 255, 0.2)
-      `,
+                    0 0 10px rgba(0, 255, 255, 0.7),
+                    0 0 20px rgba(0, 255, 255, 0.5),
+                    0 0 40px rgba(0, 255, 255, 0.3),
+                    0 0 80px rgba(0, 255, 255, 0.2)
+                  `,
                 }}
               >
                 SELECT YOUR PACK
               </span>
             </h1>
-            <p className="font-rajdhani text-lg md:text-xl text-cyan-100/60 max-w-2xl mx-auto">
-              Initialize card revelation sequence. Higher tier packs unlock
-              enhanced probability matrices.
-            </p>
           </div>
         </section>
 
@@ -722,7 +716,7 @@ export default function HolographicHub() {
             </div>
 
             {/* Pack cards grid */}
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 items-stretch">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 items-stretch">
               {PACK_CONFIGS.map((pack, index) => (
                 <div
                   key={pack.id}
@@ -746,44 +740,49 @@ export default function HolographicHub() {
                 </div>
               ))}
             </div>
+
+            {/* Pull rates */}
+            <div className="mt-12">
+              <PackOddsTable />
+            </div>
+          </div>
+
+          {/* Bottom info bar */}
+          <div className="relative px-6 py-8">
+            <div className="max-w-6xl mx-auto">
+              <HoloPanel glow={false} className="px-6 py-4">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="font-rajdhani text-sm text-gray-300">
+                      System operational • All transactions secured
+                    </span>
+                  </div>
+                  <p className="font-rajdhani text-sm text-gray-400 text-center">
+                    All sales are final. Products are randomly selected based on
+                    pack probability matrices.
+                  </p>
+                </div>
+              </HoloPanel>
+
+              <div className="flex items-center gap-4 mb-8 mt-16">
+                <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent" />
+                <h2 className="font-orbitron text-sm uppercase tracking-[0.3em] text-cyan-400">
+                  Stay Updated!
+                </h2>
+                <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent" />
+              </div>
+
+              <div className="mx-auto w-full max-w-xl flex justify-center">
+                <NewsletterSignup
+                  source="homepage"
+                  variant="card"
+                  accentColor="cyan"
+                />
+              </div>
+            </div>
           </div>
         </section>
-
-        {/* Bottom info bar */}
-        <footer className="relative px-6 py-8">
-          <div className="max-w-6xl mx-auto">
-            <HoloPanel glow={false} className="px-6 py-4">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-2">
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="font-rajdhani text-sm text-gray-300">
-                    System operational • All transactions secured
-                  </span>
-                </div>
-                <p className="font-rajdhani text-sm text-gray-400 text-center">
-                  All sales are final. Products are randomly selected based on
-                  pack probability matrices.
-                </p>
-              </div>
-            </HoloPanel>
-
-            <div className="flex items-center gap-4 mb-8 mt-16">
-              <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent" />
-              <h2 className="font-orbitron text-sm uppercase tracking-[0.3em] text-cyan-400">
-                Stay Updated!
-              </h2>
-              <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent" />
-            </div>
-
-            <div className="mx-auto w-full max-w-xl flex justify-center">
-              <NewsletterSignup
-                source="homepage"
-                variant="card"
-                accentColor="cyan"
-              />
-            </div>
-          </div>
-        </footer>
       </div>
 
       {/* Fade in animation keyframe */}

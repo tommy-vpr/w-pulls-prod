@@ -4,6 +4,7 @@ import { useState, useRef, useMemo } from "react";
 import { Loader2, Crown, Flame, Star, Gem, Zap } from "lucide-react";
 import { PackConfig } from "@/lib/packs/config";
 import { cn } from "@/lib/utils";
+import { TIER_ORDER } from "@/lib/packs/ev";
 import { PurchaseButton } from "./purchase-button";
 import { useRouter } from "next/navigation";
 
@@ -21,15 +22,23 @@ const packStyles: Record<
     borderColor: string;
   }
 > = {
+  pocket: {
+    gradient:
+      "linear-gradient(135deg, rgba(96, 165, 250, 0.15) 0%, rgba(59, 130, 246, 0.25) 100%)",
+    glowColor: "rgba(96, 165, 250, 0.3)",
+    icon: <Zap className="h-8 w-8" />,
+    accentColor: "#60a5fa",
+    borderColor: "rgba(96, 165, 250, 0.4)",
+  },
   starter: {
     gradient:
-      "linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(109, 40, 217, 0.3) 100%)",
-    glowColor: "rgba(139, 92, 246, 0.4)",
+      "linear-gradient(135deg, rgba(52, 211, 153, 0.15) 0%, rgba(16, 185, 129, 0.25) 100%)",
+    glowColor: "rgba(52, 211, 153, 0.3)",
     icon: <Flame className="h-8 w-8" />,
-    accentColor: "#a78bfa",
-    borderColor: "rgba(139, 92, 246, 0.4)",
+    accentColor: "#34d399",
+    borderColor: "rgba(52, 211, 153, 0.4)",
   },
-  premium: {
+  standard: {
     gradient:
       "linear-gradient(135deg, rgba(0, 255, 255, 0.15) 0%, rgba(0, 200, 255, 0.25) 100%)",
     glowColor: "rgba(0, 255, 255, 0.3)",
@@ -37,21 +46,21 @@ const packStyles: Record<
     accentColor: "#00ffff",
     borderColor: "rgba(0, 255, 255, 0.4)",
   },
-  elite: {
+  premium: {
     gradient:
-      "linear-gradient(135deg, rgba(200, 200, 220, 0.15) 0%, rgba(150, 150, 180, 0.25) 100%)",
-    glowColor: "rgba(200, 200, 220, 0.3)",
+      "linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(126, 34, 206, 0.3) 100%)",
+    glowColor: "rgba(168, 85, 247, 0.4)",
     icon: <Star className="h-8 w-8" />,
-    accentColor: "#c0c0c0",
-    borderColor: "rgba(200, 200, 220, 0.4)",
+    accentColor: "#c084fc",
+    borderColor: "rgba(168, 85, 247, 0.5)",
   },
-  legendary: {
+  whale: {
     gradient:
-      "linear-gradient(135deg, rgba(255, 200, 0, 0.2) 0%, rgba(255, 150, 0, 0.3) 100%)",
-    glowColor: "rgba(255, 200, 0, 0.4)",
+      "linear-gradient(135deg, rgba(255, 215, 0, 0.22) 0%, rgba(232, 121, 249, 0.25) 50%, rgba(34, 211, 238, 0.2) 100%)",
+    glowColor: "rgba(255, 215, 0, 0.45)",
     icon: <Crown className="h-8 w-8" />,
     accentColor: "#ffd700",
-    borderColor: "rgba(255, 200, 0, 0.5)",
+    borderColor: "rgba(255, 215, 0, 0.55)",
   },
 };
 
@@ -197,13 +206,17 @@ export function PackCard({ pack }: PackCardProps) {
     [],
   );
 
+  const rarePlusChance = TIER_ORDER.filter(
+    (t) => t !== "COMMON" && t !== "UNCOMMON",
+  ).reduce((sum, t) => sum + (pack.odds[t] ?? 0), 0);
+
   return (
     <div className="flex flex-col gap-3 h-full">
       {/* Card */}
       <div
         ref={cardRef}
         className={cn(
-          "relative rounded-xl overflow-hidden cursor-pointer transition-all duration-300 ease-out flex-1",
+          "relative aspect-square rounded-xl overflow-hidden cursor-pointer transition-all duration-300 ease-out flex-1",
           isHovering && "scale-[1.02]",
         )}
         style={{
@@ -290,27 +303,11 @@ export function PackCard({ pack }: PackCardProps) {
             ))}
           </div>
 
-          {/* Scan line effect */}
-          {/* <div
-            className={cn(
-              "absolute inset-0 pointer-events-none overflow-hidden transition-opacity duration-300",
-              isHovering ? "opacity-100" : "opacity-0"
-            )}
-          >
-            <div
-              className="absolute left-0 right-0 h-px"
-              style={{
-                background: `linear-gradient(90deg, transparent, ${style.accentColor}, transparent)`,
-                animation: "scan-down 2s linear infinite",
-              }}
-            />
-          </div> */}
-
           {/* Content */}
           <div className="relative p-6 flex flex-col items-center text-center h-full">
             {/* Top Badge */}
             <div
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-4"
+              className="mt-6 lg:mt-8 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-4"
               style={{
                 background: `linear-gradient(135deg, ${style.accentColor}20, ${style.accentColor}10)`,
                 border: `1px solid ${style.accentColor}40`,
@@ -318,13 +315,13 @@ export function PackCard({ pack }: PackCardProps) {
                 boxShadow: `0 0 10px ${style.accentColor}30`,
               }}
             >
-              {pack.id === "legendary" && <Crown className="w-3 h-3" />}
+              {pack.id === "whale" && <Crown className="w-3 h-3" />}
               {pack.id.toUpperCase()}
             </div>
 
             {/* Icon */}
             <div
-              className="relative w-16 h-16 rounded-xl flex items-center justify-center mb-4"
+              className="relative w-14 h-14 rounded-xl flex items-center justify-center mb-4"
               style={{
                 background: style.gradient,
                 border: `1px solid ${style.borderColor}`,
@@ -353,37 +350,19 @@ export function PackCard({ pack }: PackCardProps) {
               {pack.displayPrice}
             </div>
 
-            {/* Description */}
-            <p className="text-sm text-slate-400 mb-4 leading-relaxed flex-1">
-              {pack.description}
-            </p>
-
             {/* Odds Bar */}
             <div className="w-full mt-auto">
               <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-slate-500 mb-2">
                 <span>Rare+ Chance</span>
                 <span style={{ color: style.accentColor }}>
-                  {(
-                    pack.odds.RARE +
-                    pack.odds.ULTRA_RARE +
-                    pack.odds.SECRET_RARE +
-                    pack.odds.BANGER +
-                    pack.odds.GRAIL
-                  ).toFixed(1)}
-                  %
+                  {rarePlusChance.toFixed(1)}%
                 </span>
               </div>
               <div className="h-1.5 rounded-full bg-slate-800/50 overflow-hidden">
                 <div
                   className="h-full rounded-full transition-all duration-500"
                   style={{
-                    width: `${
-                      pack.odds.RARE +
-                      pack.odds.ULTRA_RARE +
-                      pack.odds.SECRET_RARE +
-                      pack.odds.BANGER +
-                      pack.odds.GRAIL
-                    }%`,
+                    width: `${rarePlusChance}%`,
                     background: `linear-gradient(90deg, ${style.accentColor}, ${style.glowColor})`,
                     boxShadow: `0 0 10px ${style.glowColor}`,
                   }}
