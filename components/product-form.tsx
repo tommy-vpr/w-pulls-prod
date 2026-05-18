@@ -18,6 +18,9 @@ import { ActionResponse } from "@/types/product";
 import Link from "next/link";
 import { SerializedProduct } from "@/types/product";
 import { LabelInputContainer } from "./labels/LabelInputContainer";
+import { BandEligibilityChart } from "@/components/band-eligibility-chart";
+
+import { ProductBandEligibility } from "./product-band-eligibility";
 
 interface ProductFormProps {
   product?: SerializedProduct | null;
@@ -33,6 +36,19 @@ export function ProductForm({ product, mode }: ProductFormProps) {
   const [isActive, setIsActive] = useState(product?.isActive ?? true);
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [globalError, setGlobalError] = useState<string | null>(null);
+
+  // Controlled state for the band-eligibility chart
+  const [priceInput, setPriceInput] = useState<string>(
+    product?.price ? String(Number(product.price)) : "",
+  );
+  const [tierInput, setTierInput] = useState<ProductTier>(
+    (product?.tier as ProductTier) ?? "COMMON",
+  );
+
+  const priceNumber =
+    priceInput && !isNaN(parseFloat(priceInput))
+      ? parseFloat(priceInput)
+      : null;
 
   const tierLabels: Record<ProductTier, string> = {
     COMMON: "Common",
@@ -232,6 +248,22 @@ export function ProductForm({ product, mode }: ProductFormProps) {
               )}
             </div>
           </div>
+
+          {/* Band Eligibility */}
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
+            <div className="px-6 py-4 border-b border-zinc-800">
+              <h2 className="text-lg font-semibold text-zinc-100">
+                Pack Eligibility
+              </h2>
+              <p className="text-sm text-zinc-500">
+                Which packs this product will appear in based on its price and
+                tier. Cells in green = match. Empty cells = out of band.
+              </p>
+            </div>
+            <div className="p-6">
+              <BandEligibilityChart price={priceNumber} tier={tierInput} />
+            </div>
+          </div>
         </div>
 
         {/* Sidebar */}
@@ -282,7 +314,8 @@ export function ProductForm({ product, mode }: ProductFormProps) {
                     type="number"
                     step="0.01"
                     min="0"
-                    defaultValue={product?.price ? Number(product.price) : ""}
+                    value={priceInput}
+                    onChange={(e) => setPriceInput(e.target.value)}
                     placeholder="0.00"
                     className="pl-7 bg-zinc-800/50 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-violet-500/50"
                     required
@@ -386,7 +419,8 @@ export function ProductForm({ product, mode }: ProductFormProps) {
                 <select
                   id="tier"
                   name="tier"
-                  defaultValue={product?.tier || "COMMON"}
+                  value={tierInput}
+                  onChange={(e) => setTierInput(e.target.value as ProductTier)}
                   required
                   className="flex h-9 w-full rounded-md border border-zinc-700 bg-zinc-800/50 px-3 py-1 text-sm text-zinc-100 shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-violet-500/50"
                 >
