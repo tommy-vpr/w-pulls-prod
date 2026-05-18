@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { X, Truck, Loader2, Package } from "lucide-react";
 import { SHIPPING_RATES, type ShippingMethod } from "@/lib/shipments/config";
 
@@ -37,7 +36,6 @@ export function ShipModal({
   items,
   defaultAddress,
 }: ShipModalProps) {
-  const router = useRouter();
   const [shippingMethod, setShippingMethod] =
     useState<ShippingMethod>("STANDARD");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -114,14 +112,6 @@ export function ShipModal({
         return;
       }
 
-      // Free shipping — redirect to shipments dashboard
-      if (checkoutData.free) {
-        router.push(checkoutData.redirectUrl);
-        onClose();
-        return;
-      }
-
-      // Paid — redirect to Stripe
       if (checkoutData.url) {
         window.location.href = checkoutData.url;
       }
@@ -330,11 +320,8 @@ export function ShipModal({
                   <span
                     className="text-sm font-mono font-semibold"
                     style={{
-                      color: rate.amount === 0 ? "#4ade80" : "#00ffff",
-                      textShadow:
-                        rate.amount === 0
-                          ? "0 0 6px rgba(74,222,128,.4)"
-                          : "0 0 6px rgba(0,255,255,.4)",
+                      color: "#00ffff",
+                      textShadow: "0 0 6px rgba(0,255,255,.4)",
                     }}
                   >
                     {rate.display}
@@ -370,11 +357,6 @@ export function ShipModal({
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
                 Processing...
-              </>
-            ) : selectedRate.amount === 0 ? (
-              <>
-                <Truck className="w-4 h-4" />
-                Confirm Free Shipping
               </>
             ) : (
               <>
