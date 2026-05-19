@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import prisma from "@/lib/prisma";
-import { getPackById } from "@/lib/packs/config";
+import { packById } from "@/lib/packs/config";
 import { auditService } from "@/lib/services/audit.service";
 import { auth } from "@/lib/auth";
 import { orderAbandonQueue } from "@/lib/queue/orderAbandon.queue";
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     );
 
     const { packId } = await request.json();
-    const pack = getPackById(packId);
+    const pack = packById(packId);
 
     if (!pack) {
       return NextResponse.json(

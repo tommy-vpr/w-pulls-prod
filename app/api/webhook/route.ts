@@ -4,7 +4,7 @@ import { stripe } from "@/lib/stripe";
 import prisma from "@/lib/prisma";
 import { auditService } from "@/lib/services/audit.service";
 import { rollTier, pickProductWithBump } from "@/lib/packs/ev";
-import { getPackById } from "@/lib/packs/config";
+import { packById } from "@/lib/packs/config";
 import { claimWebhookEvent } from "@/lib/utils/webhook-idempotency";
 
 export async function POST(request: NextRequest) {
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true });
   }
 
-  const pack = getPackById(packId);
+  const pack = packById(packId);
   if (!pack) {
     console.error("Invalid pack ID:", packId);
     return NextResponse.json({ received: true });
