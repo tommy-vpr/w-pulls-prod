@@ -21,7 +21,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Load shipment request
     const shipmentRequest = await prisma.shipmentRequest.findUnique({
       where: { id: shipmentRequestId },
       include: {
@@ -40,12 +39,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Must belong to this user
     if (shipmentRequest.userId !== session.user.id) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // Must be in PENDING status
     if (shipmentRequest.status !== "PENDING") {
       return NextResponse.json(
         { error: `Shipment is already ${shipmentRequest.status}` },
@@ -58,73 +55,16 @@ export async function POST(request: NextRequest) {
     const rate = SHIPPING_RATES[method];
     const amount = shipmentRequest.shippingFeeAmount;
 
-    // For free standard shipping — skip Stripe, mark directly as PAID and fire WMS
-    if (amount === 0) {
-      const updated = await prisma.shipmentRequest.update({
-        where: { id: shipmentRequestId },
-        data: { status: "PAID", paidAt: new Date() },
-        include: {
-          items: { include: { orderItem: true, product: true } },
-          user: true,
-        },
-      });
-
-      try {
-        const { triggerWMSShipmentWebhook } =
-          await import("@/lib/webhooks/wms");
-        await triggerWMSShipmentWebhook(updated);
-        await prisma.shipmentRequest.update({
-          where: { id: shipmentRequestId },
-          data: { status: "SENT_TO_WMS" },
-        });
-
-        if (updated.user?.email) {
-          const { sendShipmentConfirmedEmail } =
-            await import("@/lib/emails/send-shipment-confirmed");
-          sendShipmentConfirmedEmail({
-            to: updated.user.email,
-            customerName: updated.user.name ?? "Customer",
-            shipmentRequestId: updated.id,
-            shippingMethod: updated.shippingMethod,
-            shippingFeeAmount: updated.shippingFeeAmount,
-            shippingAddress: {
-              name: updated.shippingName,
-              line1: updated.shippingLine1,
-              line2: updated.shippingLine2,
-              city: updated.shippingCity,
-              state: updated.shippingState,
-              postal: updated.shippingPostal,
-              country: updated.shippingCountry,
-            },
-            items: updated.items.map((i: any) => ({
-              title: i.product.title,
-              imageUrl: i.product.imageUrl,
-              tier: i.product.tier,
-            })),
-          }).catch((err) =>
-            console.error("[Email] Confirmed email failed:", err),
-          );
-        }
-      } catch (err) {
-        console.error("[Shipments] WMS webhook failed:", err);
-        await prisma.shipmentRequest.update({
-          where: { id: shipmentRequestId },
-          data: { status: "FAILED" },
-        });
-        return NextResponse.json(
-          { error: "Failed to send to WMS" },
-          { status: 500 },
-        );
-      }
-
-      return NextResponse.json({
-        success: true,
-        free: true,
-        redirectUrl: `/dashboard/shipments?success=true`,
-      });
+    if (!amount || amount <= 0) {
+      // Defensive: should never happen with the new paid-only config,
+      // but explicitly reject rather than silently shipping for free.
+      return NextResponse.json(
+        { error: "Invalid shipping fee" },
+        { status: 400 },
+      );
     }
 
-    // Build description from items
+    // Build a clean line-item description
     const itemCount = shipmentRequest.items.length;
     const firstItem = shipmentRequest.items[0]?.product?.title ?? "Card";
     const description =
@@ -132,7 +72,7 @@ export async function POST(request: NextRequest) {
         ? firstItem
         : `${firstItem} + ${itemCount - 1} more card${itemCount - 1 > 1 ? "s" : ""}`;
 
-    // Create Stripe checkout session for paid shipping
+    // Create Stripe checkout session — WMS gets notified later, via Stripe webhook
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: "payment",
       line_items: [
@@ -157,7 +97,6 @@ export async function POST(request: NextRequest) {
       customer_email: session.user.email ?? undefined,
     });
 
-    // Store Stripe session ID
     await prisma.shipmentRequest.update({
       where: { id: shipmentRequestId },
       data: { stripeSessionId: checkoutSession.id },
