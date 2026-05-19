@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useMemo } from "react";
-import { Loader2, Crown, Flame, Star, Gem, Zap } from "lucide-react";
+import { Loader2, Crown, Flame, Star, Gem, Zap, Sparkles } from "lucide-react";
 import { PackConfig } from "@/lib/packs/config";
 import { cn } from "@/lib/utils";
 import { TIER_ORDER } from "@/lib/packs/ev";
@@ -22,48 +22,47 @@ const packStyles: Record<
     borderColor: string;
   }
 > = {
-  pocket: {
+  silver: {
     gradient:
-      "linear-gradient(135deg, rgba(96, 165, 250, 0.15) 0%, rgba(59, 130, 246, 0.25) 100%)",
-    glowColor: "rgba(96, 165, 250, 0.3)",
+      "linear-gradient(135deg, rgba(203, 213, 225, 0.15) 0%, rgba(148, 163, 184, 0.25) 100%)",
+    glowColor: "rgba(203, 213, 225, 0.35)",
     icon: <Zap className="h-8 w-8" />,
-    accentColor: "#60a5fa",
-    borderColor: "rgba(96, 165, 250, 0.4)",
+    accentColor: "#cbd5e1",
+    borderColor: "rgba(203, 213, 225, 0.4)",
   },
-  starter: {
+  gold: {
     gradient:
-      "linear-gradient(135deg, rgba(52, 211, 153, 0.15) 0%, rgba(16, 185, 129, 0.25) 100%)",
-    glowColor: "rgba(52, 211, 153, 0.3)",
+      "linear-gradient(135deg, rgba(251, 191, 36, 0.18) 0%, rgba(217, 119, 6, 0.3) 100%)",
+    glowColor: "rgba(251, 191, 36, 0.4)",
     icon: <Flame className="h-8 w-8" />,
-    accentColor: "#34d399",
-    borderColor: "rgba(52, 211, 153, 0.4)",
+    accentColor: "#fbbf24",
+    borderColor: "rgba(251, 191, 36, 0.45)",
   },
-  standard: {
+  platinum: {
     gradient:
-      "linear-gradient(135deg, rgba(0, 255, 255, 0.15) 0%, rgba(0, 200, 255, 0.25) 100%)",
+      "linear-gradient(135deg, rgba(6,12,24,1) 0%, rgba(14,165,233,0.22) 45%, rgba(125,211,252,0.38) 100%)",
+    glowColor: "rgba(56,189,248,0.48)",
+    icon: <Sparkles className="h-8 w-8" />,
+    accentColor: "#7dd3fc",
+    borderColor: "rgba(125,211,252,0.42)",
+  },
+  diamond: {
+    gradient:
+      "linear-gradient(135deg, rgba(0, 255, 255, 0.15) 0%, rgba(0, 200, 255, 0.35) 100%)",
     glowColor: "rgba(0, 255, 255, 0.3)",
     icon: <Gem className="h-8 w-8" />,
     accentColor: "#00ffff",
     borderColor: "rgba(0, 255, 255, 0.4)",
   },
-  premium: {
+  "black-label": {
     gradient:
       "linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(126, 34, 206, 0.3) 100%)",
     glowColor: "rgba(168, 85, 247, 0.4)",
-    icon: <Star className="h-8 w-8" />,
+    icon: <Crown className="h-8 w-8" />,
     accentColor: "#c084fc",
     borderColor: "rgba(168, 85, 247, 0.5)",
   },
-  whale: {
-    gradient:
-      "linear-gradient(135deg, rgba(255, 215, 0, 0.22) 0%, rgba(232, 121, 249, 0.25) 50%, rgba(34, 211, 238, 0.2) 100%)",
-    glowColor: "rgba(255, 215, 0, 0.45)",
-    icon: <Crown className="h-8 w-8" />,
-    accentColor: "#ffd700",
-    borderColor: "rgba(255, 215, 0, 0.55)",
-  },
 };
-
 // Corner brackets component
 function HoloBrackets({ color = "cyan-400" }: { color?: string }) {
   return (

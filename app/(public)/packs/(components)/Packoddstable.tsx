@@ -64,15 +64,11 @@ function formatMoney(amount: number): string {
   if (amount >= 1000) {
     return `$${amount.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
   }
-  if (amount >= 100) {
-    return `$${amount.toFixed(0)}`;
-  }
   return `$${amount.toFixed(0)}`;
 }
 
 function formatProbability(percentage: number): string {
   if (percentage >= 1) return `${percentage.toFixed(0)}%`;
-  if (percentage >= 0.1) return `${percentage.toFixed(1)}%`;
   return `1 in ${Math.round(100 / percentage).toLocaleString("en-US")}`;
 }
 
@@ -208,11 +204,16 @@ export function PackOddsTable({ packs = PACK_CONFIGS }: PackOddsTableProps) {
                 key={pack.id}
                 className="px-3 py-2.5 border-l border-slate-700/30 bg-slate-800/40"
               >
-                <span
-                  className={`${TIER_COLORS[topTier].text} font-mono text-sm`}
-                >
-                  {formatMoney(topBand.max)}
-                </span>
+                <div className="flex items-baseline gap-1.5">
+                  <span
+                    className={`${TIER_COLORS[topTier].text} font-mono text-sm font-semibold`}
+                  >
+                    {formatMoney(topBand.max)}
+                  </span>
+                  <span className="text-[10px] uppercase tracking-wider text-slate-500">
+                    {TIER_LABELS[topTier]}
+                  </span>
+                </div>
               </div>
             );
           })}

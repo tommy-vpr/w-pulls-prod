@@ -8,143 +8,110 @@ export interface PackConfig {
   description: string;
   minTier: ProductTier;
   allowedTiers: ProductTier[];
+  /** Probabilities sum to 100. SECRET_RARE stays at 0 — unused in V3. */
   odds: Record<ProductTier, number>;
 }
 
 /**
- * Zero-fill so every PackConfig.odds has every ProductTier key.
- * Lets us read `odds[tier]` safely without optional chaining.
+ * V3 flat odds — identical distribution across every pack.
+ *
+ * Tier → V3 outcome mapping:
+ *   COMMON      → H1  (50–75%)
+ *   UNCOMMON    → H2  (75–100%)
+ *   RARE        → H3  (100–200%)
+ *   ULTRA_RARE  → H4  (200–400%)
+ *   SECRET_RARE → unused, kept in enum for backward compat
+ *   BANGER      → H5  (400–800%)
+ *   GRAIL       → H6  (1000–5000%, i.e. 10×–50× pack price)
+ *
+ * V3 doc: H1=40.5%, H2=30.5%, H3=25.3%, H4=3.0%, H5=0.6%, H6=0.1%
  */
-const ZERO_ODDS: Record<ProductTier, number> = {
-  COMMON: 0,
-  UNCOMMON: 0,
-  RARE: 0,
-  ULTRA_RARE: 0,
-  SECRET_RARE: 0,
-  BANGER: 0,
-  GRAIL: 0,
+const V3_FLAT_ODDS: Record<ProductTier, number> = {
+  COMMON: 40.5,
+  UNCOMMON: 30.5,
+  RARE: 25.3,
+  ULTRA_RARE: 3.0,
+  SECRET_RARE: 0.0,
+  BANGER: 0.6,
+  GRAIL: 0.1,
 };
 
+/** Every pack allows every active V3 tier (SECRET_RARE excluded). */
+const V3_TIERS: ProductTier[] = [
+  "COMMON",
+  "UNCOMMON",
+  "RARE",
+  "ULTRA_RARE",
+  "BANGER",
+  "GRAIL",
+];
+
 /**
- * 5-pack ladder. Margins below assume band midpoints (honest worst case).
- * Real margin is higher when inventory clusters at the low end of each band,
- * which is the normal sourcing pattern.
+ * V3 5-pack ladder. Names follow V3 spec (Silver → Black Label).
+ * Pack IDs match V3 names — clean break from old W-Pulls naming.
  *
- *   Pocket    $25   →  ~28% margin (mid) / ~41% (low-end)
- *   Starter   $50   →  ~25% / ~39%
- *   Standard $100   →  ~20% / ~36%
- *   Premium  $200   →  ~17% / ~33%
- *   Whale    $500   →  ~12% / ~30%
- *
- * minTier is kept as "COMMON" because band-filtering scopes "what counts as
- * COMMON" to each pack's price tier — a $25 pack's COMMON is a $12.50–$18.75
- * card; a $500 pack's COMMON is a $250–$375 card.
+ * Historical orders keep their original Order.packId / packName values
+ * via Order denormalization, so no data migration needed for closed orders.
  */
 export const PACK_CONFIGS: PackConfig[] = [
   {
-    id: "pocket",
-    name: "Pocket Pull",
+    id: "silver",
+    name: "Silver Pull",
     price: 2500,
     displayPrice: "$25",
-    description: "Quick rip. Mostly commons with a real shot at rare.",
+    description:
+      "Entry tier. Every pack has the same lottery shape — even a Silver can hit GRAIL.",
     minTier: "COMMON",
-    allowedTiers: ["COMMON", "UNCOMMON", "RARE"],
-    odds: {
-      ...ZERO_ODDS,
-      COMMON: 68,
-      UNCOMMON: 29,
-      RARE: 3,
-    },
+    allowedTiers: V3_TIERS,
+    odds: V3_FLAT_ODDS,
   },
   {
-    id: "starter",
-    name: "Starter Pull",
+    id: "gold",
+    name: "Gold Pull",
     price: 5000,
     displayPrice: "$50",
-    description: "Better odds at rare. Tiny chance of ultra rare.",
+    description: "Step up. Same odds as Silver, double the prize ceiling.",
     minTier: "COMMON",
-    allowedTiers: ["COMMON", "UNCOMMON", "RARE", "ULTRA_RARE"],
-    odds: {
-      ...ZERO_ODDS,
-      COMMON: 66,
-      UNCOMMON: 27,
-      RARE: 6,
-      ULTRA_RARE: 1,
-    },
+    allowedTiers: V3_TIERS,
+    odds: V3_FLAT_ODDS,
   },
   {
-    id: "standard",
-    name: "Standard Pull",
+    id: "platinum",
+    name: "Platinum Pull",
     price: 10000,
     displayPrice: "$100",
-    description: "Real shot at ultra rare. Chase secret rares.",
+    description:
+      "Mid-luxury. GRAIL territory: $1,000–$5,000 cards on the 1-in-1000.",
     minTier: "COMMON",
-    allowedTiers: ["COMMON", "UNCOMMON", "RARE", "ULTRA_RARE", "SECRET_RARE"],
-    odds: {
-      ...ZERO_ODDS,
-      COMMON: 65,
-      UNCOMMON: 25,
-      RARE: 7,
-      ULTRA_RARE: 2,
-      SECRET_RARE: 1,
-    },
+    allowedTiers: V3_TIERS,
+    odds: V3_FLAT_ODDS,
   },
   {
-    id: "premium",
-    name: "Premium Pull",
-    price: 20000,
-    displayPrice: "$200",
-    description: "Banger territory. 1 in 10,000 GRAIL.",
+    id: "diamond",
+    name: "Diamond Pull",
+    price: 25000,
+    displayPrice: "$250",
+    description: "Premium. Banger range $1,000–$2,000. GRAIL up to $12,500.",
     minTier: "COMMON",
-    allowedTiers: [
-      "COMMON",
-      "UNCOMMON",
-      "RARE",
-      "ULTRA_RARE",
-      "SECRET_RARE",
-      "BANGER",
-      "GRAIL",
-    ],
-    odds: {
-      ...ZERO_ODDS,
-      COMMON: 65,
-      UNCOMMON: 23,
-      RARE: 8,
-      ULTRA_RARE: 2.5,
-      SECRET_RARE: 1,
-      BANGER: 0.49,
-      GRAIL: 0.01,
-    },
+    allowedTiers: V3_TIERS,
+    odds: V3_FLAT_ODDS,
   },
   {
-    id: "whale",
-    name: "Whale Pull",
+    id: "black-label",
+    name: "Black Label Pull",
     price: 50000,
     displayPrice: "$500",
-    description: "Max stakes. Real grail odds. Up to $5,000 cards.",
+    description: "Maximum tier. Top prize: $25,000 GRAIL. Source the chase.",
     minTier: "COMMON",
-    allowedTiers: [
-      "COMMON",
-      "UNCOMMON",
-      "RARE",
-      "ULTRA_RARE",
-      "SECRET_RARE",
-      "BANGER",
-      "GRAIL",
-    ],
-    odds: {
-      ...ZERO_ODDS,
-      COMMON: 62,
-      UNCOMMON: 22,
-      RARE: 10,
-      ULTRA_RARE: 4,
-      SECRET_RARE: 1.5,
-      BANGER: 0.45,
-      GRAIL: 0.05,
-    },
+    allowedTiers: V3_TIERS,
+    odds: V3_FLAT_ODDS,
   },
 ];
 
-export function getPackById(id: string): PackConfig | undefined {
-  return PACK_CONFIGS.find((pack) => pack.id === id);
+export const PACKS_BY_ID = Object.fromEntries(
+  PACK_CONFIGS.map((p) => [p.id, p]),
+);
+
+export function packById(id: string): PackConfig | null {
+  return PACKS_BY_ID[id] ?? null;
 }
