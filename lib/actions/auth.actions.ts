@@ -1,6 +1,7 @@
 // lib/actions/auth.actions.ts
 "use server";
 
+import { headers } from "next/headers";
 import { signIn, signOut } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
@@ -10,8 +11,37 @@ import { AuthError } from "next-auth";
 import { sendEmail } from "../sendEmail";
 import { passwordResetEmail } from "../emails/passwordResetEmail";
 import { verificationEmail } from "../emails/verificationEmail";
+import { verifyTurnstile } from "@/lib/cloudflare/turnstile";
 
+// ─────────────────────────────────────────────────────────────────────
+// Turnstile gate — call at the start of any publicly-callable action
+// ─────────────────────────────────────────────────────────────────────
+async function gateTurnstile(formData: FormData): Promise<{ error?: string }> {
+  const tokenRaw = formData.get("turnstileToken");
+  const token = typeof tokenRaw === "string" ? tokenRaw : null;
+
+  const headersList = await headers();
+  const ip =
+    headersList.get("cf-connecting-ip") ??
+    headersList.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    headersList.get("x-real-ip") ??
+    null;
+
+  const result = await verifyTurnstile(token, ip);
+  if (!result.success) {
+    return { error: "Verification failed — please verify again." };
+  }
+  return {};
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Sign up
+// ─────────────────────────────────────────────────────────────────────
 export async function signUpAction(formData: FormData) {
+  // ── Turnstile FIRST — fail before any DB or bcrypt work ────────────
+  const gate = await gateTurnstile(formData);
+  if (gate.error) return { error: gate.error };
+
   const name = formData.get("name") as string;
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
@@ -54,7 +84,14 @@ export async function signUpAction(formData: FormData) {
   redirect(`/auth/verify-email?email=${encodeURIComponent(email)}`);
 }
 
+// ─────────────────────────────────────────────────────────────────────
+// Sign in
+// ─────────────────────────────────────────────────────────────────────
 export async function signInAction(formData: FormData) {
+  // ── Turnstile FIRST — fail before any DB lookup or bcrypt compare ──
+  const gate = await gateTurnstile(formData);
+  if (gate.error) return { error: gate.error };
+
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const callbackUrl = formData.get("callbackUrl") as string | null;
@@ -148,15 +185,18 @@ function isValidCallbackUrl(url: string): boolean {
   return true;
 }
 
-// export async function signOutAction() {
-//   await signOut({ redirect: false });
-//   redirect("/auth");
-// }
 export async function signOutAction() {
   await signOut({ redirectTo: "/auth" });
 }
 
+// ─────────────────────────────────────────────────────────────────────
+// Forgot password
+// ─────────────────────────────────────────────────────────────────────
 export async function forgotPasswordAction(formData: FormData) {
+  // ── Turnstile FIRST — prevent email-enumeration / mass-spam abuse ──
+  const gate = await gateTurnstile(formData);
+  if (gate.error) return { error: gate.error };
+
   const email = formData.get("email") as string;
 
   if (!email) {
@@ -207,6 +247,10 @@ export async function forgotPasswordAction(formData: FormData) {
   return { success: true };
 }
 
+// ─────────────────────────────────────────────────────────────────────
+// Reset password — NO Turnstile gate. The signed token in the email
+// link IS the verification; user already proved control of inbox.
+// ─────────────────────────────────────────────────────────────────────
 export async function resetPasswordAction(formData: FormData) {
   const token = formData.get("token") as string;
   const password = formData.get("password") as string;
@@ -288,6 +332,10 @@ async function sendVerificationEmail(
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────
+// Verify email — NO Turnstile gate. PIN itself is the bot-resistant
+// factor; user proved inbox control by knowing the 6-digit code.
+// ─────────────────────────────────────────────────────────────────────
 export async function verifyEmailAction(email: string, pin: string) {
   if (!email || !pin) {
     return { error: "Email and verification code are required" };
@@ -334,6 +382,10 @@ export async function verifyEmailAction(email: string, pin: string) {
   return { success: true };
 }
 
+// ─────────────────────────────────────────────────────────────────────
+// Resend verification — protected by its own 60s rate limit, not
+// Turnstile. Could add Turnstile here if abuse surfaces in metrics.
+// ─────────────────────────────────────────────────────────────────────
 export async function resendVerificationAction(email: string) {
   if (!email) {
     return { error: "Email is required" };

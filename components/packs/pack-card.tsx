@@ -1,15 +1,27 @@
 "use client";
 
 import { useState, useRef, useMemo } from "react";
-import { Loader2, Crown, Flame, Star, Gem, Zap, Sparkles } from "lucide-react";
+import {
+  Loader2,
+  Crown,
+  Flame,
+  Star,
+  Gem,
+  Zap,
+  Sparkles,
+  ShieldAlert,
+} from "lucide-react";
 import { PackConfig } from "@/lib/packs/config";
 import { cn } from "@/lib/utils";
 import { TIER_ORDER } from "@/lib/packs/ev";
-import { PurchaseButton } from "./purchase-button";
 import { useRouter } from "next/navigation";
 
 interface PackCardProps {
   pack: PackConfig;
+  /** Turnstile verification token from page-level widget. null = not yet verified. */
+  turnstileToken: string | null;
+  /** Called when server rejects the token so the page can reset the widget */
+  onTurnstileFailed?: () => void;
 }
 
 const packStyles: Record<
@@ -63,6 +75,7 @@ const packStyles: Record<
     borderColor: "rgba(168, 85, 247, 0.5)",
   },
 };
+
 // Corner brackets component
 function HoloBrackets({ color = "cyan-400" }: { color?: string }) {
   return (
@@ -127,7 +140,11 @@ function HoloBrackets({ color = "cyan-400" }: { color?: string }) {
   );
 }
 
-export function PackCard({ pack }: PackCardProps) {
+export function PackCard({
+  pack,
+  turnstileToken,
+  onTurnstileFailed,
+}: PackCardProps) {
   const [loading, setLoading] = useState(false);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
@@ -137,7 +154,7 @@ export function PackCard({ pack }: PackCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  const style = packStyles[pack.id] || packStyles.starter;
+  const style = packStyles[pack.id] || packStyles.silver;
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return;
@@ -163,18 +180,39 @@ export function PackCard({ pack }: PackCardProps) {
   };
 
   const handlePurchase = async () => {
+    // ── Turnstile gate ─────────────────────────────────────────────
+    if (!turnstileToken) {
+      alert("Please complete verification below first.");
+      // Scroll user toward the widget so they can find it
+      document
+        .getElementById("turnstile-anchor")
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ packId: pack.id }),
+        body: JSON.stringify({
+          packId: pack.id,
+          turnstileToken,
+        }),
       });
 
       const data = await res.json();
 
+      // Auth redirect (existing behavior)
       if (res.status === 401 || data.redirect) {
         router.push(data.redirect || "/auth?callbackUrl=/packs");
+        return;
+      }
+
+      // Turnstile rejected — reset page widget so user can re-verify
+      if (res.status === 403 && /verif/i.test(data.error ?? "")) {
+        onTurnstileFailed?.();
+        alert("Verification expired. Please verify again to continue.");
         return;
       }
 
@@ -208,6 +246,9 @@ export function PackCard({ pack }: PackCardProps) {
   const rarePlusChance = TIER_ORDER.filter(
     (t) => t !== "COMMON" && t !== "UNCOMMON",
   ).reduce((sum, t) => sum + (pack.odds[t] ?? 0), 0);
+
+  const isVerified = !!turnstileToken;
+  const buttonDisabled = loading; // Always clickable so we can show the prompt
 
   return (
     <div className="flex flex-col gap-3 h-full">
@@ -294,7 +335,7 @@ export function PackCard({ pack }: PackCardProps) {
                   width: p.size,
                   height: p.size,
                   background: style.accentColor,
-                  boxShadow: `0 0 ${p.size * 2}px ${style.accentColor}`, // Glow scales with size
+                  boxShadow: `0 0 ${p.size * 2}px ${style.accentColor}`,
                   animation: `twinkle ${p.duration}s ease-in-out infinite`,
                   animationDelay: `${p.delay}s`,
                 }}
@@ -314,8 +355,8 @@ export function PackCard({ pack }: PackCardProps) {
                 boxShadow: `0 0 10px ${style.accentColor}30`,
               }}
             >
-              {pack.id === "whale" && <Crown className="w-3 h-3" />}
-              {pack.id.toUpperCase()}
+              {pack.id === "black-label" && <Crown className="w-3 h-3" />}
+              {pack.id.toUpperCase().replace("-", " ")}
             </div>
 
             {/* Icon */}
@@ -329,7 +370,6 @@ export function PackCard({ pack }: PackCardProps) {
               }}
             >
               {style.icon}
-              {/* Icon glow */}
               <div
                 className="absolute -inset-2 rounded-xl blur-xl -z-10 opacity-50"
                 style={{ background: style.glowColor }}
@@ -383,7 +423,7 @@ export function PackCard({ pack }: PackCardProps) {
       {/* Purchase Button */}
       <button
         onClick={handlePurchase}
-        disabled={loading}
+        disabled={buttonDisabled}
         onMouseEnter={() => setButtonHover(true)}
         onMouseLeave={() => setButtonHover(false)}
         className={cn(
@@ -391,6 +431,7 @@ export function PackCard({ pack }: PackCardProps) {
           "border backdrop-blur-sm",
           buttonHover && "scale-[1.02]",
           loading && "opacity-50 cursor-not-allowed",
+          !isVerified && "opacity-70",
         )}
         style={{
           background: `linear-gradient(135deg, ${style.accentColor}20, ${style.accentColor}10)`,
@@ -400,11 +441,19 @@ export function PackCard({ pack }: PackCardProps) {
           color: style.accentColor,
           boxShadow: buttonHover ? `0 0 25px ${style.glowColor}` : "none",
         }}
+        title={
+          !isVerified ? "Complete verification below to enable" : undefined
+        }
       >
         {loading ? (
           <span className="flex items-center justify-center gap-2">
             <Loader2 className="w-4 h-4 animate-spin" />
             Processing...
+          </span>
+        ) : !isVerified ? (
+          <span className="flex items-center justify-center gap-2">
+            <ShieldAlert className="w-4 h-4" />
+            Verify to Purchase
           </span>
         ) : (
           <span className="flex items-center justify-center gap-2">
@@ -425,22 +474,6 @@ export function PackCard({ pack }: PackCardProps) {
           50% {
             opacity: 1;
             transform: scale(1);
-          }
-        }
-        @keyframes scan-down {
-          0% {
-            top: -2px;
-            opacity: 0;
-          }
-          10% {
-            opacity: 1;
-          }
-          90% {
-            opacity: 1;
-          }
-          100% {
-            top: 100%;
-            opacity: 0;
           }
         }
       `}</style>

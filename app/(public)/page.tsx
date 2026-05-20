@@ -7,6 +7,7 @@ import { PACK_CONFIGS } from "@/lib/packs/config";
 import { HudFrame } from "@/components/ui/HudFrame";
 import { NewsletterSignup } from "@/components/ui/NewsletterSignup";
 import { PackOddsTable } from "./packs/(components)/Packoddstable";
+import { TurnstileWidget } from "@/components/turnstile-widget";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // HOLOGRAPHIC HUB UI - Futuristic Trading Card Interface
@@ -56,62 +57,6 @@ function DataParticles() {
     </div>
   );
 }
-// Scan lines overlay
-// function ScanLines() {
-//   return (
-//     <div className="absolute inset-0 pointer-events-none overflow-hidden">
-//       {/* Horizontal scan lines */}
-//       <div
-//         className="absolute inset-0 opacity-[0.03]"
-//         style={{
-//           backgroundImage: `repeating-linear-gradient(
-//             0deg,
-//             transparent,
-//             transparent 2px,
-//             rgba(0, 255, 255, 0.5) 2px,
-//             rgba(0, 255, 255, 0.5) 4px
-//           )`,
-//         }}
-//       />
-//       {/* Moving scan beam */}
-//       <div
-//         className="absolute left-0 right-0 h-[2px] animate-scan-beam"
-//         style={{
-//           background: `linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.6), transparent)`,
-//           boxShadow: `0 0 20px rgba(0, 255, 255, 0.5), 0 0 40px rgba(0, 255, 255, 0.3)`,
-//         }}
-//       />
-//     </div>
-//   );
-// }
-
-// Holographic corner brackets
-// function HoloBrackets({ className = "" }: { className?: string }) {
-//   return (
-//     <div className={`absolute inset-0 pointer-events-none ${className}`}>
-//       {/* Top Left */}
-//       <div className="absolute top-0 left-0 w-8 h-8">
-//         <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-cyan-400 to-transparent" />
-//         <div className="absolute top-0 left-0 h-full w-[2px] bg-gradient-to-b from-cyan-400 to-transparent" />
-//       </div>
-//       {/* Top Right */}
-//       <div className="absolute top-0 right-0 w-8 h-8">
-//         <div className="absolute top-0 right-0 w-full h-[2px] bg-gradient-to-l from-cyan-400 to-transparent" />
-//         <div className="absolute top-0 right-0 h-full w-[2px] bg-gradient-to-b from-cyan-400 to-transparent" />
-//       </div>
-//       {/* Bottom Left */}
-//       <div className="absolute bottom-0 left-0 w-8 h-8">
-//         <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-cyan-400 to-transparent" />
-//         <div className="absolute bottom-0 left-0 h-full w-[2px] bg-gradient-to-t from-cyan-400 to-transparent" />
-//       </div>
-//       {/* Bottom Right */}
-//       <div className="absolute bottom-0 right-0 w-8 h-8">
-//         <div className="absolute bottom-0 right-0 w-full h-[2px] bg-gradient-to-l from-cyan-400 to-transparent" />
-//         <div className="absolute bottom-0 right-0 h-full w-[2px] bg-gradient-to-t from-cyan-400 to-transparent" />
-//       </div>
-//     </div>
-//   );
-// }
 
 // Animated status indicators
 function StatusIndicator({
@@ -335,6 +280,8 @@ function StatsTicker() {
 export default function HolographicHub() {
   const [mounted, setMounted] = useState(false);
   const [systemTime, setSystemTime] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
 
   useEffect(() => {
     setMounted(true);
@@ -612,75 +559,6 @@ export default function HolographicHub() {
                 )}
               </HudFrame>
             </div>
-
-            {/* Side panels */}
-            {/* <div className="absolute left-4 top-1/2 -translate-y-1/2 hidden lg:block">
-              <HoloPanel className="w-48 p-4">
-                <div className="space-y-4">
-                  <h3 className="font-orbitron text-xs text-cyan-400 uppercase tracking-wider">
-                    System Status
-                  </h3>
-                  <StatusIndicator
-                    label="Network"
-                    value="CONNECTED"
-                    color="green"
-                  />
-                  <StatusIndicator
-                    label="RNG Engine"
-                    value="ACTIVE"
-                    color="cyan"
-                  />
-                  <StatusIndicator
-                    label="Drop Rate"
-                    value="ENHANCED"
-                    color="magenta"
-                  />
-                  <StatusIndicator
-                    label="Jackpot"
-                    value="AVAILABLE"
-                    color="yellow"
-                  />
-                </div>
-              </HoloPanel>
-            </div> */}
-
-            {/* Right side panel */}
-            {/* <div className="absolute right-4 top-1/2 -translate-y-1/2 hidden lg:block">
-              <HoloPanel className="w-48 p-4">
-                <div className="space-y-4">
-                  <h3 className="font-orbitron text-xs text-cyan-400 uppercase tracking-wider">
-                    Recent Drops
-                  </h3>
-                  {["Charizard ★", "Gardevoir", "Lucario EX", "Xerneas"].map(
-                    (card, i) => (
-                      <div key={i} className="flex items-center gap-2 text-sm">
-                        <div
-                          className="w-1.5 h-1.5 rounded-full"
-                          style={{
-                            background:
-                              i === 0
-                                ? "#ffd700"
-                                : i === 1
-                                ? "#c0c0c0"
-                                : "#cd7f32",
-                            boxShadow: `0 0 8px ${
-                              i === 0
-                                ? "#ffd700"
-                                : i === 1
-                                ? "#c0c0c0"
-                                : "#cd7f32"
-                            }`,
-                          }}
-                        />
-                        <span className="text-white/80 font-rajdhani">
-                          {card}
-                        </span>
-                      </div>
-                    )
-                  )}
-                </div>
-              </HoloPanel>
-            </div> */}
           </div>
 
           {/* Title section */}
@@ -735,11 +613,47 @@ export default function HolographicHub() {
                     }}
                   />
                   <div className="relative h-full">
-                    <PackCard pack={pack} />
+                    <PackCard
+                      pack={pack}
+                      turnstileToken={turnstileToken}
+                      onTurnstileFailed={() => {
+                        setTurnstileToken(null);
+                        setTurnstileResetKey((k) => k + 1);
+                      }}
+                    />
                   </div>
                 </div>
               ))}
             </div>
+
+            {/* ── Turnstile verification ─────────────────────────── */}
+            <section id="turnstile-anchor" className="relative mt-12">
+              <div className="max-w-md mx-auto">
+                <HoloPanel glow={false} className="px-6 py-5">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-cyan-400/70 font-mono">
+                      <div
+                        className={`w-2 h-2 rounded-full ${
+                          turnstileToken
+                            ? "bg-emerald-400"
+                            : "bg-amber-400 animate-pulse"
+                        }`}
+                      />
+                      {turnstileToken
+                        ? "Verified — purchases enabled"
+                        : "Verification required"}
+                    </div>
+                    <TurnstileWidget
+                      onSuccess={setTurnstileToken}
+                      onExpire={() => setTurnstileToken(null)}
+                      resetKey={turnstileResetKey}
+                      theme="dark"
+                      appearance="interaction-only"
+                    />
+                  </div>
+                </HoloPanel>
+              </div>
+            </section>
 
             {/* Pull rates */}
             <div className="mt-12">
