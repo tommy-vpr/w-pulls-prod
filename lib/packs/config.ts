@@ -32,8 +32,8 @@ const V3_FLAT_ODDS: Record<ProductTier, number> = {
   RARE: 25.3,
   ULTRA_RARE: 3.0,
   SECRET_RARE: 0.0,
-  BANGER: 0.6,
-  GRAIL: 0.1,
+  BANGER: 0.69,
+  GRAIL: 0.01,
 };
 
 /** Every pack allows every active V3 tier (SECRET_RARE excluded). */
