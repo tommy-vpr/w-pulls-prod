@@ -7,12 +7,35 @@ import { auditService } from "@/lib/services/audit.service";
 import { auth } from "@/lib/auth";
 import { orderAbandonQueue } from "@/lib/queue/orderAbandon.queue";
 import { getOrCreateStripeCustomer } from "@/lib/stripe/customer";
+import { verifyTurnstile, getClientIp } from "@/lib/cloudflare/turnstile";
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth();
+    // ── 1. Parse + validate body ──────────────────────────────────────
+    const { packId, turnstileToken } = (await request.json()) as {
+      packId?: string;
+      turnstileToken?: string;
+    };
 
-    // Auth check FIRST before anything else
+    if (!packId || typeof packId !== "string") {
+      return NextResponse.json(
+        { success: false, error: "Missing packId" },
+        { status: 400 },
+      );
+    }
+
+    // ── 2. Turnstile gate — BEFORE any expensive work ─────────────────
+    const ip = getClientIp(request.headers);
+    const verification = await verifyTurnstile(turnstileToken, ip);
+    if (!verification.success) {
+      return NextResponse.json(
+        { success: false, error: "verification failed — please re-verify" },
+        { status: 403 },
+      );
+    }
+
+    // ── 3. Auth check ─────────────────────────────────────────────────
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json(
         {
@@ -24,16 +47,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Now safe to use session.user
-    const customerId = await getOrCreateStripeCustomer(
-      session.user.id,
-      session.user.email!,
-      session.user.name,
-    );
-
-    const { packId } = await request.json();
+    // ── 4. Validate pack exists ───────────────────────────────────────
     const pack = packById(packId);
-
     if (!pack) {
       return NextResponse.json(
         { success: false, error: "Invalid pack" },
@@ -41,10 +56,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create PENDING order with user info from session
+    // ── 5. Now safe — touch Stripe, DB, queues ────────────────────────
+    const customerId = await getOrCreateStripeCustomer(
+      session.user.id,
+      session.user.email!,
+      session.user.name,
+    );
+
     const order = await prisma.order.create({
       data: {
-        type: "PACK", // Add this!
+        type: "PACK",
         userId: session.user.id,
         packId: pack.id,
         packName: pack.name,
@@ -55,13 +76,12 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Add abandon worker
     await orderAbandonQueue.add(
       "abandon-check",
       { orderId: order.id },
       {
         delay: 30 * 60 * 1000,
-        jobId: `abandon_${order.id}`, // ✅ no colon
+        jobId: `abandon_${order.id}`,
       },
     );
 
@@ -72,14 +92,14 @@ export async function POST(request: NextRequest) {
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: "payment",
       payment_method_types: ["card"],
-      customer: customerId, // ← adds this
+      customer: customerId,
       customer_update: {
         shipping: "auto",
         address: "auto",
       },
       automatic_tax: { enabled: true },
       payment_intent_data: {
-        setup_future_usage: "off_session", // ← adds this
+        setup_future_usage: "off_session",
       },
       shipping_address_collection: {
         allowed_countries: ["US"],

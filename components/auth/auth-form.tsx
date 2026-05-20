@@ -13,12 +13,14 @@ import {
   Loader2,
   ArrowLeft,
   Sparkles,
+  ShieldAlert,
 } from "lucide-react";
 import {
   signUpAction,
   signInAction,
   forgotPasswordAction,
 } from "@/lib/actions/auth.actions";
+import { TurnstileWidget } from "@/components/turnstile-widget";
 import "./auth-form.css";
 import Image from "next/image";
 import Link from "next/link";
@@ -41,42 +43,32 @@ export function AuthForm() {
 
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
-  <AnimatePresence>
-    {message === "password_reset" && (
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -10 }}
-        className="mb-4 p-3 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-sm"
-      >
-        Password reset successfully. Please sign in.
-      </motion.div>
-    )}
-    {message === "email_verified" && (
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -10 }}
-        className="mb-4 p-3 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-sm"
-      >
-        Email verified! You can now sign in.
-      </motion.div>
-    )}
-    {urlError === "invalid_token" && (
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -10 }}
-        className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm"
-      >
-        Reset link has expired. Please request a new one.
-      </motion.div>
-    )}
-  </AnimatePresence>;
+  // ── Turnstile state ──────────────────────────────────────────────
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
+
+  const resetTurnstile = () => {
+    setTurnstileToken(null);
+    setTurnstileResetKey((k) => k + 1);
+  };
+
+  const switchMode = (newMode: FormMode) => {
+    setMode(newMode);
+    setError(null);
+    resetTurnstile(); // tokens are mode-specific, reset on switch
+  };
 
   const handleSubmit = async (formData: FormData) => {
     setError(null);
     setSuccess(null);
+
+    if (!turnstileToken) {
+      setError("Please complete verification below.");
+      return;
+    }
+
+    // Forward token to Server Action via FormData
+    formData.set("turnstileToken", turnstileToken);
 
     startTransition(async () => {
       let result;
@@ -98,13 +90,43 @@ export function AuthForm() {
 
       if (result?.error) {
         setError(result.error);
+        resetTurnstile(); // token is consumed once it hits the server
       }
     });
   };
 
-  const handleGoogleSignIn = () => {
+  const handleGoogleSignIn = async () => {
+    if (!turnstileToken) {
+      setError("Please complete verification below.");
+      return;
+    }
+
+    setError(null);
     setIsGoogleLoading(true);
-    signIn("google", { callbackUrl: "/dashboard" });
+
+    // Verify token server-side BEFORE redirecting to Google
+    try {
+      const res = await fetch("/api/auth/verify-turnstile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: turnstileToken }),
+      });
+
+      if (!res.ok) {
+        setError("Verification failed. Please try again.");
+        resetTurnstile();
+        setIsGoogleLoading(false);
+        return;
+      }
+    } catch {
+      setError("Verification request failed. Please try again.");
+      resetTurnstile();
+      setIsGoogleLoading(false);
+      return;
+    }
+
+    // Verified — proceed to Google OAuth
+    signIn("google", { callbackUrl: callbackUrl ?? "/dashboard" });
   };
 
   return (
@@ -128,6 +150,40 @@ export function AuthForm() {
           </div>
         </div>
 
+        {/* ── URL-based banners (was dead JSX before — now properly rendered) ── */}
+        <AnimatePresence>
+          {message === "password_reset" && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="mb-4 p-3 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-sm"
+            >
+              Password reset successfully. Please sign in.
+            </motion.div>
+          )}
+          {message === "email_verified" && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="mb-4 p-3 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-sm"
+            >
+              Email verified! You can now sign in.
+            </motion.div>
+          )}
+          {urlError === "invalid_token" && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm"
+            >
+              Reset link has expired. Please request a new one.
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Mode Switcher */}
         <AnimatePresence mode="wait">
           {mode !== "forgot" && (
@@ -139,10 +195,7 @@ export function AuthForm() {
             >
               <button
                 type="button"
-                onClick={() => {
-                  setMode("login");
-                  setError(null);
-                }}
+                onClick={() => switchMode("login")}
                 className={`cursor-pointer flex-1 py-2.5 text-sm font-medium rounded-lg transition-all duration-300 ${
                   mode === "login"
                     ? "bg-white/10 text-white shadow-lg"
@@ -153,10 +206,7 @@ export function AuthForm() {
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  setMode("signup");
-                  setError(null);
-                }}
+                onClick={() => switchMode("signup")}
                 className={`cursor-pointer flex-1 py-2.5 text-sm font-medium rounded-lg transition-all duration-300 ${
                   mode === "signup"
                     ? "bg-white/10 text-white shadow-lg"
@@ -173,7 +223,7 @@ export function AuthForm() {
         {mode === "forgot" && (
           <button
             type="button"
-            onClick={() => setMode("login")}
+            onClick={() => switchMode("login")}
             className="cursor-pointer flex items-center gap-2 text-white/60 hover:text-white mb-6 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -195,11 +245,6 @@ export function AuthForm() {
               {mode === "signup" && "Create account"}
               {mode === "forgot" && "Reset password"}
             </h1>
-            {/* <p className="text-white/60 mt-1">
-              {mode === "login" && "Sign in to access your account"}
-              {mode === "signup" && "Start your journey with us"}
-              {mode === "forgot" && "We'll send you a reset link"}
-            </p> */}
           </motion.div>
         </AnimatePresence>
 
@@ -322,10 +367,7 @@ export function AuthForm() {
                 <div className="flex justify-end">
                   <button
                     type="button"
-                    onClick={() => {
-                      setMode("forgot");
-                      setError(null);
-                    }}
+                    onClick={() => switchMode("forgot")}
                     className="cursor-pointer text-sm text-purple-400 hover:text-purple-300 transition-colors"
                   >
                     Forgot password?
@@ -341,6 +383,11 @@ export function AuthForm() {
               >
                 {isPending ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
+                ) : !turnstileToken ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <ShieldAlert className="h-4 w-4" />
+                    Verify to continue
+                  </span>
                 ) : (
                   <>
                     {mode === "login" && "Sign In"}
@@ -369,8 +416,9 @@ export function AuthForm() {
           <button
             type="button"
             onClick={handleGoogleSignIn}
-            disabled={isGoogleLoading}
+            disabled={isGoogleLoading || isPending}
             className="auth-social-btn"
+            title={!turnstileToken ? "Verify below to continue" : undefined}
           >
             {isGoogleLoading ? (
               <Loader2 className="h-5 w-5 animate-spin" />
@@ -394,9 +442,32 @@ export function AuthForm() {
                 />
               </svg>
             )}
-            {isGoogleLoading ? "Redirecting..." : "Google"}
+            {isGoogleLoading
+              ? "Redirecting..."
+              : !turnstileToken
+                ? "Verify to continue"
+                : "Google"}
           </button>
         )}
+
+        {/* ── Cloudflare Turnstile widget ─────────────────────────────── */}
+        <div className="mt-6 flex flex-col items-center gap-2">
+          <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-white/40">
+            <div
+              className={`w-1.5 h-1.5 rounded-full ${
+                turnstileToken ? "bg-emerald-400" : "bg-amber-400 animate-pulse"
+              }`}
+            />
+            {turnstileToken ? "Verified" : "Verification required"}
+          </div>
+          <TurnstileWidget
+            onSuccess={setTurnstileToken}
+            onExpire={() => setTurnstileToken(null)}
+            resetKey={turnstileResetKey}
+            theme="dark"
+            appearance="interaction-only"
+          />
+        </div>
 
         {/* Terms */}
         {mode === "signup" && (
