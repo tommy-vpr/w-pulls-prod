@@ -48,6 +48,12 @@ export async function verifyTurnstile(
 
     const data = (await res.json()) as TurnstileVerifyResponse;
 
+    console.log("[Turnstile] Cloudflare responded:", {
+      success: data.success,
+      errors: data["error-codes"],
+      hostname: data.hostname,
+    });
+
     if (!data.success) {
       console.warn("[Turnstile] Verification failed:", data["error-codes"]);
       return {

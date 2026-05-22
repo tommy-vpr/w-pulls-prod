@@ -106,7 +106,7 @@ export function AuthForm() {
 
     // Verify token server-side BEFORE redirecting to Google
     try {
-      const res = await fetch("/api/auth/verify-turnstile", {
+      const res = await fetch("/api/verify-turnstile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: turnstileToken }),
@@ -461,7 +461,13 @@ export function AuthForm() {
             {turnstileToken ? "Verified" : "Verification required"}
           </div>
           <TurnstileWidget
-            onSuccess={setTurnstileToken}
+            onSuccess={(token) => {
+              console.log(
+                "[Turnstile] ✅ Got token:",
+                token.slice(0, 30) + "...",
+              );
+              setTurnstileToken(token);
+            }}
             onExpire={() => setTurnstileToken(null)}
             resetKey={turnstileResetKey}
             theme="dark"
