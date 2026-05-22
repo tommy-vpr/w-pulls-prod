@@ -41,8 +41,11 @@ export function ProductForm({ product, mode }: ProductFormProps) {
   const [priceInput, setPriceInput] = useState<string>(
     product?.price ? String(Number(product.price)) : "",
   );
-  const [tierInput, setTierInput] = useState<ProductTier>(
-    (product?.tier as ProductTier) ?? "COMMON",
+  const [costInput, setCostInput] = useState<string>(
+    product?.cost ? String(Number(product.cost)) : "",
+  );
+  const [tierInput, setTierInput] = useState<ProductTier | "">(
+    (product?.tier as ProductTier) ?? "",
   );
 
   const priceNumber =
@@ -300,30 +303,78 @@ export function ProductForm({ product, mode }: ProductFormProps) {
               </h2>
             </div>
             <div className="p-6 space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="price" className="text-zinc-300">
-                  Price *
-                </Label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">
-                    $
-                  </span>
-                  <Input
-                    id="price"
-                    name="price"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={priceInput}
-                    onChange={(e) => setPriceInput(e.target.value)}
-                    placeholder="0.00"
-                    className="pl-7 bg-zinc-800/50 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-violet-500/50"
-                    required
-                  />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="price" className="text-zinc-300">
+                    Price *
+                  </Label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">
+                      $
+                    </span>
+                    <Input
+                      id="price"
+                      name="price"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={priceInput}
+                      onChange={(e) => setPriceInput(e.target.value)}
+                      placeholder="0.00"
+                      className="pl-7 bg-zinc-800/50 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-violet-500/50"
+                      required
+                    />
+                  </div>
+                  {errors.price && (
+                    <p className="text-sm text-red-400">{errors.price[0]}</p>
+                  )}
                 </div>
-                {errors.price && (
-                  <p className="text-sm text-red-400">{errors.price[0]}</p>
-                )}
+
+                <div className="space-y-2">
+                  <Label htmlFor="cost" className="text-zinc-300">
+                    Cost
+                    {costInput && priceInput && (
+                      <span className="ml-2 text-xs text-zinc-500">
+                        margin{" "}
+                        <span
+                          className={
+                            (parseFloat(priceInput) - parseFloat(costInput)) /
+                              parseFloat(priceInput) <
+                            0.2
+                              ? "text-rose-400"
+                              : "text-emerald-400"
+                          }
+                        >
+                          {(
+                            ((parseFloat(priceInput) - parseFloat(costInput)) /
+                              parseFloat(priceInput)) *
+                            100
+                          ).toFixed(0)}
+                          %
+                        </span>
+                      </span>
+                    )}
+                  </Label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">
+                      $
+                    </span>
+                    <Input
+                      id="cost"
+                      name="cost"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={costInput}
+                      onChange={(e) => setCostInput(e.target.value)}
+                      placeholder="0.00"
+                      className="pl-7 bg-zinc-800/50 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-violet-500/50"
+                    />
+                  </div>
+                  {errors.cost && (
+                    <p className="text-sm text-red-400">{errors.cost[0]}</p>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -414,16 +465,21 @@ export function ProductForm({ product, mode }: ProductFormProps) {
               {/* Tier */}
               <div className="space-y-2">
                 <Label htmlFor="tier" className="text-zinc-300">
-                  Tier *
+                  Tier
                 </Label>
                 <select
                   id="tier"
                   name="tier"
                   value={tierInput}
-                  onChange={(e) => setTierInput(e.target.value as ProductTier)}
-                  required
+                  onChange={(e) =>
+                    setTierInput(e.target.value as ProductTier | "")
+                  }
                   className="flex h-9 w-full rounded-md border border-zinc-700 bg-zinc-800/50 px-3 py-1 text-sm text-zinc-100 shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-violet-500/50"
                 >
+                  +{" "}
+                  <option value="" className="bg-zinc-800 text-zinc-500">
+                    + — Untagged — +{" "}
+                  </option>
                   {Object.entries(tierLabels).map(([value, label]) => (
                     <option key={value} value={value} className="bg-zinc-800">
                       {label}

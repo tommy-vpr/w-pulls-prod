@@ -103,7 +103,9 @@ export class ProductRepository {
       where.category = category as ProductCategory;
     }
 
-    if (tier) {
+    if (tier === "untagged") {
+      where.tier = null;
+    } else if (tier) {
       where.tier = tier as ProductTier;
     }
 

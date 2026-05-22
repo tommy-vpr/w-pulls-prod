@@ -10,6 +10,15 @@ export const TIER_ORDER: ProductTier[] = [
   "GRAIL",
 ];
 
+// Special config returned when a product's tier is null (untagged)
+export const UNTAGGED_CONFIG: TierConfig = {
+  label: "Untagged",
+  color: "text-zinc-500",
+  bgColor: "bg-zinc-900/50",
+  borderColor: "border-zinc-700/50",
+  hexColor: "#52525b",
+};
+
 export type TierConfig = {
   label: string;
   color: string;
@@ -72,7 +81,7 @@ export const TIER_CONFIG: Record<ProductTier, TierConfig> = {
 
 // Type guard to check if string is valid ProductTier
 export function isValidTier(
-  tier: string | null | undefined
+  tier: string | null | undefined,
 ): tier is ProductTier {
   return tier != null && tier in TIER_CONFIG;
 }
@@ -93,6 +102,9 @@ export function isHighTier(tier: string | null | undefined): boolean {
 export function getTierConfig(tier: string | null | undefined): TierConfig {
   if (isValidTier(tier)) {
     return TIER_CONFIG[tier];
+  }
+  if (tier == null) {
+    return UNTAGGED_CONFIG;
   }
   return TIER_CONFIG.COMMON;
 }
