@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ProductsTable } from "./_components/products-table";
 import { getProductsAction } from "@/app/actions/product.actions";
 import { ProductsFilters } from "./_components/product-filter";
+import { CsvImportButton } from "@/components/products/csv-import-button";
 
 export const dynamic = "force-dynamic";
 
@@ -100,15 +101,18 @@ export default async function ProductsPage({
             Manage your product catalog
           </p>
         </div>
-        <Button
-          asChild
-          className="group/btn relative h-10 px-6 rounded-md bg-gradient-to-br from-violet-600 to-purple-600 font-medium text-white text-sm shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-85 transition"
-        >
-          <Link href="/admin/products/new">
-            <Plus className="mr-2 h-4 w-4" />
-            Add Product
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <CsvImportButton />
+          <Button
+            asChild
+            className="group/btn relative h-10 px-6 rounded-md bg-gradient-to-br from-violet-600 to-purple-600 font-medium text-white text-sm shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-85 transition"
+          >
+            <Link href="/admin/products/new">
+              <Plus className="mr-2 h-4 w-4" />
+              Add Product
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Filter */}

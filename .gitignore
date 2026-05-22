@@ -49,3 +49,8 @@ stripe.log
 
 # Next Auth (optional cache)
 .next-auth/
+
+# Local backups (do not commit)
+*.MY-*
+*.OLD-*
+*-backup-DELETE-LATER/

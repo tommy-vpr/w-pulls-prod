@@ -117,6 +117,7 @@ model Product {
   slug        String          @unique
   description String?         @db.Text
   price       Decimal         @db.Decimal(10, 2)
+  cost        Decimal?        @db.Decimal(10, 2)
   imageUrl    String?
   sku         String          @unique
 
@@ -127,7 +128,7 @@ model Product {
   inventorySyncedAt DateTime?
 
   category    ProductCategory
-  tier        ProductTier     @default(COMMON)
+  tier        ProductTier?
 
   inventory   Int             @default(0)
   isActive    Boolean         @default(true)

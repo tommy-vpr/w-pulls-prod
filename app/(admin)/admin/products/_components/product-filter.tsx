@@ -37,6 +37,7 @@ const statusOptions = [
 
 const tierOptions = [
   { value: "all", label: "All Tiers" },
+  { value: "untagged", label: "Untagged" },
   ...TIER_ORDER.map((tier) => ({
     value: tier,
     label: getTierConfig(tier).label,
@@ -78,7 +79,7 @@ export function ProductsFilters({
 
       return newParams.toString();
     },
-    [searchParams]
+    [searchParams],
   );
 
   const handleSearch = (value: string) => {
@@ -229,7 +230,7 @@ export function ProductsFilters({
             <FilterTag
               label={`Category: ${
                 categoryOptions.find(
-                  (c) => c.value === searchParams.get("category")
+                  (c) => c.value === searchParams.get("category"),
                 )?.label
               }`}
               onRemove={() => handleCategoryChange("all")}

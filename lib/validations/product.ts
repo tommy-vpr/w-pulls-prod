@@ -11,9 +11,20 @@ export const createProductSchema = z.object({
     .refine((val) => !isNaN(parseFloat(val)) && parseFloat(val) >= 0, {
       message: "Price must be a valid positive number",
     }),
+  cost: z
+    .string()
+    .refine(
+      (val) => !val || (!isNaN(parseFloat(val)) && parseFloat(val) >= 0),
+      {
+        message: "Cost must be a valid non-negative number",
+      },
+    )
+    .optional()
+    .nullable(),
   imageUrl: z.string().url("Invalid image URL").optional().nullable(),
   category: productCategorySchema,
-  tier: z.nativeEnum(ProductTier),
+  // tier is optional + nullable — leave empty for "untagged" products
+  tier: z.nativeEnum(ProductTier).optional().nullable(),
   sku: z
     .string()
     .min(1, "SKU is required")

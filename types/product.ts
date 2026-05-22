@@ -7,8 +7,10 @@ export interface ProductListItem {
   title: string;
   slug: string;
   price: number;
+  cost: number | null;
   imageUrl: string | null;
   category: string | null;
+  tier: ProductTier | null;
   inventory: number;
   isActive: boolean;
   createdAt: Date;
@@ -16,7 +18,8 @@ export interface ProductListItem {
 
 export interface ProductFilters {
   category?: ProductCategory | string;
-  tier?: ProductTier | string;
+  /** Pass "untagged" to filter for null-tier products */
+  tier?: ProductTier | "untagged" | string;
   isActive?: boolean;
   search?: string;
   stock?: "instock" | "outofstock" | "low";
@@ -25,7 +28,7 @@ export interface ProductFilters {
 export interface PaginationParams {
   page?: number;
   limit?: number;
-  sortBy?: string; // Optional: add sorting
+  sortBy?: string;
   sortOrder?: "asc" | "desc";
 }
 
@@ -51,9 +54,10 @@ export interface SerializedProduct {
   slug: string;
   description: string | null;
   price: string;
+  cost: string | null;
   imageUrl: string | null;
   category: string | null;
-  tier: string;
+  tier: ProductTier | null;
   sku: string | null;
   inventory: number;
   isActive: boolean;
@@ -65,11 +69,12 @@ export interface SerializedProduct {
   inventorySyncedAt?: string | null;
 }
 
-// Helper to serialize Product for client components
 export function serializeProduct(product: Product): SerializedProduct {
   return {
     ...product,
     price: product.price.toString(),
+    cost: product.cost?.toString() ?? null,
+    tier: product.tier ?? null,
     createdAt: product.createdAt.toISOString(),
     updatedAt: product.updatedAt.toISOString(),
     weight: product.weight?.toString() ?? null,
@@ -81,11 +86,4 @@ export function serializeProduct(product: Product): SerializedProduct {
 
 export function serializeProducts(products: Product[]): SerializedProduct[] {
   return products.map(serializeProduct);
-}
-
-export interface ProductFilters {
-  category?: string;
-  tier?: string; // Add this
-  isActive?: boolean;
-  search?: string;
 }
