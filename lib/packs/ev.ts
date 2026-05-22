@@ -138,6 +138,7 @@ function avgValueByTier(
 
   for (const p of products) {
     if (!p.isActive || p.inventory <= 0) continue;
+    if (p.tier === null) continue; // skip untagged products
     if (!isProductInBand(Number(p.price), p.tier, packPriceCents)) continue;
     sums[p.tier] += valueFn(p) * p.inventory;
     counts[p.tier] += p.inventory;
@@ -206,7 +207,7 @@ export function getTierStats(products: Product[]) {
 
   for (const p of products) {
     if (!p.isActive || p.inventory <= 0) continue;
-
+    if (p.tier === null) continue; // skip untagged products
     const price = Number(p.price);
 
     stats[p.tier].productCount += 1;
@@ -259,6 +260,7 @@ export function getInBandTierStats(
 
   for (const p of products) {
     if (!p.isActive || p.inventory <= 0) continue;
+    if (p.tier === null) continue; // skip untagged products
     if (!isProductInBand(Number(p.price), p.tier, packPriceCents)) continue;
     const price = Number(p.price);
     stats[p.tier].productCount += 1;

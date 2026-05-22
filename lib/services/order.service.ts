@@ -24,7 +24,7 @@ export interface SerializedOrderItem {
     imageUrl: string | null;
     description: string | null;
     price: string;
-    tier: string;
+    tier: string | null;
     category: string;
   };
 }

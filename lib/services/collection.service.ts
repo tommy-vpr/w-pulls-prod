@@ -51,6 +51,8 @@ export class CollectionService {
       for (const item of order.items) {
         const product = item.product;
         if (!product) continue;
+        // Untagged products shouldn't appear in collections, but defensively skip
+        if (product.tier === null) continue;
 
         const value = Number(item.unitPrice);
         const isSoldBack = item.disposition === "SOLD_BACK";
