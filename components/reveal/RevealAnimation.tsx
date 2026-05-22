@@ -12,7 +12,7 @@ import RevealStage, { RevealState } from "./RevealStage";
 
 interface RevealAnimationProps {
   product: SerializedProduct;
-  tier: string;
+  tier: string | null;
   packName: string;
 }
 
@@ -63,7 +63,9 @@ export function RevealAnimation({
 }: RevealAnimationProps) {
   const [state, setState] = useState<RevealState>("IDLE");
 
-  const tierStyle = tierConfig[tier] || tierConfig.COMMON;
+  const tierStyle = tier
+    ? tierConfig[tier] || tierConfig.COMMON
+    : tierConfig.COMMON;
 
   const handleRevealSequence = () => {
     setState("CHARGING");
@@ -114,7 +116,7 @@ export function RevealAnimation({
             className={cn(
               "text-lg px-4 py-1 mb-4",
               tierStyle.bgColor,
-              "text-white border-0"
+              "text-white border-0",
             )}
           >
             {tierStyle.label}
@@ -172,7 +174,9 @@ export function RevealAnimation({
           border: none;
           cursor: pointer;
           isolation: isolate;
-          transition: transform 0.25s ease, box-shadow 0.25s ease,
+          transition:
+            transform 0.25s ease,
+            box-shadow 0.25s ease,
             filter 0.25s ease;
         }
 
@@ -189,12 +193,15 @@ export function RevealAnimation({
           filter: blur(16px);
           opacity: 0.6;
           z-index: -1;
-          transition: opacity 0.25s ease, filter 0.25s ease;
+          transition:
+            opacity 0.25s ease,
+            filter 0.25s ease;
         }
 
         .neon-btn:hover {
           transform: translateY(-1px) scale(1.02);
-          box-shadow: 0 10px 40px rgba(32, 200, 60, 0.45),
+          box-shadow:
+            0 10px 40px rgba(32, 200, 60, 0.45),
             0 0 60px rgba(20, 209, 45, 0.35);
           filter: brightness(1.1);
         }

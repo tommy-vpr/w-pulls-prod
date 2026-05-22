@@ -264,7 +264,10 @@ export function ProductForm({ product, mode }: ProductFormProps) {
               </p>
             </div>
             <div className="p-6">
-              <BandEligibilityChart price={priceNumber} tier={tierInput} />
+              <BandEligibilityChart
+                price={priceNumber}
+                tier={tierInput || null}
+              />
             </div>
           </div>
         </div>
@@ -476,9 +479,8 @@ export function ProductForm({ product, mode }: ProductFormProps) {
                   }
                   className="flex h-9 w-full rounded-md border border-zinc-700 bg-zinc-800/50 px-3 py-1 text-sm text-zinc-100 shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-violet-500/50"
                 >
-                  +{" "}
                   <option value="" className="bg-zinc-800 text-zinc-500">
-                    + — Untagged — +{" "}
+                    — Untagged —
                   </option>
                   {Object.entries(tierLabels).map(([value, label]) => (
                     <option key={value} value={value} className="bg-zinc-800">

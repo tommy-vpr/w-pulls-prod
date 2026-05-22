@@ -4,7 +4,7 @@ import { resend } from "@/lib/resend";
 interface ShipmentItem {
   title: string;
   imageUrl?: string | null;
-  tier: string;
+  tier: string | null;
 }
 
 interface SendShipmentConfirmedParams {
@@ -61,7 +61,7 @@ function generateHTML(params: SendShipmentConfirmedParams): string {
         </td>
         <td style="padding: 10px 0; padding-left: 14px; vertical-align: middle;">
           <p style="font-size:14px;font-weight:bold;color:#ffffff;margin:0 0 3px 0;">${item.title}</p>
-          <p style="font-size:11px;color:rgba(0,255,255,0.5);margin:0;text-transform:uppercase;letter-spacing:1px;">${item.tier.replace("_", " ")}</p>
+          <p style="font-size:11px;color:rgba(0,255,255,0.5);margin:0;text-transform:uppercase;letter-spacing:1px;">${(item.tier ?? "Untagged").replace("_", " ")}</p>
         </td>
       </tr>`,
     )

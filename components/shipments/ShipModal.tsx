@@ -10,7 +10,7 @@ export interface ShipItem {
   productId: string;
   title: string;
   imageUrl: string | null;
-  tier: string;
+  tier: string | null;
 }
 
 export interface DefaultAddress {

@@ -12,7 +12,7 @@ type AnimationStage = "idle" | "tearing" | "revealing" | "done";
 
 interface PackRevealAnimationProps {
   product: SerializedProduct;
-  tier: string;
+  tier: string | null;
   packName: string;
   packTopImage?: string;
   packBottomImage?: string;

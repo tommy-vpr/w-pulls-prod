@@ -173,10 +173,16 @@ export function ProductsTable({ products }: ProductsTableProps) {
                 </TableCell>
                 <TableCell>
                   <Badge
-                    variant={tierVariants[product.tier] || "secondary"}
+                    variant={
+                      product.tier
+                        ? tierVariants[product.tier] || "secondary"
+                        : "secondary"
+                    }
                     className="whitespace-nowrap"
                   >
-                    {tierLabels[product.tier] || product.tier}
+                    {product.tier
+                      ? tierLabels[product.tier] || product.tier
+                      : "Untagged"}
                   </Badge>
                 </TableCell>
                 <TableCell className="font-medium">
@@ -188,8 +194,8 @@ export function ProductsTable({ products }: ProductsTableProps) {
                       product.inventory <= 0
                         ? "text-destructive"
                         : product.inventory <= 10
-                        ? "text-amber-600"
-                        : ""
+                          ? "text-amber-600"
+                          : ""
                     }
                   >
                     {product.inventory}

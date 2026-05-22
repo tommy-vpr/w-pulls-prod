@@ -41,7 +41,7 @@ const adjust = (
 // ============================================
 interface PackRevealAnimationProps {
   // product: SerializedProduct;
-  tier: string;
+  tier: string | null;
   packName: string;
   orderId: string;
   packTopImage?: string;
@@ -1039,7 +1039,7 @@ export function PackSlashAnimation({
                   revealedProduct?.imageUrl || "/images/placeholder-card.png"
                 }
                 alt={revealedProduct?.title ?? ""}
-                rarity={tier}
+                rarity={tier ?? undefined}
                 isActive={stage === "done"}
               />
             </div>

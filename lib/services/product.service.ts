@@ -112,7 +112,7 @@ export class ProductService {
           newValue: input.inventory,
         });
       }
-      if (input.tier && input.tier !== existingProduct.tier) {
+      if (input.tier !== undefined && input.tier !== existingProduct.tier) {
         changes.push({
           field: "tier",
           oldValue: existingProduct.tier,

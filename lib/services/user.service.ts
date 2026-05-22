@@ -62,7 +62,7 @@ export interface SerializedUserOrderFull {
     imageUrl: string | null;
     price: string;
     description: string | null;
-    tier: string;
+    tier: string | null;
     category: string;
   } | null;
 }

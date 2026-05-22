@@ -6,7 +6,7 @@ export interface SerializedOrderItemProduct {
   description: string | null;
   imageUrl: string | null;
   price: string;
-  tier: string;
+  tier: string | null;
   category: string;
 }
 
@@ -16,7 +16,7 @@ export function serializeOrderItemProduct(product: {
   description: string | null;
   imageUrl: string | null;
   price: Prisma.Decimal;
-  tier: string;
+  tier: string | null;
   category: string;
 }): SerializedOrderItemProduct {
   return {

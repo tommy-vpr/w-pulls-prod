@@ -55,7 +55,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   if (!product) notFound();
 
   const tierConfig = getTierConfig(product.tier);
-  const tierColor = tierColors[product.tier] || "#78ff7c";
+  const tierColor = (product.tier && tierColors[product.tier]) || "#78ff7c";
 
   const relatedProducts = await prisma.product.findMany({
     where: {

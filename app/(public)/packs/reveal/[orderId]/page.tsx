@@ -1,11 +1,6 @@
 export const dynamic = "force-dynamic";
 import { notFound, redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
-import { RevealAnimation } from "@/components/reveal/RevealAnimation";
-import { serializeProduct } from "@/types/product";
-import { rollTier, pickProductWithBump } from "@/lib/packs/ev";
-import { packById } from "@/lib/packs/config";
-import { PackRevealAnimation } from "@/components/reveal/PackRevealAnimation";
 import { PackSlashAnimation } from "@/components/reveal/PackSlashAnimation";
 import { getTierConfig } from "@/lib/tier-config";
 import { PackLoadingSparks } from "@/components/reveal/PackLoadingSparks";

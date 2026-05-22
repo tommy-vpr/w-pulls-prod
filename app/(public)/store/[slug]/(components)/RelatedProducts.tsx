@@ -27,7 +27,6 @@ export function RelatedProducts({ products }: RelatedProductsProps) {
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
       {products.map((product) => {
         const tierConfig = getTierConfig(product.tier);
-        const tierColor = tierColors[product.tier] || "#78ff7c";
 
         return (
           <Link

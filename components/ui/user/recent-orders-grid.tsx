@@ -15,7 +15,7 @@ interface Order {
     title: string;
     imageUrl: string | null;
     price: any;
-    tier: string;
+    tier: string | null;
   } | null;
 }
 
