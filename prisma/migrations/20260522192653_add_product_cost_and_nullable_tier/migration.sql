@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "Product" ADD COLUMN     "cost" DECIMAL(10,2),
+ALTER COLUMN "tier" DROP NOT NULL,
+ALTER COLUMN "tier" DROP DEFAULT;
