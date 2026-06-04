@@ -5,7 +5,6 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { getTierConfig } from "@/lib/tier-config";
 import { SerializedProduct } from "@/types/product";
-import { TiltCard } from "@/components/ui/tilt-card";
 import { MetalTierBadge } from "./Metaltierbadge";
 
 interface ProductCardProps {
@@ -17,40 +16,27 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <div className="">
-      <TiltCard className="">
-        <Link
-          href={`/store/${product.slug}`}
-          className="group relative flex flex-col"
-        >
-          {/* Image */}
-          <div className="relative aspect-[3/4] h-full rounded-xl overflow-hidden">
-            {product.imageUrl ? (
-              <Image
-                src={product.imageUrl}
-                alt={product.title}
-                fill
-                className="object-cover"
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center">
-                <span className="text-zinc-600 text-sm">No image</span>
-              </div>
-            )}
-          </div>
+      <Link
+        href={`/store/${product.slug}`}
+        className="group relative flex flex-col"
+      >
+        {/* Image */}
+        <div className="relative aspect-[3/4] h-full rounded-xl overflow-hidden">
+          {product.imageUrl ? (
+            <Image
+              src={product.imageUrl}
+              alt={product.title}
+              fill
+              className="object-contain transition-transform duration-300 ease-out group-hover:scale-95"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center">
+              <span className="text-zinc-600 text-sm">No image</span>
+            </div>
+          )}
+        </div>
+      </Link>
 
-          {/* Hover Glow Effect */}
-          <div
-            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-xl z-[5]"
-            style={{
-              background: `radial-gradient(
-            circle at 50% 100%,
-            rgba(250, 250, 250, 0.08) 30%,
-            transparent 60%
-            )`,
-            }}
-          />
-        </Link>
-      </TiltCard>
       {/* Content Overlay - Bottom */}
       <div className="relative mt-2">
         {/* Tier Badge - Top Left */}
@@ -62,12 +48,7 @@ export function ProductCard({ product }: ProductCardProps) {
         </h3>
 
         <div className="font-mono flex items-center justify-between">
-          {/* <span className="font-light text-emerald-400">
-            ${Number(product.price).toFixed(2)}
-          </span> */}
-
           <p
-            // className="text-base font-mono text-[#78ff7c]"
             className="text-base font-mono text-green-400"
             style={{ textShadow: "0 0 6px rgba(120,255,124,.4)" }}
           >

@@ -6,7 +6,6 @@ import { Product } from "@prisma/client";
 import { cn } from "@/lib/utils";
 import { getTierConfig } from "@/lib/tier-config";
 import { MetalTierBadge } from "../../(components)/Metaltierbadge";
-import { TiltCard } from "@/components/ui/tilt-card";
 
 interface RelatedProductsProps {
   products: Product[];
@@ -35,53 +34,23 @@ export function RelatedProducts({ products }: RelatedProductsProps) {
             className="group flex flex-col"
           >
             {/* Image Card */}
-            <TiltCard>
-              <div className="relative aspect-[3/4] rounded-xl overflow-hidden">
-                {product.imageUrl ? (
-                  <Image
-                    src={product.imageUrl}
-                    alt={product.title}
-                    fill
-                    className="object-contain transition-transform duration-500"
-                    sizes="(max-width: 768px) 50vw, 25vw"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center">
-                    <span className="font-mono text-[#3de14d] text-sm">
-                      NO IMAGE
-                    </span>
-                  </div>
-                )}
-
-                {/* Scanline */}
-                <div
-                  className="absolute inset-0 pointer-events-none opacity-20"
-                  style={{
-                    background: `repeating-linear-gradient(
-                    to bottom,
-                    rgba(120,255,124,0.03) 0px,
-                    rgba(120,255,124,0.03) 1px,
-                    rgba(0,0,0,0.05) 2px,
-                    rgba(0,0,0,0.05) 3px
-                  )`,
-                  }}
+            <div className="relative aspect-[3/4] rounded-xl overflow-hidden">
+              {product.imageUrl ? (
+                <Image
+                  src={product.imageUrl}
+                  alt={product.title}
+                  fill
+                  className="object-contain transition-transform duration-300 ease-out group-hover:scale-95"
+                  sizes="(max-width: 768px) 50vw, 25vw"
                 />
-
-                {/* Vignette */}
-                {/* <div
-                className="absolute inset-0 pointer-events-none"
-                style={{ boxShadow: "inset 0 0 40px rgba(0,0,0,.4)" }}
-              /> */}
-
-                {/* Hover Glow */}
-                {/* <div
-                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-xl"
-                style={{
-                  background: `radial-gradient(circle at 50% 100%, ${tierColor}20 0%, transparent 60%)`,
-                }}
-              /> */}
-              </div>
-            </TiltCard>
+              ) : (
+                <div className="flex h-full items-center justify-center">
+                  <span className="font-mono text-[#3de14d] text-sm">
+                    NO IMAGE
+                  </span>
+                </div>
+              )}
+            </div>
 
             {/* Content */}
             <div className="mt-2 px-1">

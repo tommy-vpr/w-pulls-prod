@@ -385,7 +385,10 @@ export function PackCard({
             </h3>
 
             {/* Price */}
-            <div className="text-3xl font-black text-white mb-3 tracking-tight">
+            <div
+              className="text-5xl font-extralight text-gray-100 mb-3 tracking-tight"
+              style={{ WebkitTextStroke: "0.5px rgb(17 24 39)" }}
+            >
               {pack.displayPrice}
             </div>
 
