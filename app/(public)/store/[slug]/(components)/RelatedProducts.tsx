@@ -54,13 +54,7 @@ export function RelatedProducts({ products }: RelatedProductsProps) {
 
             {/* Content */}
             <div className="mt-2 px-1">
-              {/* Tier Badge */}
-              <MetalTierBadge label={tierConfig.label} tier={product.tier} />
-
-              <h3
-                className="mt-1 font-mono font-medium text-[#eafbe0] line-clamp-1 text-sm group-hover:text-[#78ff7c] transition-colors"
-                style={{ textShadow: "0 0 0.5px rgba(120,255,124,.35)" }}
-              >
+              <h3 className="mt-1 font-mono font-medium text-gray-400 text-sm group-hover:text-gray-200 transition-colors">
                 {product.title}
               </h3>
               <p
