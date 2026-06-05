@@ -57,15 +57,18 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const tierConfig = getTierConfig(product.tier);
   const tierColor = (product.tier && tierColors[product.tier]) || "#78ff7c";
 
-  const relatedProducts = await prisma.product.findMany({
+  const pool = await prisma.product.findMany({
     where: {
       isActive: true,
+      inventory: { gt: 0 },
       id: { not: product.id },
       OR: [{ category: product.category }, { tier: product.tier }],
     },
-    take: 4,
+    take: 20,
     orderBy: { createdAt: "desc" },
   });
+
+  const relatedProducts = pool.sort(() => Math.random() - 0.5).slice(0, 4);
 
   return (
     <div className="min-h-screen relative pt-12 bg-slate-950">
@@ -121,13 +124,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
           {/* Right Column - Details */}
           <div className="flex flex-col">
-            {/* Tier Badge */}
-            <div className="mb-4">
-              <MetalTierBadge label={tierConfig.label} tier={product.tier} />
-            </div>
-
             {/* Title */}
-            <h1 className="font-['Oxanium',monospace] font-bold text-2xl sm:text-3xl lg:text-4xl text-gray-200 mb-4">
+            <h1 className="font-['Oxanium',monospace] font-semibold text-xl sm:text-2xl lg:text-3xl text-gray-200 mb-4">
               {product.title}
             </h1>
 

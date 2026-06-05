@@ -39,10 +39,6 @@ export function ProductCard({ product }: ProductCardProps) {
 
       {/* Content Overlay - Bottom */}
       <div className="relative mt-2">
-        {/* Tier Badge - Top Left */}
-        <div className="mb-1">
-          <MetalTierBadge label={tierConfig.label} tier={product.tier} />
-        </div>
         <h3 className="font-['Oxanium',monospace] text-zinc-300 line-clamp-2 text-xs sm:text-base drop-shadow-lg">
           {product.title}
         </h3>
