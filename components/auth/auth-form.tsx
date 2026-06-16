@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -47,6 +47,15 @@ export function AuthForm() {
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [turnstileResetKey, setTurnstileResetKey] = useState(0);
 
+  const [alreadyVerified, setAlreadyVerified] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/verify-status")
+      .then((r) => r.json())
+      .then((d) => setAlreadyVerified(!!d.verified))
+      .catch(() => {});
+  }, []);
+
   const resetTurnstile = () => {
     setTurnstileToken(null);
     setTurnstileResetKey((k) => k + 1);
@@ -62,13 +71,15 @@ export function AuthForm() {
     setError(null);
     setSuccess(null);
 
-    if (!turnstileToken) {
+    if (!turnstileToken && !alreadyVerified) {
       setError("Please complete verification below.");
       return;
     }
 
     // Forward token to Server Action via FormData
-    formData.set("turnstileToken", turnstileToken);
+    if (turnstileToken) {
+      formData.set("turnstileToken", turnstileToken);
+    }
 
     startTransition(async () => {
       let result;
@@ -90,7 +101,8 @@ export function AuthForm() {
 
       if (result?.error) {
         setError(result.error);
-        resetTurnstile(); // token is consumed once it hits the server
+        // Don't reset on credential/email errors — the cookie (if set) still
+        // covers the retry, and resetting re-shows the checkbox needlessly.
       }
     });
   };
@@ -451,29 +463,33 @@ export function AuthForm() {
         )}
 
         {/* ── Cloudflare Turnstile widget ─────────────────────────────── */}
-        <div className="mt-6 flex flex-col items-center gap-2">
-          <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-white/40">
-            <div
-              className={`w-1.5 h-1.5 rounded-full ${
-                turnstileToken ? "bg-emerald-400" : "bg-amber-400 animate-pulse"
-              }`}
+        {!alreadyVerified && (
+          <div className="mt-6 flex flex-col items-center gap-2">
+            <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-white/40">
+              <div
+                className={`w-1.5 h-1.5 rounded-full ${
+                  turnstileToken
+                    ? "bg-emerald-400"
+                    : "bg-amber-400 animate-pulse"
+                }`}
+              />
+              {turnstileToken ? "Verified" : "Verification required"}
+            </div>
+            <TurnstileWidget
+              onSuccess={(token) => {
+                console.log(
+                  "[Turnstile] ✅ Got token:",
+                  token.slice(0, 30) + "...",
+                );
+                setTurnstileToken(token);
+              }}
+              onExpire={() => setTurnstileToken(null)}
+              resetKey={turnstileResetKey}
+              theme="dark"
+              appearance="interaction-only"
             />
-            {turnstileToken ? "Verified" : "Verification required"}
           </div>
-          <TurnstileWidget
-            onSuccess={(token) => {
-              console.log(
-                "[Turnstile] ✅ Got token:",
-                token.slice(0, 30) + "...",
-              );
-              setTurnstileToken(token);
-            }}
-            onExpire={() => setTurnstileToken(null)}
-            resetKey={turnstileResetKey}
-            theme="dark"
-            appearance="interaction-only"
-          />
-        </div>
+        )}
 
         {/* Terms */}
         {mode === "signup" && (
