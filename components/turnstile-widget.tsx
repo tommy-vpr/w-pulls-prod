@@ -24,15 +24,17 @@ export function TurnstileWidget({
   onError,
   resetKey,
   theme = "dark",
-  appearance = "always",
+  appearance = "interaction-only",
 }: TurnstileWidgetProps) {
   const ref = useRef<TurnstileInstance | null>(null);
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
-  // Reset widget when parent bumps resetKey (e.g. after failed verification)
+  const prevResetKey = useRef(resetKey);
+
   useEffect(() => {
-    if (resetKey !== undefined) {
+    if (resetKey !== undefined && resetKey !== prevResetKey.current) {
       ref.current?.reset();
+      prevResetKey.current = resetKey;
     }
   }, [resetKey]);
 

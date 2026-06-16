@@ -12,11 +12,18 @@ import { sendEmail } from "../sendEmail";
 import { passwordResetEmail } from "../emails/passwordResetEmail";
 import { verificationEmail } from "../emails/verificationEmail";
 import { verifyTurnstile } from "@/lib/cloudflare/turnstile";
+import {
+  hasValidVerifiedCookie,
+  setVerifiedCookie,
+} from "@/lib/cloudflare/verified-cookie";
 
 // ─────────────────────────────────────────────────────────────────────
 // Turnstile gate — call at the start of any publicly-callable action
 // ─────────────────────────────────────────────────────────────────────
 async function gateTurnstile(formData: FormData): Promise<{ error?: string }> {
+  // Already verified within the window — skip the challenge entirely.
+  if (await hasValidVerifiedCookie()) return {};
+
   const tokenRaw = formData.get("turnstileToken");
   const token = typeof tokenRaw === "string" ? tokenRaw : null;
 
@@ -31,6 +38,9 @@ async function gateTurnstile(formData: FormData): Promise<{ error?: string }> {
   if (!result.success) {
     return { error: "Verification failed — please verify again." };
   }
+
+  // Verified — open the window so we don't re-challenge on the next action.
+  await setVerifiedCookie();
   return {};
 }
 

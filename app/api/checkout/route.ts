@@ -8,6 +8,10 @@ import { auth } from "@/lib/auth";
 import { orderAbandonQueue } from "@/lib/queue/orderAbandon.queue";
 import { getOrCreateStripeCustomer } from "@/lib/stripe/customer";
 import { verifyTurnstile, getClientIp } from "@/lib/cloudflare/turnstile";
+import {
+  hasValidVerifiedCookie,
+  setVerifiedCookieOnResponse,
+} from "@/lib/cloudflare/verified-cookie";
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,14 +28,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ── 2. Turnstile gate — BEFORE any expensive work ─────────────────
-    const ip = getClientIp(request.headers);
-    const verification = await verifyTurnstile(turnstileToken, ip);
-    if (!verification.success) {
-      return NextResponse.json(
-        { success: false, error: "verification failed — please re-verify" },
-        { status: 403 },
-      );
+    // ── 2. Turnstile gate — skip if already verified within the window ──
+    let alreadyVerified = await hasValidVerifiedCookie();
+    if (!alreadyVerified) {
+      const ip = getClientIp(request.headers);
+      const verification = await verifyTurnstile(turnstileToken, ip);
+      if (!verification.success) {
+        return NextResponse.json(
+          { success: false, error: "verification failed — please re-verify" },
+          { status: 403 },
+        );
+      }
     }
 
     // ── 3. Auth check ─────────────────────────────────────────────────
@@ -127,7 +134,9 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ success: true, url: checkoutSession.url });
+    const res = NextResponse.json({ success: true, url: checkoutSession.url });
+    if (!alreadyVerified) setVerifiedCookieOnResponse(res);
+    return res;
   } catch (err) {
     console.error("Checkout error:", err);
     return NextResponse.json(
