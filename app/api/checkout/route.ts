@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     }
 
     // ── 2. Turnstile gate — skip if already verified within the window ──
-    let alreadyVerified = await hasValidVerifiedCookie();
+    const alreadyVerified = await hasValidVerifiedCookie();
     if (!alreadyVerified) {
       const ip = getClientIp(request.headers);
       const verification = await verifyTurnstile(turnstileToken, ip);

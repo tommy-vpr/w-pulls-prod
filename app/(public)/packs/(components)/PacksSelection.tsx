@@ -605,9 +605,12 @@ export default function PacksSelection() {
                   <div className="relative h-full">
                     <PackCard
                       pack={pack}
-                      turnstileToken={turnstileToken}
+                      turnstileToken={
+                        turnstileToken ?? (alreadyVerified ? "cookie" : null)
+                      }
                       onTurnstileFailed={() => {
                         setTurnstileToken(null);
+                        setAlreadyVerified(false);
                         setTurnstileResetKey((k) => k + 1);
                       }}
                     />
