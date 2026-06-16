@@ -463,7 +463,7 @@ export function AuthForm() {
         )}
 
         {/* ── Cloudflare Turnstile widget ─────────────────────────────── */}
-        {!alreadyVerified && (
+        {!turnstileToken && (
           <div className="mt-6 flex flex-col items-center gap-2">
             <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-white/40">
               <div
