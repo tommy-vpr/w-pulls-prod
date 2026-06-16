@@ -284,6 +284,7 @@ export default function PacksSelection() {
   const [systemTime, setSystemTime] = useState("");
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [turnstileResetKey, setTurnstileResetKey] = useState(0);
+  const [alreadyVerified, setAlreadyVerified] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -301,6 +302,13 @@ export default function PacksSelection() {
     updateTime();
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/verify-status")
+      .then((r) => r.json())
+      .then((d) => setAlreadyVerified(!!d.verified))
+      .catch(() => {});
   }, []);
 
   return (
