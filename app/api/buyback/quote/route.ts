@@ -8,6 +8,7 @@ import {
   getBuybackRate,
   generateQuoteToken,
   getQuoteExpiresAt,
+  isWithinSellbackWindow,
   QUOTE_EXPIRATION_SECONDS,
   MINIMUM_BUYBACK_AMOUNT,
 } from "@/lib/buyback/config";
@@ -76,6 +77,13 @@ export async function POST(request: NextRequest) {
     if (!orderItem.order.revealedAt) {
       return NextResponse.json(
         { success: false, error: "Pack must be revealed first" },
+        { status: 400 },
+      );
+    }
+
+    if (!isWithinSellbackWindow(orderItem.order.revealedAt)) {
+      return NextResponse.json(
+        { success: false, error: "Sellback window has expired" },
         { status: 400 },
       );
     }

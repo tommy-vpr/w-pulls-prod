@@ -49,6 +49,21 @@ export function calculateBuybackAmount(
 export const QUOTE_EXPIRATION_SECONDS = 600; // 10 minutes
 
 /**
+ * Fixed sellback window, anchored to revealedAt. NOT resettable per quote.
+ * This is the real gate — the quote token's own expiry is only a freshness bound.
+ */
+export const SELLBACK_WINDOW_SECONDS = 600; // 10 min from reveal
+
+export function getSellbackDeadline(revealedAt: Date): Date {
+  return new Date(revealedAt.getTime() + SELLBACK_WINDOW_SECONDS * 1000);
+}
+
+export function isWithinSellbackWindow(revealedAt: Date | null): boolean {
+  if (!revealedAt) return false;
+  return Date.now() < getSellbackDeadline(revealedAt).getTime();
+}
+
+/**
  * Minimum buyback amount in cents
  * Prevents micro-transactions
  */

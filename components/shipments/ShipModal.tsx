@@ -40,6 +40,10 @@ export function ShipModal({
     useState<ShippingMethod>("STANDARD");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [suggestions, setSuggestions] = useState<
+    { placeId: string; text: string }[]
+  >([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const [address, setAddress] = useState({
     name: defaultAddress?.name ?? "",
@@ -50,6 +54,56 @@ export function ShipModal({
     postal: defaultAddress?.postal ?? "",
     country: defaultAddress?.country ?? "US",
   });
+
+  // debounced autocomplete on line1 typing
+  const handleLine1Change = (value: string) => {
+    setAddress((a) => ({ ...a, line1: value }));
+    if (value.length < 3) {
+      setSuggestions([]);
+      return;
+    }
+
+    clearTimeout((window as any).__placesDebounce);
+    (window as any).__placesDebounce = setTimeout(async () => {
+      try {
+        const res = await fetch("/api/places/autocomplete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ input: value }),
+        });
+        const data = await res.json();
+        setSuggestions(data.suggestions ?? []);
+        setShowSuggestions(true);
+      } catch {
+        /* ignore */
+      }
+    }, 300);
+  };
+
+  const selectSuggestion = async (placeId: string) => {
+    setShowSuggestions(false);
+    setSuggestions([]);
+    try {
+      const res = await fetch("/api/places/details", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ placeId }),
+      });
+      const data = await res.json();
+      if (data.address) {
+        setAddress((a) => ({
+          ...a,
+          line1: data.address.line1,
+          city: data.address.city,
+          state: data.address.state,
+          postal: data.address.postal,
+          country: data.address.country || "US",
+        }));
+      }
+    } catch {
+      /* ignore */
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -211,15 +265,37 @@ export function ShipModal({
                 }
                 className="w-full px-3 py-2.5 rounded-lg bg-zinc-900 border border-zinc-700 text-white text-sm placeholder:text-zinc-600 focus:outline-none focus:border-cyan-400/50 transition-colors font-mono"
               />
-              <input
-                type="text"
-                placeholder="Address Line 1 *"
-                value={address.line1}
-                onChange={(e) =>
-                  setAddress((a) => ({ ...a, line1: e.target.value }))
-                }
-                className="w-full px-3 py-2.5 rounded-lg bg-zinc-900 border border-zinc-700 text-white text-sm placeholder:text-zinc-600 focus:outline-none focus:border-cyan-400/50 transition-colors font-mono"
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Address Line 1 *"
+                  value={address.line1}
+                  onChange={(e) => handleLine1Change(e.target.value)}
+                  onFocus={() => suggestions.length && setShowSuggestions(true)}
+                  autoComplete="off"
+                  className="w-full px-3 py-2.5 rounded-lg bg-zinc-900 border border-zinc-700 text-white text-sm placeholder:text-zinc-600 focus:outline-none focus:border-cyan-400/50 transition-colors font-mono"
+                />
+                {showSuggestions && suggestions.length > 0 && (
+                  <div
+                    className="absolute z-10 left-0 right-0 mt-1 rounded-lg overflow-hidden max-h-52 overflow-y-auto"
+                    style={{
+                      background: "rgba(6,12,18,.98)",
+                      border: "1px solid rgba(0,255,255,.25)",
+                    }}
+                  >
+                    {suggestions.map((s) => (
+                      <button
+                        key={s.placeId}
+                        type="button"
+                        onClick={() => selectSuggestion(s.placeId)}
+                        className="cursor-pointer w-full text-left px-3 py-2 text-xs font-mono text-zinc-300 hover:bg-cyan-400/10 transition-colors"
+                      >
+                        {s.text}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               <input
                 type="text"
                 placeholder="Address Line 2 (optional)"

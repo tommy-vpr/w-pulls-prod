@@ -280,9 +280,6 @@ function StatsTicker() {
 export default function HolographicHub() {
   const [mounted, setMounted] = useState(false);
   const [systemTime, setSystemTime] = useState("");
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
-  const [alreadyVerified, setAlreadyVerified] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -300,13 +297,6 @@ export default function HolographicHub() {
     updateTime();
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    fetch("/api/verify-status")
-      .then((r) => r.json())
-      .then((d) => setAlreadyVerified(!!d.verified))
-      .catch(() => {});
   }, []);
 
   return (
@@ -623,50 +613,13 @@ export default function HolographicHub() {
                   <div className="relative h-full">
                     <PackCard
                       pack={pack}
-                      turnstileToken={
-                        turnstileToken ?? (alreadyVerified ? "cookie" : null)
-                      }
-                      onTurnstileFailed={() => {
-                        setTurnstileToken(null);
-                        setAlreadyVerified(false);
-                        setTurnstileResetKey((k) => k + 1);
-                      }}
+                      turnstileToken="signin-gated"
+                      onTurnstileFailed={() => {}}
                     />
                   </div>
                 </div>
               ))}
             </div>
-
-            {/* ── Turnstile verification ─────────────────────────── */}
-            {!alreadyVerified && !turnstileToken && (
-              <section id="turnstile-anchor" className="relative mt-12">
-                <div className="max-w-md mx-auto">
-                  <HoloPanel glow={false} className="px-6 py-5">
-                    <div className="flex flex-col items-center gap-3">
-                      <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-cyan-400/70 font-mono">
-                        <div
-                          className={`w-2 h-2 rounded-full ${
-                            turnstileToken
-                              ? "bg-emerald-400"
-                              : "bg-amber-400 animate-pulse"
-                          }`}
-                        />
-                        {turnstileToken
-                          ? "Verified — purchases enabled"
-                          : "Verification required"}
-                      </div>
-                      <TurnstileWidget
-                        onSuccess={setTurnstileToken}
-                        onExpire={() => setTurnstileToken(null)}
-                        resetKey={turnstileResetKey}
-                        theme="dark"
-                        appearance="interaction-only"
-                      />
-                    </div>
-                  </HoloPanel>
-                </div>
-              </section>
-            )}
 
             {/* Pull rates */}
             <div className="mt-12">

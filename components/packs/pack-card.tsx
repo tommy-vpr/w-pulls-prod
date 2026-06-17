@@ -18,10 +18,6 @@ import { useRouter } from "next/navigation";
 
 interface PackCardProps {
   pack: PackConfig;
-  /** Turnstile verification token from page-level widget. null = not yet verified. */
-  turnstileToken: string | null;
-  /** Called when server rejects the token so the page can reset the widget */
-  onTurnstileFailed?: () => void;
 }
 
 const packStyles: Record<
@@ -140,11 +136,7 @@ function HoloBrackets({ color = "cyan-400" }: { color?: string }) {
   );
 }
 
-export function PackCard({
-  pack,
-  turnstileToken,
-  onTurnstileFailed,
-}: PackCardProps) {
+export function PackCard({ pack }: PackCardProps) {
   const [loading, setLoading] = useState(false);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
@@ -180,39 +172,19 @@ export function PackCard({
   };
 
   const handlePurchase = async () => {
-    // ── Turnstile gate ─────────────────────────────────────────────
-    if (!turnstileToken) {
-      alert("Please complete verification below first.");
-      // Scroll user toward the widget so they can find it
-      document
-        .getElementById("turnstile-anchor")
-        ?.scrollIntoView({ behavior: "smooth", block: "center" });
-      return;
-    }
-
     setLoading(true);
     try {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          packId: pack.id,
-          turnstileToken,
-        }),
+        body: JSON.stringify({ packId: pack.id }),
       });
 
       const data = await res.json();
 
-      // Auth redirect (existing behavior)
+      // Not signed in → go to auth (Turnstile lives there)
       if (res.status === 401 || data.redirect) {
         router.push(data.redirect || "/auth?callbackUrl=/packs");
-        return;
-      }
-
-      // Turnstile rejected — reset page widget so user can re-verify
-      if (res.status === 403 && /verif/i.test(data.error ?? "")) {
-        onTurnstileFailed?.();
-        alert("Verification expired. Please verify again to continue.");
         return;
       }
 
@@ -247,8 +219,7 @@ export function PackCard({
     (t) => t !== "COMMON" && t !== "UNCOMMON",
   ).reduce((sum, t) => sum + (pack.odds[t] ?? 0), 0);
 
-  const isVerified = !!turnstileToken;
-  const buttonDisabled = loading; // Always clickable so we can show the prompt
+  const buttonDisabled = loading;
 
   return (
     <div className="flex flex-col gap-3 h-full">
@@ -434,7 +405,6 @@ export function PackCard({
           "border backdrop-blur-sm",
           buttonHover && "scale-[1.02]",
           loading && "opacity-50 cursor-not-allowed",
-          !isVerified && "opacity-70",
         )}
         style={{
           background: `linear-gradient(135deg, ${style.accentColor}20, ${style.accentColor}10)`,
@@ -444,19 +414,11 @@ export function PackCard({
           color: style.accentColor,
           boxShadow: buttonHover ? `0 0 25px ${style.glowColor}` : "none",
         }}
-        title={
-          !isVerified ? "Complete verification below to enable" : undefined
-        }
       >
         {loading ? (
           <span className="flex items-center justify-center gap-2">
             <Loader2 className="w-4 h-4 animate-spin" />
             Processing...
-          </span>
-        ) : !isVerified ? (
-          <span className="flex items-center justify-center gap-2">
-            <ShieldAlert className="w-4 h-4" />
-            Verify to Purchase
           </span>
         ) : (
           <span className="flex items-center justify-center gap-2">
