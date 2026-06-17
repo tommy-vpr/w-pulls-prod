@@ -52,6 +52,14 @@ export async function triggerWMSShipmentWebhook(shipmentRequest: any) {
   const wmsUrl = process.env.WMS_WEBHOOK_URL;
   const secret = process.env.WMS_WEBHOOK_SECRET;
   if (!wmsUrl || !secret) throw new Error("WMS webhook not configured");
+
+  // Derive the W-Pulls order(s) this shipment covers
+  const orderRefs = (shipmentRequest.items ?? [])
+    .map((i: any) => i.orderItem?.order)
+    .filter(Boolean);
+  const uniqueIds = [...new Set(orderRefs.map((o: any) => o.id))];
+  const singleOrder = uniqueIds.length === 1 ? orderRefs[0] : null;
+
   const res = await fetch(wmsUrl, {
     method: "POST",
     headers: {
@@ -62,6 +70,8 @@ export async function triggerWMSShipmentWebhook(shipmentRequest: any) {
     body: JSON.stringify({
       event: "shipment.requested",
       shipmentRequestId: shipmentRequest.id,
+      wpullsOrderId: singleOrder?.id ?? null, // ← single-order case
+      wpullsOrderNumber: singleOrder?.orderNumber ?? null, // ← raw number (e.g. 18)
       customerName: shipmentRequest.shippingName,
       customerEmail: shipmentRequest.user?.email,
       shippingAddress: {
@@ -127,6 +137,7 @@ export async function triggerWMSProductOrder(order: {
     },
     body: JSON.stringify({
       wpullsOrderId: order.id,
+      wpullsOrderNumber: order.orderNumber,
       orderNumber: `#WPULLS-${String(order.orderNumber)}`,
       customerName: order.customerName ?? "W-Pulls Customer",
       customerEmail: order.customerEmail ?? null,
