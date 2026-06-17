@@ -8,9 +8,9 @@ export default function SiteLayout({
 }) {
   return (
     <div className="bg-slate-950">
-      <Navbar />
+      {/* <Navbar /> */}
       {children}
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 }
