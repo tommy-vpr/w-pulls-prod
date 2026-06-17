@@ -11,15 +11,11 @@ import { SignJWT, jwtVerify } from "jose";
  * Percentage of product value offered for buyback (0.0 - 1.0)
  * Higher tiers get better rates to incentivize keeping lower-value cards
  */
-export const BUYBACK_RATES: Record<ProductTier, number> = {
-  COMMON: 0.5, // 50%
-  UNCOMMON: 0.55, // 55%
-  RARE: 0.6, // 60%
-  ULTRA_RARE: 0.7, // 70%
-  SECRET_RARE: 0.75, // 75%
-  BANGER: 0.8, // 80%
-  GRAIL: 0.85, // 85%
-};
+const FLAT_BUYBACK_RATE = 0.9; // 90% across all tiers
+
+export const BUYBACK_RATES: Record<ProductTier, number> = Object.fromEntries(
+  Object.values(ProductTier).map((tier) => [tier, FLAT_BUYBACK_RATE]),
+) as Record<ProductTier, number>;
 
 /**
  * Get the buyback rate for a given tier

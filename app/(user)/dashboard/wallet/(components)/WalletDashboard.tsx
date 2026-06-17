@@ -854,9 +854,15 @@ export function WalletDashboard({
       } else if (data.alreadyOnboarded) {
         setIsOnboarded(true);
         setHasPayoutAccount(true);
+      } else {
+        // surface the failure instead of silently doing nothing
+        alert(
+          data.error || "Couldn't start payout onboarding. Please try again.",
+        );
       }
     } catch (error) {
       console.error("Connect failed:", error);
+      alert("Couldn't reach the server. Please try again.");
     } finally {
       setIsConnecting(false);
     }

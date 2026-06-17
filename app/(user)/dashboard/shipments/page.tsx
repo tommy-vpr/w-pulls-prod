@@ -37,7 +37,7 @@ const STATUS_CONFIG: Record<
   SENT_TO_WMS: {
     label: "Processing",
     className: "bg-zinc-800/50 text-zinc-300 border-zinc-700",
-    icon: Loader2,
+    icon: Truck,
   },
   IN_PROGRESS: {
     label: "In Progress",
@@ -167,7 +167,7 @@ export default async function ShipmentsPage() {
                     <StatusIcon
                       className={cn(
                         "w-3 h-3",
-                        shipment.status === "SENT_TO_WMS" && "animate-spin",
+                        shipment.status === "SENT_TO_WMS",
                       )}
                     />
                     {config.label}
