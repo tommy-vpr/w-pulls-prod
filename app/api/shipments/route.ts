@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { ItemDisposition } from "@prisma/client";
+import { SHIPPING_RATES, ShippingMethod } from "@/lib/shipments/config";
 
 export async function GET() {
   const session = await auth();
@@ -142,12 +143,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const SHIPPING_FEE: Record<string, number> = {
-      STANDARD: 0,
-      EXPRESS: 999,
-      OVERNIGHT: 1999,
-    };
-    const shippingFeeAmount = SHIPPING_FEE[shippingMethod];
+    const shippingFeeAmount =
+      SHIPPING_RATES[shippingMethod as ShippingMethod].amount;
 
     const shipmentRequest = await prisma.$transaction(async (tx) => {
       const req = await tx.shipmentRequest.create({

@@ -70,7 +70,7 @@ interface BuybackQuote {
 interface HoloCardFaceProps {
   imageUrl: string;
   alt: string;
-  rarity?: string;
+  rarity?: string | null;
   isActive?: boolean;
 }
 
@@ -1187,7 +1187,7 @@ export function PackSlashAnimation({
               </button>
               <button
                 onClick={handleOpenAnother}
-                className="cursor-pointer flex-1 py-2 bg-gray-200 text-gray-700 rounded font-medium text-sm hover:bg-zinc-700 transition-colors"
+                className="cursor-pointer flex-1 py-2 bg-gray-200 text-gray-700 rounded font-medium text-sm hover:bg-zinc-300 transition-colors"
               >
                 Open Another
               </button>

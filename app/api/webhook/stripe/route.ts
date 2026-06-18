@@ -83,7 +83,14 @@ export async function POST(request: NextRequest) {
       where: { id: shipmentRequestId },
       data: { status: "PAID", paidAt: new Date() },
       include: {
-        items: { include: { orderItem: true, product: true } },
+        items: {
+          include: {
+            orderItem: {
+              include: { order: { select: { id: true, orderNumber: true } } },
+            },
+            product: true,
+          },
+        },
         user: true,
       },
     });

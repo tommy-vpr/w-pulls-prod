@@ -7,7 +7,6 @@ import { auditService } from "@/lib/services/audit.service";
 import { auth } from "@/lib/auth";
 import { orderAbandonQueue } from "@/lib/queue/orderAbandon.queue";
 import { getOrCreateStripeCustomer } from "@/lib/stripe/customer";
-import { verifyTurnstile, getClientIp } from "@/lib/cloudflare/turnstile";
 import {
   hasValidVerifiedCookie,
   setVerifiedCookieOnResponse,
@@ -15,11 +14,7 @@ import {
 
 export async function POST(request: NextRequest) {
   try {
-    // ── 1. Parse + validate body ──────────────────────────────────────
-    const { packId, turnstileToken } = (await request.json()) as {
-      packId?: string;
-      turnstileToken?: string;
-    };
+    const { packId } = (await request.json()) as { packId?: string };
 
     if (!packId || typeof packId !== "string") {
       return NextResponse.json(
@@ -28,20 +23,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ── 2. Turnstile gate — skip if already verified within the window ──
-    const alreadyVerified = await hasValidVerifiedCookie();
-    if (!alreadyVerified) {
-      const ip = getClientIp(request.headers);
-      const verification = await verifyTurnstile(turnstileToken, ip);
-      if (!verification.success) {
-        return NextResponse.json(
-          { success: false, error: "verification failed — please re-verify" },
-          { status: 403 },
-        );
-      }
-    }
-
-    // ── 3. Auth check ─────────────────────────────────────────────────
+    // Auth is the gate for pack purchase
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -134,9 +116,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    const res = NextResponse.json({ success: true, url: checkoutSession.url });
-    if (!alreadyVerified) setVerifiedCookieOnResponse(res);
-    return res;
+    return NextResponse.json({ success: true, url: checkoutSession.url });
   } catch (err) {
     console.error("Checkout error:", err);
     return NextResponse.json(

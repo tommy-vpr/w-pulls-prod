@@ -95,10 +95,6 @@ export function RecentOrderCard({ order }: RecentOrderProps) {
           <span className="text-xs text-zinc-500">
             {format(new Date(order.createdAt), "MMM d")}
           </span>
-
-          <span className="text-sm font-medium text-zinc-300">
-            ${(order.amount / 100).toFixed(2)}
-          </span>
         </div>
       </div>
     </Link>

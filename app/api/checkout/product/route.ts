@@ -5,6 +5,11 @@ import { stripe } from "@/lib/stripe";
 import { auth } from "@/lib/auth";
 import { orderAbandonQueue } from "@/lib/queue/orderAbandon.queue";
 import { getOrCreateStripeCustomer } from "@/lib/stripe/customer";
+import { verifyTurnstile, getClientIp } from "@/lib/cloudflare/turnstile";
+import {
+  hasValidVerifiedCookie,
+  setVerifiedCookieOnResponse,
+} from "@/lib/cloudflare/verified-cookie";
 
 export async function POST(request: NextRequest) {
   try {

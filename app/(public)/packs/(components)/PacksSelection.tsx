@@ -4,7 +4,6 @@ import { useEffect, useState, useRef, useMemo } from "react";
 import { PackCard } from "@/components/packs/pack-card";
 import { PACK_CONFIGS } from "@/lib/packs/config";
 import { PackOddsTable } from "./Packoddstable";
-import { TurnstileWidget } from "@/components/turnstile-widget";
 
 export const metadata = {
   title: "Open Packs",
@@ -282,9 +281,6 @@ function StatsTicker() {
 export default function PacksSelection() {
   const [mounted, setMounted] = useState(false);
   const [systemTime, setSystemTime] = useState("");
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
-  const [alreadyVerified, setAlreadyVerified] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -302,13 +298,6 @@ export default function PacksSelection() {
     updateTime();
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    fetch("/api/verify-status")
-      .then((r) => r.json())
-      .then((d) => setAlreadyVerified(!!d.verified))
-      .catch(() => {});
   }, []);
 
   return (
@@ -605,14 +594,8 @@ export default function PacksSelection() {
                   <div className="relative h-full">
                     <PackCard
                       pack={pack}
-                      turnstileToken={
-                        turnstileToken ?? (alreadyVerified ? "cookie" : null)
-                      }
-                      onTurnstileFailed={() => {
-                        setTurnstileToken(null);
-                        setAlreadyVerified(false);
-                        setTurnstileResetKey((k) => k + 1);
-                      }}
+                      turnstileToken="signin-gated"
+                      onTurnstileFailed={() => {}}
                     />
                   </div>
                 </div>
@@ -620,37 +603,6 @@ export default function PacksSelection() {
             </div>
           </div>
         </section>
-
-        {/* Turnstile verification — gates all pack purchases */}
-        {!alreadyVerified && !turnstileToken && (
-          <section id="turnstile-anchor" className="relative px-6 pb-8">
-            <div className="max-w-md mx-auto">
-              <HoloPanel glow={false} className="px-6 py-5">
-                <div className="flex flex-col items-center gap-3">
-                  <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-cyan-400/70 font-mono">
-                    <div
-                      className={`w-2 h-2 rounded-full ${
-                        turnstileToken
-                          ? "bg-emerald-400"
-                          : "bg-amber-400 animate-pulse"
-                      }`}
-                    />
-                    {turnstileToken
-                      ? "Verified — purchases enabled"
-                      : "Verification required"}
-                  </div>
-                  <TurnstileWidget
-                    onSuccess={setTurnstileToken}
-                    onExpire={() => setTurnstileToken(null)}
-                    resetKey={turnstileResetKey}
-                    theme="dark"
-                    appearance="interaction-only"
-                  />
-                </div>
-              </HoloPanel>
-            </div>
-          </section>
-        )}
 
         <section className="w-full max-w-6xl mx-auto">
           {/* <TierBreakdownChart odds={PACK_CONFIGS[0].odds} /> */}

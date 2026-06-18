@@ -11,15 +11,11 @@ import { SignJWT, jwtVerify } from "jose";
  * Percentage of product value offered for buyback (0.0 - 1.0)
  * Higher tiers get better rates to incentivize keeping lower-value cards
  */
-export const BUYBACK_RATES: Record<ProductTier, number> = {
-  COMMON: 0.5, // 50%
-  UNCOMMON: 0.55, // 55%
-  RARE: 0.6, // 60%
-  ULTRA_RARE: 0.7, // 70%
-  SECRET_RARE: 0.75, // 75%
-  BANGER: 0.8, // 80%
-  GRAIL: 0.85, // 85%
-};
+const FLAT_BUYBACK_RATE = 0.9; // 90% across all tiers
+
+export const BUYBACK_RATES: Record<ProductTier, number> = Object.fromEntries(
+  Object.values(ProductTier).map((tier) => [tier, FLAT_BUYBACK_RATE]),
+) as Record<ProductTier, number>;
 
 /**
  * Get the buyback rate for a given tier
@@ -51,6 +47,21 @@ export function calculateBuybackAmount(
  * After this, user must request a new quote
  */
 export const QUOTE_EXPIRATION_SECONDS = 600; // 10 minutes
+
+/**
+ * Fixed sellback window, anchored to revealedAt. NOT resettable per quote.
+ * This is the real gate — the quote token's own expiry is only a freshness bound.
+ */
+export const SELLBACK_WINDOW_SECONDS = 600; // 10 min from reveal
+
+export function getSellbackDeadline(revealedAt: Date): Date {
+  return new Date(revealedAt.getTime() + SELLBACK_WINDOW_SECONDS * 1000);
+}
+
+export function isWithinSellbackWindow(revealedAt: Date | null): boolean {
+  if (!revealedAt) return false;
+  return Date.now() < getSellbackDeadline(revealedAt).getTime();
+}
 
 /**
  * Minimum buyback amount in cents

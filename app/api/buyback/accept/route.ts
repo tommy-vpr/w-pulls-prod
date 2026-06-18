@@ -3,7 +3,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
-import { verifyQuoteToken } from "@/lib/buyback/config";
+import { verifyQuoteToken, isWithinSellbackWindow } from "@/lib/buyback/config";
 import { walletService } from "@/lib/services/wallet.service";
 import { ItemDisposition, WalletTransactionReason } from "@prisma/client";
 
@@ -81,6 +81,16 @@ export async function POST(request: NextRequest) {
         throw new Error(
           `Item already ${orderItem.disposition.toLowerCase().replace("_", " ")}`,
         );
+      }
+
+      // Verify order is still completed
+      if (orderItem.order.status !== "COMPLETED") {
+        throw new Error("Order is no longer eligible for buyback");
+      }
+
+      // ── Fixed sellback window: revealedAt + 10min, server-enforced ──
+      if (!isWithinSellbackWindow(orderItem.order.revealedAt)) {
+        throw new Error("Sellback window has expired for this item");
       }
 
       // Verify order is still completed
