@@ -258,12 +258,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </div>
 
             {/* Add to Cart */}
-            <div className="mb-8">
+            {/* Add Back */}
+            {/* <div className="mb-8">
               <AddToCartButton
                 productId={product.id}
                 disabled={product.inventory <= 0}
               />
-            </div>
+            </div> */}
 
             {/* Trust Badges */}
             <div className="grid grid-cols-3 gap-4 pt-6 border-t border-cyan-400/25">

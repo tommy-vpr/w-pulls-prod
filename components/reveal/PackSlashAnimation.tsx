@@ -185,7 +185,9 @@ function HoloCardFace({
     };
   }, []);
 
-  const normalizedRarity = rarity.toLowerCase().replace(/\s+/g, "_");
+  const normalizedRarity = (rarity ?? "common")
+    .toLowerCase()
+    .replace(/\s+/g, "_");
 
   return (
     <div

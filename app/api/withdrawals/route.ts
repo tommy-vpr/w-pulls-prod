@@ -10,6 +10,7 @@ import {
   MINIMUM_WITHDRAWAL_AMOUNT,
   MAXIMUM_WITHDRAWAL_AMOUNT,
 } from "@/lib/buyback/config";
+import { moneyLoopGuard } from "@/lib/access/guard";
 
 // GET /api/withdrawals - List user's withdrawals
 export async function GET(request: NextRequest) {
@@ -22,6 +23,9 @@ export async function GET(request: NextRequest) {
         { status: 401 },
       );
     }
+
+    const locked = moneyLoopGuard(session?.user?.email);
+    if (locked) return locked;
 
     const { searchParams } = new URL(request.url);
     const limit = Math.min(parseInt(searchParams.get("limit") ?? "20"), 100);

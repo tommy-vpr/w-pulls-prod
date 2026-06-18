@@ -11,6 +11,7 @@ import {
   hasValidVerifiedCookie,
   setVerifiedCookieOnResponse,
 } from "@/lib/cloudflare/verified-cookie";
+import { moneyLoopGuard } from "@/lib/access/guard";
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,6 +36,9 @@ export async function POST(request: NextRequest) {
         { status: 401 },
       );
     }
+
+    const locked = moneyLoopGuard(session?.user?.email);
+    if (locked) return locked;
 
     // ── 4. Validate pack exists ───────────────────────────────────────
     const pack = packById(packId);

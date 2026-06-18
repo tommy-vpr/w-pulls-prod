@@ -10,12 +10,16 @@ import {
   hasValidVerifiedCookie,
   setVerifiedCookieOnResponse,
 } from "@/lib/cloudflare/verified-cookie";
+import { moneyLoopGuard } from "@/lib/access/guard";
 
 export async function POST(request: NextRequest) {
   try {
     // Auth is optional — guests can checkout too
     const session = await auth();
     const userId = session?.user?.id ?? null;
+
+    const locked = moneyLoopGuard(session?.user?.email);
+    if (locked) return locked;
 
     // Get/create Stripe customer BEFORE creating order
     const customerId = userId
