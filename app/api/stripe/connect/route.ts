@@ -36,6 +36,7 @@ export async function POST(request: NextRequest) {
       const account = await stripe.accounts.create({
         country: "US",
         email: user.email,
+        business_type: "individual",
         controller: {
           stripe_dashboard: { type: "none" },
           fees: { payer: "application" },
@@ -44,7 +45,7 @@ export async function POST(request: NextRequest) {
         },
         capabilities: {
           transfers: { requested: true },
-          card_payments: { requested: true },
+          // card_payments: { requested: true },
         },
         metadata: { userId: user.id },
       });
