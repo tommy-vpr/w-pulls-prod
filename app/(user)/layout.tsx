@@ -1,5 +1,6 @@
 import { requireAuth } from "@/lib/auth-utils";
 import { UserSidebar } from "@/components/dashboard/user-sidebar";
+import { canUseMoneyLoop } from "@/lib/access/internal-allowlist";
 
 export default async function UserLayout({
   children,
@@ -10,7 +11,10 @@ export default async function UserLayout({
 
   return (
     <div className="flex min-h-screen">
-      <UserSidebar user={session.user} />
+      <UserSidebar
+        user={session.user}
+        showMoneyLoop={canUseMoneyLoop(session?.user?.email)}
+      />
       <main className="flex-1 lg:pl-64 w-full mx-auto">
         <div className="p-6 mt-12 md:mt-0 lg:p-12">{children}</div>
       </main>
