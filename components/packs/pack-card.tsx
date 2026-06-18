@@ -148,6 +148,9 @@ export function PackCard({ pack }: PackCardProps) {
 
   const style = packStyles[pack.id] || packStyles.silver;
 
+  // MAINTAINENCE MODAL (delete after)
+  const [lockedModal, setLockedModal] = useState<string | null>(null);
+
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return;
 
@@ -191,11 +194,11 @@ export function PackCard({ pack }: PackCardProps) {
       if (data.success && data.url) {
         window.location.href = data.url;
       } else {
-        alert(data.error || "Something went wrong");
+        setLockedModal(data.error || "Something went wrong.");
       }
     } catch (error) {
       console.error("Purchase error:", error);
-      alert("Something went wrong");
+      setLockedModal("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -442,6 +445,52 @@ export function PackCard({ pack }: PackCardProps) {
           }
         }
       `}</style>
+
+      {lockedModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center px-6"
+          onClick={(e) => e.target === e.currentTarget && setLockedModal(null)}
+        >
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setLockedModal(null)}
+          />
+          <div
+            className="relative w-full max-w-sm rounded-2xl p-6 text-center"
+            style={{
+              background:
+                "linear-gradient(180deg, rgba(12,20,28,.98), rgba(6,12,18,.98))",
+              border: "1px solid rgba(0,255,255,.25)",
+              boxShadow: "0 0 40px rgba(0,255,255,.12)",
+            }}
+          >
+            <h3
+              className="font-mono font-semibold text-base uppercase tracking-wider mb-2"
+              style={{
+                color: "#00ffff",
+                textShadow: "0 0 8px rgba(0,255,255,.4)",
+              }}
+            >
+              Temporarily Unavailable
+            </h3>
+            <p className="text-zinc-400 font-mono text-sm leading-relaxed mb-5">
+              {lockedModal}
+            </p>
+            <button
+              onClick={() => setLockedModal(null)}
+              className="cursor-pointer w-full py-2.5 rounded-lg font-mono font-semibold text-sm uppercase tracking-wider transition-all"
+              style={{
+                background:
+                  "linear-gradient(135deg, rgba(0,255,255,.15), rgba(0,255,255,.05))",
+                border: "1px solid rgba(0,255,255,.4)",
+                color: "#00ffff",
+              }}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

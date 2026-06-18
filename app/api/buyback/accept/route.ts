@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { verifyQuoteToken, isWithinSellbackWindow } from "@/lib/buyback/config";
 import { walletService } from "@/lib/services/wallet.service";
 import { ItemDisposition, WalletTransactionReason } from "@prisma/client";
+import { moneyLoopGuard } from "@/lib/access/guard";
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,6 +18,9 @@ export async function POST(request: NextRequest) {
         { status: 401 },
       );
     }
+
+    const locked = moneyLoopGuard(session?.user?.email);
+    if (locked) return locked;
 
     const { orderItemId, quoteToken } = await request.json();
 

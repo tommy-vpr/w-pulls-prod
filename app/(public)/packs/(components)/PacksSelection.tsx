@@ -592,11 +592,7 @@ export default function PacksSelection() {
                     }}
                   />
                   <div className="relative h-full">
-                    <PackCard
-                      pack={pack}
-                      turnstileToken="signin-gated"
-                      onTurnstileFailed={() => {}}
-                    />
+                    <PackCard pack={pack} />
                   </div>
                 </div>
               ))}

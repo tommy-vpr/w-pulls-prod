@@ -611,11 +611,7 @@ export default function HolographicHub() {
                     }}
                   />
                   <div className="relative h-full">
-                    <PackCard
-                      pack={pack}
-                      turnstileToken="signin-gated"
-                      onTurnstileFailed={() => {}}
-                    />
+                    <PackCard pack={pack} />
                   </div>
                 </div>
               ))}
