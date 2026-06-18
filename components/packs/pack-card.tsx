@@ -185,7 +185,13 @@ export function PackCard({ pack }: PackCardProps) {
 
       const data = await res.json();
 
-      // Not signed in → go to auth (Turnstile lives there)
+      // Lockdown wins — show modal regardless of auth state
+      if (res.status === 403 || data.locked) {
+        setLockedModal(data.error || "W-Pulls is temporarily unavailable.");
+        return;
+      }
+
+      // Genuinely not signed in (and not locked) → auth
       if (res.status === 401 || data.redirect) {
         router.push(data.redirect || "/auth?callbackUrl=/packs");
         return;

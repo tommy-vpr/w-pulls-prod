@@ -12,6 +12,7 @@ import {
   setVerifiedCookieOnResponse,
 } from "@/lib/cloudflare/verified-cookie";
 import { moneyLoopGuard } from "@/lib/access/guard";
+import { canUseMoneyLoop } from "@/lib/access/internal-allowlist";
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,21 +25,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Auth is the gate for pack purchase
     const session = await auth();
-    if (!session?.user?.id) {
+
+    // ── Lockdown FIRST — applies to everyone, signed in or not ──
+    if (!canUseMoneyLoop(session?.user?.email)) {
       return NextResponse.json(
         {
           success: false,
-          error: "Unauthorized",
-          redirect: "/auth?callbackUrl=/packs",
+          locked: true,
+          error:
+            "W-Pulls is temporarily unavailable while we finalize a few things.",
         },
-        { status: 401 },
+        { status: 403 },
       );
     }
 
-    const locked = moneyLoopGuard(session?.user?.email);
-    if (locked) return locked;
+    // ── Then the normal auth gate ──
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, redirect: "/auth?callbackUrl=/packs" },
+        { status: 401 },
+      );
+    }
 
     // ── 4. Validate pack exists ───────────────────────────────────────
     const pack = packById(packId);
