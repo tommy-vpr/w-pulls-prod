@@ -16,6 +16,7 @@ import {
   Wallet,
   Menu,
   X,
+  Undo2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signOutAction } from "@/lib/actions/auth.actions";
@@ -33,27 +34,23 @@ interface SidebarUser {
 
 interface UserSidebarProps {
   user: SidebarUser;
+  showMoneyLoop?: boolean;
 }
-
-const navItems = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "My Orders", href: "/dashboard/orders", icon: ShoppingBag },
-  { label: "My Wallet", href: "/dashboard/wallet", icon: Wallet },
-  { label: "Open Packs", href: "/packs", icon: Sparkles },
-  { label: "Collections", href: "/dashboard/collections", icon: Copy },
-  { label: "Shipments", href: "/dashboard/shipments", icon: Truck },
-  { label: "Profile", href: "/dashboard/profile", icon: User },
-  { label: "Settings", href: "/dashboard/settings", icon: Settings },
-];
 
 function NavLinks({
   pathname,
   isAdmin,
   onNavigate,
+  navItems,
 }: {
   pathname: string;
   isAdmin: boolean;
   onNavigate?: () => void;
+  navItems: {
+    label: string;
+    href: string;
+    icon: React.ComponentType<{ className?: string }>;
+  }[];
 }) {
   return (
     <>
@@ -123,11 +120,29 @@ function NavLinks({
   );
 }
 
-export function UserSidebar({ user }: UserSidebarProps) {
+export function UserSidebar({ user, showMoneyLoop = false }: UserSidebarProps) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const isAdmin = user.role === "ADMIN";
+
+  const navItems = [
+    { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+    { label: "My Orders", href: "/dashboard/orders", icon: ShoppingBag },
+    ...(showMoneyLoop
+      ? [{ label: "My Wallet", href: "/dashboard/wallet", icon: Wallet }]
+      : []),
+    ...(showMoneyLoop
+      ? [{ label: "Open Packs", href: "/packs", icon: Sparkles }]
+      : []),
+    ...(showMoneyLoop
+      ? [{ label: "Sell Back", href: "/dashboard/sell-back", icon: Undo2 }]
+      : []),
+    { label: "Collections", href: "/dashboard/collections", icon: Copy },
+    { label: "Shipments", href: "/dashboard/shipments", icon: Truck },
+    { label: "Profile", href: "/dashboard/profile", icon: User },
+    { label: "Settings", href: "/dashboard/settings", icon: Settings },
+  ];
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -252,7 +267,12 @@ export function UserSidebar({ user }: UserSidebarProps) {
 
         {/* Nav */}
         <nav className="flex-1 space-y-1 p-4 overflow-y-auto scrollbar-thin scrollbar-thumb-purple-500/20">
-          <NavLinks pathname={pathname} isAdmin={isAdmin} />
+          <NavLinks
+            pathname={pathname}
+            isAdmin={isAdmin}
+            navItems={navItems}
+            onNavigate={() => setMobileOpen(false)}
+          />{" "}
         </nav>
 
         <UserMenuContent />
@@ -357,6 +377,7 @@ export function UserSidebar({ user }: UserSidebarProps) {
               <NavLinks
                 pathname={pathname}
                 isAdmin={isAdmin}
+                navItems={navItems}
                 onNavigate={() => setMobileOpen(false)}
               />
             </nav>

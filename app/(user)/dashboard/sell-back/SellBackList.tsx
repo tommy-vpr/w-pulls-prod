@@ -122,7 +122,11 @@ function Row({
   );
 }
 
-export function BuybackList({ initialItems }: { initialItems: BuybackItem[] }) {
+export function SellbackList({
+  initialItems,
+}: {
+  initialItems: BuybackItem[];
+}) {
   const router = useRouter();
   const [items, setItems] = useState(initialItems);
 

@@ -7,7 +7,7 @@ import {
   getBuybackRate,
   calculateBuybackAmount,
 } from "@/lib/buyback/config";
-import { BuybackList } from "./BuybackList";
+import { SellbackList } from "./SellBackList";
 
 export const metadata = { title: "Sell Back" };
 export const dynamic = "force-dynamic"; // time-sensitive; never cache
@@ -56,11 +56,8 @@ export default async function BuybackPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-zinc-100 mb-2">Sell Back</h1>
-      <p className="text-zinc-500 mb-8">
-        Cards you can still sell back for wallet credit. Each offer expires 10
-        minutes after reveal.
-      </p>
-      <BuybackList initialItems={eligible} />
+
+      <SellbackList initialItems={eligible} />
     </div>
   );
 }

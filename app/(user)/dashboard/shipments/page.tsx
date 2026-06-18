@@ -193,7 +193,7 @@ export default async function ShipmentsPage() {
                             <Package className="w-4 h-4 text-zinc-600" />
                           </div>
                         )}
-                        <span className="text-xs text-zinc-400 max-w-[120px] truncate">
+                        <span className="text-xs text-zinc-200 max-w-[120px]">
                           {item.product.title}
                         </span>
                       </div>
@@ -201,8 +201,11 @@ export default async function ShipmentsPage() {
                   </div>
 
                   {/* Address */}
-                  <p className="text-xs text-zinc-600">
-                    {shipment.shippingName} · {shipment.shippingCity},{" "}
+                  <p className="text-xs text-zinc-400">
+                    {shipment.shippingName}
+                  </p>
+                  <p className="text-xs text-zinc-400">
+                    {shipment.shippingLine1} {shipment.shippingCity},{" "}
                     {shipment.shippingState} {shipment.shippingPostal}
                   </p>
 
@@ -236,7 +239,7 @@ export default async function ShipmentsPage() {
                         "text-xs font-medium",
                         shipment.shippingFeeAmount === 0
                           ? "text-emerald-400"
-                          : "text-zinc-500",
+                          : "text-zinc-400",
                       )}
                     >
                       {shipment.shippingFeeAmount === 0
