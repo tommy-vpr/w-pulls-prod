@@ -822,7 +822,6 @@ export function PackSlashAnimation({
       left: 0,
       right: 0,
       zIndex: 20,
-      borderRadius: "8px",
       overflow: "hidden",
       transition:
         "transform 0.7s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1)",
