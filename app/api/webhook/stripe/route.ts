@@ -151,6 +151,26 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true });
   }
 
+  // Capture card last4 + brand (PCI-safe fields only)
+  let cardLast4: string | null = null;
+  let cardBrand: string | null = null;
+  try {
+    const fullSession = await stripe.checkout.sessions.retrieve(session.id, {
+      expand: ["payment_intent.latest_charge"],
+    });
+    const pi = fullSession.payment_intent;
+    const charge =
+      typeof pi === "object" && pi !== null ? pi.latest_charge : null;
+    const card =
+      typeof charge === "object" && charge !== null
+        ? charge.payment_method_details?.card
+        : null;
+    cardLast4 = card?.last4 ?? null;
+    cardBrand = card?.brand ?? null;
+  } catch (err) {
+    console.error("[Stripe] Failed to capture card details (non-fatal):", err);
+  }
+
   const address = session.collected_information?.shipping_details?.address;
 
   await prisma.order.update({
@@ -164,6 +184,8 @@ export async function POST(request: NextRequest) {
       amount: session.amount_total,
       customerEmail: session.customer_details?.email ?? order.customerEmail,
       customerName: session.customer_details?.name ?? order.customerName,
+      cardLast4,
+      cardBrand,
       shippingLine1: address?.line1 ?? null,
       shippingLine2: address?.line2 ?? null,
       shippingCity: address?.city ?? null,

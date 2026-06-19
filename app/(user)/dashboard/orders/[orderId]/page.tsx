@@ -667,7 +667,11 @@ function PaymentSummary({ order }: { order: any }) {
             <div className="h-8 w-12 rounded bg-zinc-800 flex items-center justify-center">
               <CreditCard className="h-4 w-4 text-zinc-500" />
             </div>
-            <span className="text-sm text-zinc-400">•••• •••• •••• ****</span>
+            <span className="text-sm text-zinc-400">
+              {order.cardLast4
+                ? `${order.cardBrand ? order.cardBrand.toUpperCase() + " " : ""}•••• ${order.cardLast4}`
+                : "•••• ****"}
+            </span>
           </div>
         </div>
       </div>
