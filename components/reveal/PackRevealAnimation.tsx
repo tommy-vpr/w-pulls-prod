@@ -23,8 +23,8 @@ export function PackRevealAnimation({
   product,
   tier,
   packName,
-  packTopImage = "/images/pack-top.png",
-  packBottomImage = "/images/pack-bottom.png",
+  packTopImage = "/images/pack-top-comp.webp",
+  packBottomImage = "/images/pack-bottom-comp.webp",
   orderId,
 }: PackRevealAnimationProps) {
   const router = useRouter();
@@ -230,7 +230,7 @@ export function PackRevealAnimation({
               "inline-flex items-center rounded-md px-3 py-1.5 text-sm font-medium border",
               tierConfig.bgColor,
               tierConfig.color,
-              tierConfig.borderColor
+              tierConfig.borderColor,
             )}
           >
             <Sparkles className="mr-1.5 h-3.5 w-3.5" />

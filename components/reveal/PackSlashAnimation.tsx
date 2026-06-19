@@ -566,8 +566,8 @@ export function PackSlashAnimation({
   packName,
   orderId,
   defaultShippingAddress,
-  packTopImage = "/images/pack-top.png",
-  packBottomImage = "/images/pack-bottom.png",
+  packTopImage = "/images/pack-top-comp.webp",
+  packBottomImage = "/images/pack-bottom-comp.webp",
 }: PackRevealAnimationProps) {
   const router = useRouter();
   const [stage, setStage] = useState<AnimationStage>("idle");

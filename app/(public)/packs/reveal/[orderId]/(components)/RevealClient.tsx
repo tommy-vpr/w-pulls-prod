@@ -44,8 +44,8 @@ export default function RevealClient({ orderId }: { orderId: string }) {
       tier={order.selectedTier}
       packName={order.packName}
       orderId={order.id}
-      packTopImage="/images/pack-top.png"
-      packBottomImage="/images/pack-bottom.png"
+      packTopImage="/images/pack-top-comp.webp"
+      packBottomImage="/images/pack-bottom-comp.webp"
     />
   );
 }

@@ -19,10 +19,10 @@ const adjust = (
   fromMin: number,
   fromMax: number,
   toMin: number,
-  toMax: number
+  toMax: number,
 ) => {
   return round(
-    toMin + ((toMax - toMin) * (value - fromMin)) / (fromMax - fromMin)
+    toMin + ((toMax - toMin) * (value - fromMin)) / (fromMax - fromMin),
   );
 };
 
@@ -70,21 +70,21 @@ function HoloCardFace({
       bgX: number,
       bgY: number,
       rotX: number,
-      rotY: number
+      rotY: number,
     ) => {
       if (!cardRef.current) return;
 
       const pointerFromCenter = clamp(
         Math.sqrt((y - 50) * (y - 50) + (x - 50) * (x - 50)) / 50,
         0,
-        1
+        1,
       );
 
       cardRef.current.style.setProperty("--pointer-x", `${x}%`);
       cardRef.current.style.setProperty("--pointer-y", `${y}%`);
       cardRef.current.style.setProperty(
         "--pointer-from-center",
-        `${pointerFromCenter}`
+        `${pointerFromCenter}`,
       );
       cardRef.current.style.setProperty("--card-opacity", `${o}`);
       cardRef.current.style.setProperty("--background-x", `${bgX}%`);
@@ -92,7 +92,7 @@ function HoloCardFace({
       cardRef.current.style.setProperty("--rotate-x", `${rotX}deg`);
       cardRef.current.style.setProperty("--rotate-y", `${rotY}deg`);
     },
-    []
+    [],
   );
 
   const handleInteract = useCallback(
@@ -139,7 +139,7 @@ function HoloCardFace({
         updateStyles(percent.x, percent.y, 1, bgX, bgY, rotX, rotY);
       });
     },
-    [isActive, updateStyles]
+    [isActive, updateStyles],
   );
 
   const handleInteractEnd = useCallback(() => {
@@ -495,7 +495,7 @@ export default function PackRevealTest() {
                 "px-4 py-2 rounded-lg text-sm font-medium transition-all",
                 stage === s
                   ? "bg-violet-600 text-white"
-                  : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200"
+                  : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200",
               )}
             >
               {s}
@@ -556,7 +556,7 @@ export default function PackRevealTest() {
           {stage === "tearing" && <SlashEffect color={MOCK_TIER.hexColor} />}
 
           <img
-            src="/images/pack-bottom.png"
+            src="/images/pack-bottom-comp.webp"
             alt="Pack"
             className="w-full h-auto"
           />
@@ -565,7 +565,7 @@ export default function PackRevealTest() {
         {/* Pack Top */}
         <div style={getPackTopStyles()}>
           <img
-            src="/images/pack-top.png"
+            src="/images/pack-top-comp.webp"
             alt="Pack Top"
             className="w-full h-auto"
           />
@@ -590,7 +590,7 @@ export default function PackRevealTest() {
               "inline-flex items-center rounded-md px-3 py-1.5 text-sm font-medium border",
               MOCK_TIER.bgColor,
               MOCK_TIER.color,
-              MOCK_TIER.borderColor
+              MOCK_TIER.borderColor,
             )}
           >
             <Sparkles className="mr-1.5 h-3.5 w-3.5" />
