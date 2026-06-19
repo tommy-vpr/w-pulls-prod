@@ -54,18 +54,22 @@ export function OrderConfirmationEmail({
   total,
   shippingAddress,
 }: OrderConfirmationEmailProps) {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://wpull.com";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://wpulls.com";
 
   return (
     <Html>
       <Head />
-      <Preview>Order Confirmed - W-Pulls #{orderNumber}</Preview>
+      <Preview>Order Confirmed - WPulls #{orderNumber}</Preview>
       <Body style={main}>
         <Container style={container}>
           {/* Header */}
           <Section style={header}>
-            <Text style={logo}>W-Pulls</Text>
-            <Text style={tagline}>CARD SYSTEM</Text>
+            <Img
+              src="https://wpulls.com/images/w-pull-logo.png"
+              alt="W-Pulls"
+              width="140"
+              style={logoImg}
+            />
           </Section>
 
           {/* Order Confirmed Banner */}
@@ -203,7 +207,7 @@ export function OrderConfirmationEmail({
               </Link>
             </Text>
             <Text style={footerCopyright}>
-              © {new Date().getFullYear()} W-Pulls. All rights reserved.
+              © {new Date().getFullYear()} WPulls. All rights reserved.
             </Text>
           </Section>
         </Container>
@@ -217,6 +221,16 @@ const main = {
   backgroundColor: "#030812",
   fontFamily:
     '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+};
+
+const logoImg = {
+  display: "block",
+  margin: "0 auto",
+  maxWidth: "140px",
+  height: "auto",
+  border: "0",
+  outline: "none",
+  textDecoration: "none",
 };
 
 const container = {

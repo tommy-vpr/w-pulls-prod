@@ -566,8 +566,8 @@ export function PackSlashAnimation({
   packName,
   orderId,
   defaultShippingAddress,
-  packTopImage = "/images/pack-top.png",
-  packBottomImage = "/images/pack-bottom.png",
+  packTopImage = "/images/pack-top-comp.webp",
+  packBottomImage = "/images/pack-bottom-comp.webp",
 }: PackRevealAnimationProps) {
   const router = useRouter();
   const [stage, setStage] = useState<AnimationStage>("idle");
@@ -822,7 +822,6 @@ export function PackSlashAnimation({
       left: 0,
       right: 0,
       zIndex: 20,
-      borderRadius: "8px",
       overflow: "hidden",
       transition:
         "transform 0.7s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1)",

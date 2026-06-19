@@ -119,15 +119,19 @@ function generateOrderConfirmationHTML(
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Order Confirmed - W-Pulls #${orderNumber}</title>
+  <title>Order Confirmed - WPulls #${orderNumber}</title>
 </head>
 <body style="background-color: #030812; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0;">
   <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
     
     <!-- Header -->
     <div style="text-align: center; padding: 30px 0;">
-      <p style="font-size: 28px; font-weight: bold; color: #00ffff; letter-spacing: 4px; margin: 0;">W-Pulls</p>
-      <p style="font-size: 10px; color: rgba(0,255,255,0.5); letter-spacing: 3px; margin: 4px 0 0 0;">CARD SYSTEM</p>
+      <div style="text-align:center;padding:30px 0;">
+        <img src="https://wpulls.com/images/w-pull-logo.png"
+            alt="WPulls"
+            width="140"
+            style="display:block;margin:0 auto;max-width:140px;height:auto;border:0;outline:none;text-decoration:none;" />
+      </div>
     </div>
 
     <!-- Order Confirmed Banner -->
@@ -205,7 +209,7 @@ function generateOrderConfirmationHTML(
       <p style="font-size: 12px; color: rgba(255,255,255,0.5); margin: 0 0 10px 0;">
         Questions about your order? <a href="${baseUrl}/support" style="color: #00ffff; text-decoration: underline;">Contact Support</a>
       </p>
-      <p style="font-size: 11px; color: rgba(255,255,255,0.3); margin: 0;">© ${new Date().getFullYear()} W-Pulls. All rights reserved.</p>
+      <p style="font-size: 11px; color: rgba(255,255,255,0.3); margin: 0;">© ${new Date().getFullYear()} WPulls. All rights reserved.</p>
     </div>
 
   </div>
@@ -219,9 +223,9 @@ export async function sendOrderConfirmationEmail(
 ) {
   try {
     const { error } = await resend.emails.send({
-      from: "W-Pulls <orders@emails.hq.team>",
+      from: "WPulls <orders@emails.hq.team>",
       to: params.to,
-      subject: `Order Confirmed - W-Pulls #${params.orderNumber}`,
+      subject: `Order Confirmed - WPulls #${params.orderNumber}`,
       html: generateOrderConfirmationHTML(params),
     });
 
