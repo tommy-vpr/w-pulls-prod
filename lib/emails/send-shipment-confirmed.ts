@@ -86,10 +86,9 @@ function generateHTML(params: SendShipmentConfirmedParams): string {
 
     <!-- Banner -->
     <div style="background:linear-gradient(135deg,rgba(0,255,255,0.1),rgba(0,100,200,0.05));border:1px solid rgba(0,255,255,0.3);border-radius:12px;padding:30px;text-align:center;margin-bottom:28px;">
-      <p style="font-size:44px;color:#00ffff;margin:0 0 10px 0;">📦</p>
       <h1 style="font-size:22px;color:#ffffff;margin:0 0 8px 0;">Shipment Confirmed!</h1>
       <p style="font-size:15px;color:rgba(255,255,255,0.7);margin:0;">
-        Your card${items.length > 1 ? "s are" : " is"} on the way to the warehouse, ${customerName}.
+        We're preparing your card${items.length > 1 ? "s" : ""} for shipment, ${customerName}.
       </p>
     </div>
 
@@ -153,7 +152,7 @@ function generateHTML(params: SendShipmentConfirmedParams): string {
     <div style="background:rgba(0,255,255,0.04);border:1px solid rgba(0,255,255,0.12);border-radius:8px;padding:18px;margin-bottom:24px;">
       <p style="font-size:11px;font-weight:bold;color:#00ffff;letter-spacing:2px;margin:0 0 10px 0;text-transform:uppercase;">What Happens Next</p>
       <p style="font-size:13px;color:rgba(255,255,255,0.6);margin:0;line-height:1.7;">
-        Our warehouse team will pick and pack your card${items.length > 1 ? "s" : ""}.
+        Our team will carefully pick and pack your card${items.length > 1 ? "s" : ""}.
         Once a shipping label is created you'll receive a separate email with your tracking number.
       </p>
     </div>
