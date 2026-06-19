@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
         },
         capabilities: {
           transfers: { requested: true },
-          // card_payments: { requested: true },
+          card_payments: { requested: true },
         },
         metadata: { userId: user.id },
       });
