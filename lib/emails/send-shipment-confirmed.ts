@@ -73,15 +73,17 @@ function generateHTML(params: SendShipmentConfirmedParams): string {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Shipment Confirmed — W-Pulls</title>
+  <title>Shipment Confirmed — WPulls</title>
 </head>
 <body style="background-color:#030812;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;margin:0;padding:0;">
   <div style="max-width:600px;margin:0 auto;padding:20px;">
 
     <!-- Logo -->
     <div style="text-align:center;padding:30px 0;">
-      <p style="font-size:28px;font-weight:bold;color:#00ffff;letter-spacing:4px;margin:0;">W-Pulls</p>
-      <p style="font-size:10px;color:rgba(0,255,255,0.5);letter-spacing:3px;margin:4px 0 0 0;">CARD SYSTEM</p>
+      <img src="https://wpulls.com/images/w-pull-logo.png"
+          alt="WPulls"
+          width="140"
+          style="display:block;margin:0 auto;max-width:140px;height:auto;border:0;outline:none;text-decoration:none;" />
     </div>
 
     <!-- Banner -->
@@ -170,7 +172,7 @@ function generateHTML(params: SendShipmentConfirmedParams): string {
       <p style="font-size:12px;color:rgba(255,255,255,0.4);margin:0 0 8px 0;">
         Questions? <a href="${baseUrl}/support" style="color:#00ffff;text-decoration:underline;">Contact Support</a>
       </p>
-      <p style="font-size:11px;color:rgba(255,255,255,0.25);margin:0;">© ${new Date().getFullYear()} W-Pulls. All rights reserved.</p>
+      <p style="font-size:11px;color:rgba(255,255,255,0.25);margin:0;">© ${new Date().getFullYear()} WPulls. All rights reserved.</p>
     </div>
 
   </div>
@@ -183,7 +185,7 @@ export async function sendShipmentConfirmedEmail(
 ) {
   try {
     const { error } = await resend.emails.send({
-      from: "W-Pulls <orders@emails.hq.team>",
+      from: "WPulls <orders@emails.hq.team>",
       to: params.to,
       subject: `Shipment Confirmed — Your card${params.items.length > 1 ? "s are" : " is"} being packed`,
       html: generateHTML(params),
