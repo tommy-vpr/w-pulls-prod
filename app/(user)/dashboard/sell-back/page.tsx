@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic"; // time-sensitive; never cache
 
 export default async function BuybackPage() {
   const session = await auth();
-  if (!session?.user?.id) redirect("/auth?callbackUrl=/dashboard/buyback");
+  if (!session?.user?.id) redirect("/auth?callbackUrl=/dashboard/sell-back");
 
   const items = await prisma.orderItem.findMany({
     where: {
