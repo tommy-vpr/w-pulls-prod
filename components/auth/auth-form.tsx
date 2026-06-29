@@ -322,6 +322,35 @@ export function AuthForm() {
                 />
               </div>
 
+              {/* ── Cloudflare Turnstile widget ─────────────────────────────── */}
+              {!turnstileToken && (
+                <div className="flex flex-col items-center gap-2 py-2">
+                  <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-white/40">
+                    <div
+                      className={`w-1.5 h-1.5 rounded-full ${
+                        turnstileToken
+                          ? "bg-emerald-400"
+                          : "bg-amber-400 animate-pulse"
+                      }`}
+                    />
+                    {turnstileToken ? "Verified" : "Verification required"}
+                  </div>
+                  <TurnstileWidget
+                    onSuccess={(token) => {
+                      console.log(
+                        "[Turnstile] ✅ Got token:",
+                        token.slice(0, 30) + "...",
+                      );
+                      setTurnstileToken(token);
+                    }}
+                    onExpire={() => setTurnstileToken(null)}
+                    resetKey={turnstileResetKey}
+                    theme="dark"
+                    appearance="interaction-only"
+                  />
+                </div>
+              )}
+
               {/* Password field (not for forgot) */}
               {mode !== "forgot" && (
                 <div className="auth-input-group">
@@ -460,35 +489,6 @@ export function AuthForm() {
                 ? "Verify to continue"
                 : "Google"}
           </button>
-        )}
-
-        {/* ── Cloudflare Turnstile widget ─────────────────────────────── */}
-        {!turnstileToken && (
-          <div className="mt-6 flex flex-col items-center gap-2">
-            <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-white/40">
-              <div
-                className={`w-1.5 h-1.5 rounded-full ${
-                  turnstileToken
-                    ? "bg-emerald-400"
-                    : "bg-amber-400 animate-pulse"
-                }`}
-              />
-              {turnstileToken ? "Verified" : "Verification required"}
-            </div>
-            <TurnstileWidget
-              onSuccess={(token) => {
-                console.log(
-                  "[Turnstile] ✅ Got token:",
-                  token.slice(0, 30) + "...",
-                );
-                setTurnstileToken(token);
-              }}
-              onExpire={() => setTurnstileToken(null)}
-              resetKey={turnstileResetKey}
-              theme="dark"
-              appearance="interaction-only"
-            />
-          </div>
         )}
 
         {/* Terms */}
