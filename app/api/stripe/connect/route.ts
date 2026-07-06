@@ -52,9 +52,7 @@ export async function POST(request: NextRequest) {
           transfers: { requested: true },
         },
 
-        tos_acceptance: {
-          service_agreement: "recipient",
-        },
+        // Remove tos_acceptance entirely for US → US
 
         metadata: { userId: user.id },
       });
