@@ -28,12 +28,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Helper: create a fresh recipient-only connected account.
-    // Payout-only model (Stripe-managed, no dashboard):
-    // - service_agreement "recipient" → receives transfers, never processes charges
-    // - requirement_collection "stripe" + dashboard "none" → Stripe collects info
-    //   AND must own losses (negative balances/refunds/chargebacks), so
-    //   losses.payments MUST be "stripe" — "application" is rejected in this combo.
+    // Helper: create a fresh recipient-only (payout-only) connected account.
+    // Under the recipient service agreement, the account receives transfers and
+    // can NOT process charges — so card_payments must NOT be requested at all.
+    // requirement_collection "stripe" + dashboard "none" → Stripe collects the
+    // individual's info and owns losses (losses.payments must be "stripe").
     const createRecipientAccount = async () => {
       const account = await stripe.accounts.create({
         country: "US",
@@ -48,11 +47,13 @@ export async function POST(request: NextRequest) {
         },
 
         capabilities: {
-          card_payments: { requested: false },
+          card_payments: { requested: true },
           transfers: { requested: true },
         },
 
-        // Remove tos_acceptance entirely for US → US
+        business_profile: {
+          url: "https://wpulls.com",
+        },
 
         metadata: { userId: user.id },
       });
