@@ -29,9 +29,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Helper: create a fresh recipient-only connected account.
-    // - recipient service agreement → payout-only, no card_payments required
-    // - controller.losses/fees = application → platform owns losses + fees
-    //   (required for separate charges & transfers)
+    // Payout-only model (Stripe-managed, no dashboard):
+    // - service_agreement "recipient" → receives transfers, never processes charges
+    // - requirement_collection "stripe" + dashboard "none" → Stripe collects info
+    //   AND must own losses (negative balances/refunds/chargebacks), so
+    //   losses.payments MUST be "stripe" — "application" is rejected in this combo.
     const createRecipientAccount = async () => {
       const account = await stripe.accounts.create({
         country: "US",
@@ -41,12 +43,12 @@ export async function POST(request: NextRequest) {
         controller: {
           stripe_dashboard: { type: "none" },
           fees: { payer: "application" },
-          losses: { payments: "application" },
+          losses: { payments: "stripe" },
           requirement_collection: "stripe",
         },
 
         capabilities: {
-          card_payments: { requested: false }, // ← Add this
+          card_payments: { requested: false },
           transfers: { requested: true },
         },
 
@@ -64,7 +66,6 @@ export async function POST(request: NextRequest) {
 
       return account;
     };
-
     let accountId = user.stripeConnectedAccountId;
     let account;
 
