@@ -52,7 +52,10 @@ export async function POST(request: NextRequest) {
         },
 
         business_profile: {
+          mcc: "7994",
           url: "https://wpulls.com",
+          product_description: "Wallet payout to user",
+          support_phone: "626-808-9090", // pre-fill to drop the last business field
         },
 
         metadata: { userId: user.id },
