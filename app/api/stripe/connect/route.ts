@@ -37,16 +37,23 @@ export async function POST(request: NextRequest) {
         country: "US",
         email: user.email,
         business_type: "individual",
+
         controller: {
           stripe_dashboard: { type: "none" },
           fees: { payer: "application" },
           losses: { payments: "application" },
-          requirement_collection: "application",
+          requirement_collection: "stripe",
         },
+
         capabilities: {
+          card_payments: { requested: false }, // ← Add this
           transfers: { requested: true },
-          card_payments: { requested: true },
         },
+
+        tos_acceptance: {
+          service_agreement: "recipient",
+        },
+
         metadata: { userId: user.id },
       });
 
