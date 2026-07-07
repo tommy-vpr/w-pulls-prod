@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
         controller: {
           stripe_dashboard: { type: "express" },
           fees: { payer: "application" },
-          losses: { payments: "stripe" },
+          losses: { payments: "application" },
           requirement_collection: "stripe",
         },
 
