@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
         business_type: "individual",
 
         controller: {
-          stripe_dashboard: { type: "none" },
+          stripe_dashboard: { type: "express" },
           fees: { payer: "application" },
           losses: { payments: "stripe" },
           requirement_collection: "stripe",
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
           mcc: "7994",
           url: "https://wpulls.com",
           product_description: "Wallet payout to user",
-          support_phone: "626-808-9090", // pre-fill to drop the last business field
+          support_phone: "626-310-2620", // pre-fill to drop the last business field
         },
 
         metadata: { userId: user.id },
