@@ -49,6 +49,9 @@ export function AuthForm() {
 
   const [alreadyVerified, setAlreadyVerified] = useState(false);
 
+  // ── Terms + Privacy acknowledgement (signup only) ────────────────
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+
   useEffect(() => {
     fetch("/api/verify-status")
       .then((r) => r.json())
@@ -64,6 +67,7 @@ export function AuthForm() {
   const switchMode = (newMode: FormMode) => {
     setMode(newMode);
     setError(null);
+    setAcceptedTerms(false); // re-require acknowledgement each time signup is shown
     resetTurnstile(); // tokens are mode-specific, reset on switch
   };
 
@@ -76,9 +80,21 @@ export function AuthForm() {
       return;
     }
 
+    if (mode === "signup" && !acceptedTerms) {
+      setError(
+        "Please acknowledge the Terms of Service and Privacy Policy to continue.",
+      );
+      return;
+    }
+
     // Forward token to Server Action via FormData
     if (turnstileToken) {
       formData.set("turnstileToken", turnstileToken);
+    }
+
+    // Forward acknowledgement to Server Action via FormData
+    if (mode === "signup") {
+      formData.set("acceptedTerms", acceptedTerms ? "true" : "");
     }
 
     startTransition(async () => {
@@ -110,6 +126,13 @@ export function AuthForm() {
   const handleGoogleSignIn = async () => {
     if (!turnstileToken) {
       setError("Please complete verification below.");
+      return;
+    }
+
+    if (mode === "signup" && !acceptedTerms) {
+      setError(
+        "Please acknowledge the Terms of Service and Privacy Policy to continue.",
+      );
       return;
     }
 
@@ -416,10 +439,44 @@ export function AuthForm() {
                 </div>
               )}
 
+              {/* Terms + Privacy acknowledgement (signup only) */}
+              {mode === "signup" && (
+                <label className="flex items-start gap-3 cursor-pointer select-none px-1">
+                  <input
+                    type="checkbox"
+                    name="acceptedTermsCheckbox"
+                    checked={acceptedTerms}
+                    onChange={(e) => setAcceptedTerms(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer rounded border-white/20 bg-white/5 accent-purple-500"
+                  />
+                  <span className="text-xs leading-relaxed text-white/60">
+                    I am 18 or older and I have read and agree to the{" "}
+                    <a
+                      href="/terms-and-conditions"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-purple-400 hover:underline"
+                    >
+                      Terms of Service
+                    </a>{" "}
+                    and{" "}
+                    <a
+                      href="/privacy-policy"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-purple-400 hover:underline"
+                    >
+                      Privacy Policy
+                    </a>
+                    .
+                  </span>
+                </label>
+              )}
+
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isPending}
+                disabled={isPending || (mode === "signup" && !acceptedTerms)}
                 className="auth-submit-btn"
               >
                 {isPending ? (
@@ -429,6 +486,8 @@ export function AuthForm() {
                     <ShieldAlert className="h-4 w-4" />
                     Verify to continue
                   </span>
+                ) : mode === "signup" && !acceptedTerms ? (
+                  "Accept terms to continue"
                 ) : (
                   <>
                     {mode === "login" && "Sign In"}
@@ -489,20 +548,6 @@ export function AuthForm() {
                 ? "Verify to continue"
                 : "Google"}
           </button>
-        )}
-
-        {/* Terms */}
-        {mode === "signup" && (
-          <p className="mt-6 text-center text-xs text-white/40">
-            By creating an account, you agree to our{" "}
-            <a href="/terms" className="text-purple-400 hover:underline">
-              Terms of Service
-            </a>{" "}
-            and{" "}
-            <a href="/privacy" className="text-purple-400 hover:underline">
-              Privacy Policy
-            </a>
-          </p>
         )}
 
         <Link

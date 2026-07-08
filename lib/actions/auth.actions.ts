@@ -56,9 +56,18 @@ export async function signUpAction(formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const confirmPassword = formData.get("confirmPassword") as string;
+  const acceptedTerms = formData.get("acceptedTerms") === "true";
 
   if (!name || !email || !password) {
     return { error: "All fields are required" };
+  }
+
+  // Never trust the client — require the acknowledgement server-side too.
+  if (!acceptedTerms) {
+    return {
+      error:
+        "You must accept the Terms of Service and Privacy Policy to create an account.",
+    };
   }
 
   if (password.length < 8) {
@@ -84,6 +93,7 @@ export async function signUpAction(formData: FormData) {
       name,
       email,
       password: hashedPassword,
+      termsAcceptedAt: new Date(),
     },
   });
 

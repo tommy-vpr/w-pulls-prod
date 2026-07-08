@@ -21,6 +21,9 @@ model User {
   image         String?
   role          UserRole  @default(USER)
 
+  // Legal — timestamp captured when the user accepts Terms + Privacy at signup
+  termsAcceptedAt DateTime?
+
   // Stripe Connect for payouts
   stripeConnectedAccountId String?
   stripeConnectOnboardedAt DateTime?
