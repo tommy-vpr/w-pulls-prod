@@ -5,6 +5,9 @@ import { Inter } from "next/font/google";
 import { SessionProvider } from "@/components/providers/session-provider";
 import { Orbitron, Rajdhani } from "next/font/google";
 import { GTMNoScript, GTMScript } from "@/components/analytics/GTM";
+import { ConsentModeScript } from "@/components/consent/ConsentModeScript";
+import { ConsentProvider } from "@/components/consent/ConsentProvider";
+import { CookieBanner } from "@/components/consent/CookieBanner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -43,13 +46,18 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Consent Mode defaults MUST come before GTM so tags start denied */}
+        <ConsentModeScript />
         <GTMScript />
       </head>
       <body
         className={`${inter.className} ${orbitron.variable} ${rajdhani.variable} bg-[#0a0a0f]`}
       >
         <GTMNoScript />
-        <SessionProvider>{children}</SessionProvider>
+        <ConsentProvider>
+          <SessionProvider>{children}</SessionProvider>
+          <CookieBanner />
+        </ConsentProvider>
       </body>
     </html>
   );
