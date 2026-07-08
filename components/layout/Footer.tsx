@@ -16,8 +16,8 @@ const FOOTER_LINKS = {
     { label: "Support", href: "/support" },
   ],
   legal: [
-    { label: "Terms", href: "/terms" },
-    { label: "Privacy", href: "/privacy" },
+    { label: "Terms", href: "/terms-and-conditions" },
+    { label: "Privacy", href: "/privacy-policy" },
     { label: "Refunds", href: "/refunds" },
   ],
 };

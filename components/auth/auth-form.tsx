@@ -452,7 +452,7 @@ export function AuthForm() {
                   <span className="text-xs leading-relaxed text-white/60">
                     I am 18 or older and I have read and agree to the{" "}
                     <a
-                      href="/terms"
+                      href="/terms-and-conditions"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-purple-400 hover:underline"
@@ -461,7 +461,7 @@ export function AuthForm() {
                     </a>{" "}
                     and{" "}
                     <a
-                      href="/privacy"
+                      href="/privacy-policy"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-purple-400 hover:underline"
