@@ -34,7 +34,6 @@ interface SidebarUser {
 
 interface UserSidebarProps {
   user: SidebarUser;
-  showMoneyLoop?: boolean;
 }
 
 function NavLinks({
@@ -120,7 +119,7 @@ function NavLinks({
   );
 }
 
-export function UserSidebar({ user, showMoneyLoop = false }: UserSidebarProps) {
+export function UserSidebar({ user }: UserSidebarProps) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -129,15 +128,9 @@ export function UserSidebar({ user, showMoneyLoop = false }: UserSidebarProps) {
   const navItems = [
     { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { label: "My Orders", href: "/dashboard/orders", icon: ShoppingBag },
-    ...(showMoneyLoop
-      ? [{ label: "My Wallet", href: "/dashboard/wallet", icon: Wallet }]
-      : []),
-    ...(showMoneyLoop
-      ? [{ label: "Open Packs", href: "/packs", icon: Sparkles }]
-      : []),
-    ...(showMoneyLoop
-      ? [{ label: "Sell Back", href: "/dashboard/sell-back", icon: Undo2 }]
-      : []),
+    { label: "My Wallet", href: "/dashboard/wallet", icon: Wallet },
+    { label: "Open Packs", href: "/packs", icon: Sparkles },
+    { label: "Sell Back", href: "/dashboard/sell-back", icon: Undo2 },
     { label: "Collections", href: "/dashboard/collections", icon: Copy },
     { label: "Shipments", href: "/dashboard/shipments", icon: Truck },
     { label: "Profile", href: "/dashboard/profile", icon: User },
