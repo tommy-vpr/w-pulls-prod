@@ -12,7 +12,6 @@ import {
   QUOTE_EXPIRATION_SECONDS,
   MINIMUM_BUYBACK_AMOUNT,
 } from "@/lib/buyback/config";
-import { moneyLoopGuard } from "@/lib/access/guard";
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,9 +23,6 @@ export async function POST(request: NextRequest) {
         { status: 401 },
       );
     }
-
-    const locked = moneyLoopGuard(session?.user?.email);
-    if (locked) return locked;
 
     const { orderItemId } = await request.json();
 

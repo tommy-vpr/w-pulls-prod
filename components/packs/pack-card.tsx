@@ -148,8 +148,7 @@ export function PackCard({ pack }: PackCardProps) {
 
   const style = packStyles[pack.id] || packStyles.silver;
 
-  // MAINTAINENCE MODAL (delete after)
-  const [lockedModal, setLockedModal] = useState<string | null>(null);
+  const [errorModal, setErrorModal] = useState<string | null>(null);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return;
@@ -185,13 +184,7 @@ export function PackCard({ pack }: PackCardProps) {
 
       const data = await res.json();
 
-      // Lockdown wins — show modal regardless of auth state
-      if (res.status === 403 || data.locked) {
-        setLockedModal(data.error || "W-Pulls is temporarily unavailable.");
-        return;
-      }
-
-      // Genuinely not signed in (and not locked) → auth
+      // Not signed in → auth
       if (res.status === 401 || data.redirect) {
         router.push(data.redirect || "/auth?callbackUrl=/packs");
         return;
@@ -200,11 +193,11 @@ export function PackCard({ pack }: PackCardProps) {
       if (data.success && data.url) {
         window.location.href = data.url;
       } else {
-        setLockedModal(data.error || "Something went wrong.");
+        setErrorModal(data.error || "Something went wrong.");
       }
     } catch (error) {
       console.error("Purchase error:", error);
-      setLockedModal("Something went wrong. Please try again.");
+      setErrorModal("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -452,14 +445,14 @@ export function PackCard({ pack }: PackCardProps) {
         }
       `}</style>
 
-      {lockedModal && (
+      {errorModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center px-6"
-          onClick={(e) => e.target === e.currentTarget && setLockedModal(null)}
+          onClick={(e) => e.target === e.currentTarget && setErrorModal(null)}
         >
           <div
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-            onClick={() => setLockedModal(null)}
+            onClick={() => setErrorModal(null)}
           />
           <div
             className="relative w-full max-w-sm rounded-2xl p-6 text-center"
@@ -477,13 +470,13 @@ export function PackCard({ pack }: PackCardProps) {
                 textShadow: "0 0 8px rgba(0,255,255,.4)",
               }}
             >
-              Temporarily Unavailable
+              Something Went Wrong
             </h3>
             <p className="text-zinc-400 font-mono text-sm leading-relaxed mb-5">
-              {lockedModal}
+              {errorModal}
             </p>
             <button
-              onClick={() => setLockedModal(null)}
+              onClick={() => setErrorModal(null)}
               className="cursor-pointer w-full py-2.5 rounded-lg font-mono font-semibold text-sm uppercase tracking-wider transition-all"
               style={{
                 background:

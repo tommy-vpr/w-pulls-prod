@@ -11,8 +11,6 @@ import {
   hasValidVerifiedCookie,
   setVerifiedCookieOnResponse,
 } from "@/lib/cloudflare/verified-cookie";
-import { moneyLoopGuard } from "@/lib/access/guard";
-import { canUseMoneyLoop } from "@/lib/access/internal-allowlist";
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,20 +25,7 @@ export async function POST(request: NextRequest) {
 
     const session = await auth();
 
-    // ── Lockdown FIRST — applies to everyone, signed in or not ──
-    if (!canUseMoneyLoop(session?.user?.email)) {
-      return NextResponse.json(
-        {
-          success: false,
-          locked: true,
-          error:
-            "W-Pulls is temporarily unavailable while we finalize a few things.",
-        },
-        { status: 403 },
-      );
-    }
-
-    // ── Then the normal auth gate ──
+    // ── Auth gate ──
     if (!session?.user?.id) {
       return NextResponse.json(
         { success: false, redirect: "/auth?callbackUrl=/packs" },
