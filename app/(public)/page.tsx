@@ -650,11 +650,7 @@ export default function HolographicHub() {
               </div>
 
               <div className="mx-auto w-full max-w-xl flex justify-center">
-                <NewsletterSignup
-                  source="homepage"
-                  variant="card"
-                  accentColor="cyan"
-                />
+                <NewsletterSignup />
               </div>
             </div>
           </div>
